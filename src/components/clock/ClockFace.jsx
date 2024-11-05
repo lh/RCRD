@@ -16,28 +16,28 @@ const ClockFace = ({
   // Constants
   const outerRadius = 110;
   const innerRadius = 60;
-  const mobileInnerRadius = 40; // Smaller inner radius for mobile
+  const mobileInnerRadius = 40;
   const middleRadius = Math.floor((outerRadius + innerRadius) / 2);
   const tearRadius = middleRadius + 14;
-  const tearHitRadius = 20; // Larger hit area for tears on mobile
+  const tearHitRadius = 20;
   const indicatorExtension = 1;
+  const LONG_PRESS_DURATION = 500; // ms
 
   // State
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPosition, setLastPosition] = useState(null);
   const [isTouchDevice, setIsTouchDevice] = useState(false);
-  const [longPressTimer, setLongPressTimer] = useState(null);
+  const [touchStartTime, setTouchStartTime] = useState(null);
+  const [touchStartPosition, setTouchStartPosition] = useState(null);
   const svgRef = useRef(null);
 
   // Detect touch device
   useEffect(() => {
-    // Only set as touch device if it's a mobile device (no mouse)
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     setIsTouchDevice(isMobile && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
   }, []);
 
-  // Set segment count depending on device type
-  const segmentCount = isTouchDevice ? 12 : 60; // Use 12 segments for mobile, 60 for others
+  const segmentCount = isTouchDevice ? 12 : 60;
 
   // Utility functions
   const polarToCartesian = (angle, r) => {
@@ -61,28 +61,7 @@ const ClockFace = ({
     return (segment * 6) % 360;
   };
 
-  // Check if a point is within tear hit area
-  const isWithinTearArea = useCallback((x, y) => {
-    if (!isTouchDevice) return false;
-    
-    const svgRect = svgRef.current.getBoundingClientRect();
-    const centerX = svgRect.left + svgRect.width / 2;
-    const centerY = svgRect.top + svgRect.height / 2;
-    const relX = x - centerX;
-    const relY = -(y - centerY);
-    const angle = cartesianToPolar(relX, relY);
-    const hourAngle = Math.floor((angle + 15) / 30) % 12;
-    const hour = hourAngle === 0 ? 12 : hourAngle;
-    
-    const tearPos = getPosition(hour, tearRadius);
-    const dx = relX - tearPos.x;
-    const dy = -relY - tearPos.y;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    
-    return distance <= tearHitRadius;
-  }, [isTouchDevice]);
-
-  // Style constants for tears
+  // Style constants
   const styles = {
     transition: 'fill 0.2s ease, stroke 0.2s ease',
     tear: {
@@ -111,7 +90,6 @@ const ClockFace = ({
     }
   };
 
-  // Style helper for tears
   const getStyles = (hour, hoveredHour, isSelected) => {
     const isHovered = hoveredHour === hour;
     if (isSelected) {
@@ -128,7 +106,6 @@ const ClockFace = ({
     };
   };
 
-  // Tear path creation
   const createTearPath = (x, y, angle) => {
     const tearPath = `
         M -4 -8
@@ -149,9 +126,8 @@ const ClockFace = ({
     };
   };
 
-  // Position calculation for hours
   const getPosition = (hour, radius) => {
-    const angle = hour * 30; // 360/12 = 30 degrees per hour
+    const angle = hour * 30;
     const point = polarToCartesian(angle, radius);
     return {
       ...point,
@@ -160,12 +136,10 @@ const ClockFace = ({
   };
   
   const segmentToHour = (segment) => {
-    // Each hour on a clock face is represented by 5 segments (60 minutes / 12 hours)
     const hour = Math.floor(segment / 5) % 12;
-    return hour === 0 ? 12 : hour; // Convert 0 to 12 for 12 o'clock
+    return hour === 0 ? 12 : hour;
   };
   
-  // Event handlers
   const getSegmentFromPoint = useCallback((clientX, clientY) => {
     const svgRect = svgRef.current.getBoundingClientRect();
     const centerX = svgRect.left + svgRect.width / 2;
@@ -176,7 +150,6 @@ const ClockFace = ({
     const segment = degreeToSegment(angle);
 
     if (isTouchDevice) {
-      // Snap to nearest segment for mobile
       const snappedSegment = Math.round(segment / (60 / 12)) * (60 / 12);
       return snappedSegment % 60;
     }
@@ -184,6 +157,37 @@ const ClockFace = ({
     return segment;
   }, [isTouchDevice]);
 
+  // Touch event handlers for tears
+  const handleTouchStart = useCallback((hour) => (e) => {
+    if (readOnly) return;
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const touch = e.touches[0];
+    setTouchStartTime(Date.now());
+    setTouchStartPosition({ x: touch.clientX, y: touch.clientY });
+  }, [readOnly]);
+
+  const handleTouchEnd = useCallback((hour) => (e) => {
+    if (readOnly) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!touchStartTime || !touchStartPosition) return;
+
+    const touchEndTime = Date.now();
+    const pressDuration = touchEndTime - touchStartTime;
+
+    // Only toggle if it was a long press and the finger didn't move much
+    if (pressDuration >= LONG_PRESS_DURATION) {
+      onTearToggle(hour);
+    }
+
+    setTouchStartTime(null);
+    setTouchStartPosition(null);
+  }, [readOnly, touchStartTime, touchStartPosition, onTearToggle]);
+
+  // Drawing event handlers
   const handleDrawingStart = useCallback((e) => {
     if (readOnly) return;
     e.preventDefault();
@@ -216,35 +220,6 @@ const ClockFace = ({
     setLastPosition(null);
   }, [isDrawing, readOnly]);
 
-  // Long press handlers for mobile
-  const handleTouchStart = useCallback((hour) => (e) => {
-    if (readOnly) return;
-    e.preventDefault();
-    e.stopPropagation();
-    const timer = setTimeout(() => {
-      onTearToggle(hour);
-    }, 500);
-    setLongPressTimer(timer);
-  }, [onTearToggle, readOnly]);
-
-  const handleTouchEnd = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-  }, [longPressTimer]);
-
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (longPressTimer) {
-        clearTimeout(longPressTimer);
-      }
-    };
-  }, [longPressTimer]);
-
   const effectiveInnerRadius = isTouchDevice ? mobileInnerRadius : innerRadius;
 
   return (
@@ -265,13 +240,13 @@ const ClockFace = ({
           viewBox="-110 -110 220 220"
           className="w-full h-full"
           preserveAspectRatio="xMidYMid meet"
-          onMouseDown={handleDrawingStart}
-          onMouseMove={handleDrawing}
-          onMouseUp={handleDrawingEnd}
-          onMouseLeave={handleDrawingEnd}
-          onTouchStart={handleDrawingStart}
-          onTouchMove={handleDrawing}
-          onTouchEnd={handleDrawingEnd}
+          onMouseDown={!isTouchDevice ? handleDrawingStart : undefined}
+          onMouseMove={!isTouchDevice ? handleDrawing : undefined}
+          onMouseUp={!isTouchDevice ? handleDrawingEnd : undefined}
+          onMouseLeave={!isTouchDevice ? handleDrawingEnd : undefined}
+          onTouchStart={isTouchDevice ? handleDrawingStart : undefined}
+          onTouchMove={isTouchDevice ? handleDrawing : undefined}
+          onTouchEnd={isTouchDevice ? handleDrawingEnd : undefined}
         >
           {/* Background and grid circles */}
           <g className="pointer-events-none">
@@ -283,11 +258,9 @@ const ClockFace = ({
           {/* Detachment segments layer */}
           <g className="pointer-events-auto">
             {[...Array(segmentCount)].map((_, i) => {
-              // Calculate the logical segment index for the displayed segment
               const logicalSegmentStart = Math.floor(i * (60 / segmentCount));
               const logicalSegmentEnd = Math.floor((i + 1) * (60 / segmentCount));
 
-              // Determine if any logical segment within this range is selected
               const isHighlighted = detachmentSegments.some(
                 (segment) => segment >= logicalSegmentStart && segment < logicalSegmentEnd
               );
@@ -324,13 +297,13 @@ const ClockFace = ({
               return (
                 <g
                   key={`tear-${hour}`}
-                  onClick={!readOnly ? (e) => {
+                  onClick={!isTouchDevice && !readOnly ? (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     onTearToggle(hour);
                   } : undefined}
                   onTouchStart={isTouchDevice && !readOnly ? handleTouchStart(hour) : undefined}
-                  onTouchEnd={isTouchDevice && !readOnly ? handleTouchEnd : undefined}
+                  onTouchEnd={isTouchDevice && !readOnly ? handleTouchEnd(hour) : undefined}
                   onMouseEnter={!readOnly ? () => onHoverChange(hour) : undefined}
                   onMouseLeave={!readOnly ? () => onHoverChange(null) : undefined}
                   style={{
