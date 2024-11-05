@@ -67,7 +67,13 @@ const ClockFace = ({
   const degreeToSegment = (degree) => {
     return Math.floor(degree / 6) % 60;
   };
-
+  
+  const segmentToHour = (segment) => {
+    // Each hour on a clock face is represented by 5 segments (60 minutes / 12 hours)
+    const hour = Math.floor(segment / 5) % 12;
+    return hour === 0 ? 12 : hour; // Convert 0 to 12 for 12 o'clock
+  };
+  
   const segmentToDegree = (segment) => {
     return (segment * 6) % 360;
   };

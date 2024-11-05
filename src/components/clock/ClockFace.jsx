@@ -31,8 +31,13 @@ const ClockFace = ({
 
   // Detect touch device
   useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    // Only set as touch device if it's a mobile device (no mouse)
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsTouchDevice(isMobile && ('ontouchstart' in window || navigator.maxTouchPoints > 0));
   }, []);
+
+  // Set segment count depending on device type
+  const segmentCount = isTouchDevice ? 12 : 60; // Use 12 segments for mobile, 60 for others
 
   // Utility functions
   const polarToCartesian = (angle, r) => {
@@ -153,48 +158,56 @@ const ClockFace = ({
       angle
     };
   };
-
+  
+  const segmentToHour = (segment) => {
+    // Each hour on a clock face is represented by 5 segments (60 minutes / 12 hours)
+    const hour = Math.floor(segment / 5) % 12;
+    return hour === 0 ? 12 : hour; // Convert 0 to 12 for 12 o'clock
+  };
+  
   // Event handlers
   const getSegmentFromPoint = useCallback((clientX, clientY) => {
-    if (isWithinTearArea(clientX, clientY)) return null;
-
     const svgRect = svgRef.current.getBoundingClientRect();
     const centerX = svgRect.left + svgRect.width / 2;
-    const centerY = svgRect.top + svgRect.height / 2;
+    const centerY = svgRef.current.getBoundingClientRect().top + svgRect.height / 2;
     const relX = clientX - centerX;
     const relY = -(clientY - centerY);
     const angle = cartesianToPolar(relX, relY);
-    return degreeToSegment(angle);
-  }, [isWithinTearArea]);
+    const segment = degreeToSegment(angle);
+
+    if (isTouchDevice) {
+      // Snap to nearest segment for mobile
+      const snappedSegment = Math.round(segment / (60 / 12)) * (60 / 12);
+      return snappedSegment % 60;
+    }
+
+    return segment;
+  }, [isTouchDevice]);
 
   const handleDrawingStart = useCallback((e) => {
     if (readOnly) return;
     e.preventDefault();
     
     const touch = e.touches?.[0] || e;
-    if (isWithinTearArea(touch.clientX, touch.clientY)) return;
-
-    setIsDrawing(true);
     const segment = getSegmentFromPoint(touch.clientX, touch.clientY);
     if (segment !== null) {
+      setIsDrawing(true);
       setLastPosition(segment);
       onSegmentToggle(segment);
     }
-  }, [getSegmentFromPoint, onSegmentToggle, readOnly, isWithinTearArea]);
+  }, [getSegmentFromPoint, onSegmentToggle, readOnly]);
 
   const handleDrawing = useCallback((e) => {
     if (!isDrawing || readOnly) return;
     e.preventDefault();
     
     const touch = e.touches?.[0] || e;
-    if (isWithinTearArea(touch.clientX, touch.clientY)) return;
-
     const currentSegment = getSegmentFromPoint(touch.clientX, touch.clientY);
     if (currentSegment !== null && currentSegment !== lastPosition) {
       onSegmentToggle(currentSegment);
       setLastPosition(currentSegment);
     }
-  }, [isDrawing, lastPosition, getSegmentFromPoint, onSegmentToggle, readOnly, isWithinTearArea]);
+  }, [isDrawing, lastPosition, getSegmentFromPoint, onSegmentToggle, readOnly]);
 
   const handleDrawingEnd = useCallback((e) => {
     if (!isDrawing || readOnly) return;
@@ -235,123 +248,136 @@ const ClockFace = ({
   const effectiveInnerRadius = isTouchDevice ? mobileInnerRadius : innerRadius;
 
   return (
-    <div className={`relative touch-none select-none ${readOnly ? 'pointer-events-none' : ''}`}
-      style={{
-        width: readOnly ? "200px" : "min(80vw, min(80vh, 500px))",
-        aspectRatio: "1",
-        minWidth: readOnly ? "200px" : "200px",
-        maxWidth: readOnly ? "200px" : "500px",
-      }}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      <svg
-        ref={svgRef}
-        viewBox="-110 -110 220 220"
-        className="w-full h-full"
-        preserveAspectRatio="xMidYMid meet"
-        onMouseDown={!isTouchDevice ? handleDrawingStart : undefined}
-        onMouseMove={!isTouchDevice ? handleDrawing : undefined}
-        onMouseUp={!isTouchDevice ? handleDrawingEnd : undefined}
-        onMouseLeave={!isTouchDevice ? handleDrawingEnd : undefined}
-        onTouchStart={isTouchDevice ? handleDrawingStart : undefined}
-        onTouchMove={isTouchDevice ? handleDrawing : undefined}
-        onTouchEnd={isTouchDevice ? handleDrawingEnd : undefined}
+    <div className="flex justify-center items-center w-full">
+      <div 
+        className={`relative touch-none select-none ${readOnly ? 'pointer-events-none' : ''}`}
+        style={{
+          width: readOnly ? "200px" : "min(80vw, min(80vh, 500px))",
+          aspectRatio: "1",
+          minWidth: readOnly ? "200px" : "200px",
+          maxWidth: readOnly ? "200px" : "500px",
+          margin: "0 auto"
+        }}
+        onContextMenu={(e) => e.preventDefault()}
       >
-        {/* Background and grid circles */}
-        <g className="pointer-events-none">
-          <circle cx="0" cy="0" r={outerRadius} fill="none" stroke="#e5e5e5" strokeWidth="1" />
-          <circle cx="0" cy="0" r={middleRadius} fill="none" stroke="#e5e5e5" strokeWidth="0.5" />
-          <circle cx="0" cy="0" r={effectiveInnerRadius} fill="none" stroke="#e5e5e5" strokeWidth="1" />
-        </g>
+        <svg
+          ref={svgRef}
+          viewBox="-110 -110 220 220"
+          className="w-full h-full"
+          preserveAspectRatio="xMidYMid meet"
+          onMouseDown={handleDrawingStart}
+          onMouseMove={handleDrawing}
+          onMouseUp={handleDrawingEnd}
+          onMouseLeave={handleDrawingEnd}
+          onTouchStart={handleDrawingStart}
+          onTouchMove={handleDrawing}
+          onTouchEnd={handleDrawingEnd}
+        >
+          {/* Background and grid circles */}
+          <g className="pointer-events-none">
+            <circle cx="0" cy="0" r={outerRadius} fill="none" stroke="#e5e5e5" strokeWidth="1" />
+            <circle cx="0" cy="0" r={middleRadius} fill="none" stroke="#e5e5e5" strokeWidth="0.5" />
+            <circle cx="0" cy="0" r={effectiveInnerRadius} fill="none" stroke="#e5e5e5" strokeWidth="1" />
+          </g>
 
-        {/* Detachment segments layer */}
-        <g className="pointer-events-auto">
-          {[...Array(60)].map((_, i) => {
-            const degree = segmentToDegree(i);
-            const pos = polarToCartesian(degree, effectiveInnerRadius);
-            const posOuter = polarToCartesian(degree, outerRadius);
-            const nextDegree = segmentToDegree(i + 1);
-            const nextPos = polarToCartesian(nextDegree, effectiveInnerRadius);
-            const nextPosOuter = polarToCartesian(nextDegree, outerRadius);
+          {/* Detachment segments layer */}
+          <g className="pointer-events-auto">
+            {[...Array(segmentCount)].map((_, i) => {
+              // Calculate the logical segment index for the displayed segment
+              const logicalSegmentStart = Math.floor(i * (60 / segmentCount));
+              const logicalSegmentEnd = Math.floor((i + 1) * (60 / segmentCount));
 
-            return (
-              <path
-                key={`segment-${i}`}
-                d={`M ${pos.x} ${pos.y} 
-                    L ${posOuter.x} ${posOuter.y} 
-                    A ${outerRadius} ${outerRadius} 0 0 1 ${nextPosOuter.x} ${nextPosOuter.y}
-                    L ${nextPos.x} ${nextPos.y}
-                    A ${effectiveInnerRadius} ${effectiveInnerRadius} 0 0 0 ${pos.x} ${pos.y}`}
-                fill={detachmentSegments.includes(i) ? "rgba(59, 130, 246, 0.5)" : "transparent"}
-                className={`cursor-pointer hover:fill-blue-200 transition-colors ${readOnly ? '' : 'pointer-events-auto'}`}
-              />
-            );
-          })}
-        </g>
+              // Determine if any logical segment within this range is selected
+              const isHighlighted = detachmentSegments.some(
+                (segment) => segment >= logicalSegmentStart && segment < logicalSegmentEnd
+              );
 
-        {/* Tear markers layer */}
-        <g className="pointer-events-auto">
-          {[...Array(12)].map((_, i) => {
-            const hour = i === 0 ? 12 : i;
-            const visualPos = getPosition(hour, tearRadius);
-            const isSelected = selectedHours.includes(hour);
+              const degreeStart = segmentToDegree(logicalSegmentStart);
+              const degreeEnd = segmentToDegree(logicalSegmentEnd);
+              const posStart = polarToCartesian(degreeStart, effectiveInnerRadius);
+              const posOuterStart = polarToCartesian(degreeStart, outerRadius);
+              const posEnd = polarToCartesian(degreeEnd, effectiveInnerRadius);
+              const posOuterEnd = polarToCartesian(degreeEnd, outerRadius);
 
-            return (
-              <g
-                key={`tear-${hour}`}
-                onClick={!isTouchDevice && !readOnly ? (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onTearToggle(hour);
-                } : undefined}
-                onTouchStart={isTouchDevice && !readOnly ? handleTouchStart(hour) : undefined}
-                onTouchEnd={isTouchDevice && !readOnly ? handleTouchEnd : undefined}
-                onMouseEnter={!isTouchDevice && !readOnly ? () => onHoverChange(hour) : undefined}
-                onMouseLeave={!isTouchDevice && !readOnly ? () => onHoverChange(null) : undefined}
-                style={{
-                  cursor: readOnly ? 'default' : 'pointer'
-                }}
-              >
-                {/* Invisible larger hit area for mobile */}
-                {isTouchDevice && !readOnly && (
-                  <circle
-                    cx={visualPos.x}
-                    cy={visualPos.y}
-                    r={tearHitRadius}
-                    fill="transparent"
-                    className="pointer-events-auto"
-                  />
-                )}
-                
-                {isSelected ? (
-                  <path
-                    {...createTearPath(visualPos.x, visualPos.y, visualPos.angle)}
-                    style={getStyles(hour, hoveredHour, true)}
-                  />
-                ) : (
-                  <circle
-                    cx={visualPos.x}
-                    cy={visualPos.y}
-                    r="12"
-                    style={getStyles(hour, hoveredHour, false)}
-                  />
-                )}
-              </g>
-            );
-          })}
-        </g>
+              return (
+                <path
+                  key={`segment-${i}`}
+                  d={`M ${posStart.x} ${posStart.y} 
+                      L ${posOuterStart.x} ${posOuterStart.y} 
+                      A ${outerRadius} ${outerRadius} 0 0 1 ${posOuterEnd.x} ${posOuterEnd.y}
+                      L ${posEnd.x} ${posEnd.y}
+                      A ${effectiveInnerRadius} ${effectiveInnerRadius} 0 0 0 ${posStart.x} ${posStart.y}`}
+                  fill={isHighlighted ? "rgba(59, 130, 246, 0.5)" : "transparent"}
+                  className={`cursor-pointer hover:fill-blue-200 transition-colors ${readOnly ? '' : 'pointer-events-auto'}`}
+                />
+              );
+            })}
+          </g>
 
-        {/* 12 o'clock indicator */}
-        <line
-          className="pointer-events-none"
-          x1="0"
-          y1={-outerRadius}
-          x2="0"
-          y2={-(outerRadius + indicatorExtension)}
-          stroke="#666"
-          strokeWidth="2"
-        />
-      </svg>
+          {/* Tear markers layer */}
+          <g className="pointer-events-auto">
+            {[...Array(12)].map((_, i) => {
+              const hour = i === 0 ? 12 : i;
+              const visualPos = getPosition(hour, tearRadius);
+              const isSelected = selectedHours.includes(hour);
+
+              return (
+                <g
+                  key={`tear-${hour}`}
+                  onClick={!readOnly ? (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onTearToggle(hour);
+                  } : undefined}
+                  onTouchStart={isTouchDevice && !readOnly ? handleTouchStart(hour) : undefined}
+                  onTouchEnd={isTouchDevice && !readOnly ? handleTouchEnd : undefined}
+                  onMouseEnter={!readOnly ? () => onHoverChange(hour) : undefined}
+                  onMouseLeave={!readOnly ? () => onHoverChange(null) : undefined}
+                  style={{
+                    cursor: readOnly ? 'default' : 'pointer'
+                  }}
+                >
+                  {/* Invisible larger hit area for mobile */}
+                  {isTouchDevice && !readOnly && (
+                    <circle
+                      cx={visualPos.x}
+                      cy={visualPos.y}
+                      r={tearHitRadius}
+                      fill="transparent"
+                      className="pointer-events-auto"
+                    />
+                  )}
+                  
+                  {isSelected ? (
+                    <path
+                      {...createTearPath(visualPos.x, visualPos.y, visualPos.angle)}
+                      style={getStyles(hour, hoveredHour, true)}
+                    />
+                  ) : (
+                    <circle
+                      cx={visualPos.x}
+                      cy={visualPos.y}
+                      r="12"
+                      style={getStyles(hour, hoveredHour, false)}
+                    />
+                  )}
+                </g>
+              );
+            })}
+          </g>
+
+          {/* 12 o'clock indicator */}
+          <line
+            className="pointer-events-none"
+            x1="0"
+            y1={-outerRadius}
+            x2="0"
+            y2={-(outerRadius + indicatorExtension)}
+            stroke="#666"
+            strokeWidth="2"
+          />
+        </svg>
+      </div>
     </div>
   );
 };

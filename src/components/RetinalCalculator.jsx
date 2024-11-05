@@ -5,15 +5,25 @@ import RiskResults from './RiskResults';
 import { calculateRiskWithSteps } from '../utils/riskCalculations';
 
 const RetinalCalculator = () => {
-    // State management
+    // State management with defaults
     const [age, setAge] = useState('');
-    const [pvrGrade, setPvrGrade] = useState('none');
-    const [vitrectomyGauge, setVitrectomyGauge] = useState('25g');
+    const [pvrGrade, setPvrGrade] = useState('none');  // default to "No PVR"
+    const [vitrectomyGauge, setVitrectomyGauge] = useState('25g');  // default to "25 gauge"
     const [selectedHours, setSelectedHours] = useState([]);
     const [detachmentSegments, setDetachmentSegments] = useState([]);
     const [hoveredHour, setHoveredHour] = useState(null);
     const [showMath, setShowMath] = useState(false);
     const [calculatedRisk, setCalculatedRisk] = useState(null);
+
+    // Common props for RiskInputForm
+    const formProps = {
+        age,
+        setAge,
+        pvrGrade,
+        setPvrGrade,
+        vitrectomyGauge,
+        setVitrectomyGauge
+    };
 
     const handleHoverChange = (hour) => {
         setHoveredHour(hour);
@@ -48,8 +58,8 @@ const RetinalCalculator = () => {
 
     const handleReset = () => {
         setAge('');
-        setPvrGrade('none');
-        setVitrectomyGauge('25g');
+        setPvrGrade('none'); // Reset to "No PVR"
+        setVitrectomyGauge('25g'); // Reset to "25 gauge"
         setSelectedHours([]);
         setDetachmentSegments([]);
         setCalculatedRisk(null);
@@ -61,6 +71,55 @@ const RetinalCalculator = () => {
     const formatHoursList = (hours) => {
         if (hours.length === 0) return 'None';
         return hours.sort((a, b) => a - b).join(', ') + " o'clock";
+    };
+
+    const formatDetachmentHours = (segments) => {
+        if (segments.length === 0) return 'None';
+        
+        // Check if it's a total RD (all segments selected)
+        if (segments.length >= 55) { // Allow for some missing segments but still consider it total
+            return "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 o'clock (Total)";
+        }
+        
+        // Get min and max segments
+        const sortedSegments = [...segments].sort((a, b) => a - b);
+        const minSegment = sortedSegments[0];
+        const maxSegment = sortedSegments[sortedSegments.length - 1];
+        
+        // Convert to hours (each hour is 5 segments)
+        let startHour = Math.floor(minSegment / 5) + 1;
+        let endHour = Math.floor(maxSegment / 5) + 1;
+        
+        // Adjust for 12 o'clock position
+        startHour = startHour === 13 ? 1 : startHour === 1 && minSegment < 5 ? 12 : startHour;
+        endHour = endHour === 13 ? 1 : endHour === 1 && maxSegment < 5 ? 12 : endHour;
+        
+        // Generate array of all hours in between
+        const hours = [];
+        let currentHour = startHour;
+        
+        // Handle wrap-around case
+        if (startHour === endHour && segments.length > 5) {
+            // This means we've wrapped around completely
+            while (hours.length < 12) {
+                hours.push(currentHour);
+                currentHour = currentHour === 12 ? 1 : currentHour + 1;
+            }
+        } else {
+            // Normal case
+            while (currentHour !== endHour) {
+                hours.push(currentHour);
+                currentHour = currentHour === 12 ? 1 : currentHour + 1;
+            }
+            hours.push(endHour); // Add the end hour
+        }
+        
+        return hours.join(', ') + " o'clock";
+    };
+
+    // Helper to format PVR grade display
+    const formatPVRGrade = (grade) => {
+        return grade === 'none' ? 'A' : grade.toUpperCase();
     };
 
     return (
@@ -79,26 +138,16 @@ const RetinalCalculator = () => {
                                 {/* Mobile Layout */}
                                 <div className="md:hidden space-y-4">
                                     <RiskInputForm
-                                        age={age}
-                                        setAge={setAge}
-                                        pvrGrade={pvrGrade}
-                                        setPvrGrade={setPvrGrade}
-                                        position="left"
+                                        {...formProps}
+                                        isMobile={true}
                                     />
-                                    <div className="w-full">
-                                        <ClockFace
-                                            selectedHours={selectedHours}
-                                            detachmentSegments={detachmentSegments}
-                                            hoveredHour={hoveredHour}
-                                            onHoverChange={handleHoverChange}
-                                            onTearToggle={handleTearToggle}
-                                            onSegmentToggle={handleSegmentToggle}
-                                        />
-                                    </div>
-                                    <RiskInputForm
-                                        vitrectomyGauge={vitrectomyGauge}
-                                        setVitrectomyGauge={setVitrectomyGauge}
-                                        position="right"
+                                    <ClockFace
+                                        selectedHours={selectedHours}
+                                        detachmentSegments={detachmentSegments}
+                                        hoveredHour={hoveredHour}
+                                        onHoverChange={handleHoverChange}
+                                        onTearToggle={handleTearToggle}
+                                        onSegmentToggle={handleSegmentToggle}
                                     />
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <h3 className="text-sm font-medium text-gray-700">Current Selection:</h3>
@@ -118,10 +167,7 @@ const RetinalCalculator = () => {
                                     <div className="w-1/4">
                                         <div className="bg-gray-50 p-4 rounded-lg">
                                             <RiskInputForm
-                                                age={age}
-                                                setAge={setAge}
-                                                pvrGrade={pvrGrade}
-                                                setPvrGrade={setPvrGrade}
+                                                {...formProps}
                                                 position="left"
                                             />
                                             <div className="mt-4">
@@ -150,8 +196,7 @@ const RetinalCalculator = () => {
                                     <div className="w-1/4">
                                         <div className="bg-gray-50 p-4 rounded-lg">
                                             <RiskInputForm
-                                                vitrectomyGauge={vitrectomyGauge}
-                                                setVitrectomyGauge={setVitrectomyGauge}
+                                                {...formProps}
                                                 position="right"
                                             />
                                         </div>
@@ -196,10 +241,18 @@ const RetinalCalculator = () => {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <p className="text-sm"><span className="font-medium">Age:</span> {age} years</p>
-                                            <p className="text-sm"><span className="font-medium">PVR Grade:</span> {pvrGrade.toUpperCase()}</p>
+                                            <p className="text-sm"><span className="font-medium">PVR Grade:</span> {formatPVRGrade(pvrGrade)}</p>
                                             <p className="text-sm"><span className="font-medium">Vitrectomy Gauge:</span> {vitrectomyGauge}</p>
                                             <p className="text-sm"><span className="font-medium">Breaks:</span> {formatHoursList(selectedHours)}</p>
-                                            <p className="text-sm"><span className="font-medium">Detachment:</span> {formatHoursList(detachmentSegments)}</p>
+                                            <p className="text-sm"><span className="font-medium">Detachment:</span> {formatDetachmentHours(detachmentSegments)}</p>
+                                            <div className="pt-4">
+                                                <button
+                                                    onClick={handleReset}
+                                                    className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md"
+                                                >
+                                                    Reset Calculator
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="w-full max-w-xs mx-auto">
                                             <ClockFace

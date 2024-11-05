@@ -105,7 +105,7 @@ export const calculateRiskWithSteps = ({
     steps.push({
         label: "PVR grade",
         value: pvrCoef.toFixed(3),
-        detail: `(grade ${pvrType === "C" ? "C" : "A/B"})`
+        detail: `(grade ${pvrType === "C" ? "C" : "None/A/B"})`
     });
 
     // Vitrectomy gauge coefficient
