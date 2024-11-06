@@ -134,12 +134,12 @@ const ClockFace = ({
       angle
     };
   };
-  
+
   const segmentToHour = (segment) => {
     const hour = Math.floor(segment / 5) % 12;
     return hour === 0 ? 12 : hour;
   };
-  
+
   const getSegmentFromPoint = useCallback((clientX, clientY) => {
     const svgRect = svgRef.current.getBoundingClientRect();
     const centerX = svgRect.left + svgRect.width / 2;
@@ -162,16 +162,19 @@ const ClockFace = ({
     if (readOnly) return;
     e.preventDefault();
     e.stopPropagation();
-    
+
+
     const touch = e.touches[0];
     setTouchStartTime(Date.now());
     setTouchStartPosition({ x: touch.clientX, y: touch.clientY });
+    return false;
   }, [readOnly]);
 
   const handleTouchEnd = useCallback((hour) => (e) => {
     if (readOnly) return;
     e.preventDefault();
     e.stopPropagation();
+
 
     if (!touchStartTime || !touchStartPosition) return;
 
@@ -185,13 +188,14 @@ const ClockFace = ({
 
     setTouchStartTime(null);
     setTouchStartPosition(null);
+    return false;
   }, [readOnly, touchStartTime, touchStartPosition, onTearToggle]);
 
   // Drawing event handlers
   const handleDrawingStart = useCallback((e) => {
     if (readOnly) return;
     e.preventDefault();
-    
+
     const touch = e.touches?.[0] || e;
     const segment = getSegmentFromPoint(touch.clientX, touch.clientY);
     if (segment !== null) {
@@ -204,7 +208,7 @@ const ClockFace = ({
   const handleDrawing = useCallback((e) => {
     if (!isDrawing || readOnly) return;
     e.preventDefault();
-    
+
     const touch = e.touches?.[0] || e;
     const currentSegment = getSegmentFromPoint(touch.clientX, touch.clientY);
     if (currentSegment !== null && currentSegment !== lastPosition) {
@@ -224,7 +228,7 @@ const ClockFace = ({
 
   return (
     <div className="flex justify-center items-center w-full">
-      <div 
+      <div
         className={`relative touch-none select-none ${readOnly ? 'pointer-events-none' : ''}`}
         style={{
           width: readOnly ? "200px" : "min(80vw, min(80vh, 500px))",
@@ -256,7 +260,7 @@ const ClockFace = ({
           </g>
 
           {/* Detachment segments layer */}
-          <g className="pointer-events-auto">
+          <g className="pointer-events-auto" style={{ isolation: 'isolate' }}>
             {[...Array(segmentCount)].map((_, i) => {
               const logicalSegmentStart = Math.floor(i * (60 / segmentCount));
               const logicalSegmentEnd = Math.floor((i + 1) * (60 / segmentCount));
@@ -276,19 +280,20 @@ const ClockFace = ({
                 <path
                   key={`segment-${i}`}
                   d={`M ${posStart.x} ${posStart.y} 
-                      L ${posOuterStart.x} ${posOuterStart.y} 
-                      A ${outerRadius} ${outerRadius} 0 0 1 ${posOuterEnd.x} ${posOuterEnd.y}
-                      L ${posEnd.x} ${posEnd.y}
-                      A ${effectiveInnerRadius} ${effectiveInnerRadius} 0 0 0 ${posStart.x} ${posStart.y}`}
+      L ${posOuterStart.x} ${posOuterStart.y} 
+      A ${outerRadius} ${outerRadius} 0 0 1 ${posOuterEnd.x} ${posOuterEnd.y}
+      L ${posEnd.x} ${posEnd.y}
+      A ${effectiveInnerRadius} ${effectiveInnerRadius} 0 0 0 ${posStart.x} ${posStart.y}`}
                   fill={isHighlighted ? "rgba(59, 130, 246, 0.5)" : "transparent"}
                   className={`cursor-pointer hover:fill-blue-200 transition-colors ${readOnly ? '' : 'pointer-events-auto'}`}
+                  style={{ pointerEvents: readOnly ? 'none' : 'auto' }}
                 />
               );
             })}
           </g>
 
           {/* Tear markers layer */}
-          <g className="pointer-events-auto">
+          <g className="pointer-events-auto" style={{ isolation: 'isolate' }}>
             {[...Array(12)].map((_, i) => {
               const hour = i === 0 ? 12 : i;
               const visualPos = getPosition(hour, tearRadius);
@@ -301,6 +306,7 @@ const ClockFace = ({
                     e.preventDefault();
                     e.stopPropagation();
                     onTearToggle(hour);
+                    return false;
                   } : undefined}
                   onTouchStart={isTouchDevice && !readOnly ? handleTouchStart(hour) : undefined}
                   onTouchEnd={isTouchDevice && !readOnly ? handleTouchEnd(hour) : undefined}
@@ -310,8 +316,8 @@ const ClockFace = ({
                     cursor: readOnly ? 'default' : 'pointer'
                   }}
                 >
-                  {/* Invisible larger hit area for mobile */}
-                  {isTouchDevice && !readOnly && (
+                  {/* Invisible larger hit area for all devices */}
+                  {!readOnly && (
                     <circle
                       cx={visualPos.x}
                       cy={visualPos.y}
@@ -320,18 +326,27 @@ const ClockFace = ({
                       className="pointer-events-auto"
                     />
                   )}
-                  
+
                   {isSelected ? (
                     <path
                       {...createTearPath(visualPos.x, visualPos.y, visualPos.angle)}
-                      style={getStyles(hour, hoveredHour, true)}
+                      style={{
+                        ...getStyles(hour, hoveredHour, true),
+                        zIndex: 10
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
                     />
                   ) : (
                     <circle
                       cx={visualPos.x}
                       cy={visualPos.y}
                       r="12"
-                      style={getStyles(hour, hoveredHour, false)}
+                      style={{
+                        ...getStyles(hour, hoveredHour, false),
+                        pointerEvents: 'all',
+                        zIndex: 10
+                      }}
+                      onMouseDown={(e) => e.stopPropagation()}
                     />
                   )}
                 </g>

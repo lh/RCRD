@@ -73,48 +73,86 @@ const RetinalCalculator = () => {
         return hours.sort((a, b) => a - b).join(', ') + " o'clock";
     };
 
+    // Helper function to convert segment to clock hour
+    const segmentToHour = (segment) => {
+        const hour = Math.floor(segment / 5) % 12;
+        return hour === 0 ? 12 : hour;
+    };
+
+
+ 
     const formatDetachmentHours = (segments) => {
         if (segments.length === 0) return 'None';
         
         // Check if it's a total RD (all segments selected)
-        if (segments.length >= 55) { // Allow for some missing segments but still consider it total
-            return "1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 o'clock (Total)";
+        if (segments.length >= 55) {
+            return "1-12 o'clock";
         }
-        
-        // Get min and max segments
-        const sortedSegments = [...segments].sort((a, b) => a - b);
-        const minSegment = sortedSegments[0];
-        const maxSegment = sortedSegments[sortedSegments.length - 1];
-        
-        // Convert to hours (each hour is 5 segments)
-        let startHour = Math.floor(minSegment / 5) + 1;
-        let endHour = Math.floor(maxSegment / 5) + 1;
-        
-        // Adjust for 12 o'clock position
-        startHour = startHour === 13 ? 1 : startHour === 1 && minSegment < 5 ? 12 : startHour;
-        endHour = endHour === 13 ? 1 : endHour === 1 && maxSegment < 5 ? 12 : endHour;
-        
-        // Generate array of all hours in between
-        const hours = [];
-        let currentHour = startHour;
-        
-        // Handle wrap-around case
-        if (startHour === endHour && segments.length > 5) {
-            // This means we've wrapped around completely
-            while (hours.length < 12) {
-                hours.push(currentHour);
-                currentHour = currentHour === 12 ? 1 : currentHour + 1;
+    
+        // First, let's map segments to hours more accurately
+        // Each hour takes up 5 segments (60/12 = 5)
+        const hourMap = {};
+        segments.forEach(segment => {
+            // Normalize segment to 0-59 range
+            segment = segment % 60;
+            // Calculate hour (1-12)
+            let hour;
+            if (segment >= 55 || segment < 5) { // Hour 12
+                hour = 12;
+            } else {
+                hour = Math.floor(segment / 5) + 1;
             }
-        } else {
-            // Normal case
-            while (currentHour !== endHour) {
-                hours.push(currentHour);
-                currentHour = currentHour === 12 ? 1 : currentHour + 1;
+            hourMap[hour] = true;
+        });
+    
+        // Convert to sorted array of hours
+        const hours = Object.keys(hourMap).map(Number).sort((a, b) => a - b);
+    
+        // Find continuous ranges
+        const ranges = [];
+        let currentRange = [hours[0]];
+    
+        const isConsecutive = (a, b) => {
+            if (b === a + 1) return true;
+            if (a === 12 && b === 1) return true;
+            return false;
+        };
+    
+        for (let i = 1; i < hours.length; i++) {
+            if (isConsecutive(hours[i-1], hours[i])) {
+                currentRange.push(hours[i]);
+            } else {
+                if (currentRange.length > 0) {
+                    ranges.push([...currentRange]);
+                }
+                currentRange = [hours[i]];
             }
-            hours.push(endHour); // Add the end hour
         }
-        
-        return hours.join(', ') + " o'clock";
+        ranges.push([...currentRange]);
+    
+        // Format ranges
+        const formattedRanges = ranges.map(range => {
+            // Special case for midnight crossing
+            if (range.includes(11) && range.includes(12) && range.includes(1)) {
+                return "11-1";
+            }
+            // Special case for ranges ending at 1 that started at 11
+            if (range[0] === 11 && range[range.length - 1] === 1) {
+                return "11-1";
+            }
+            // Special case for 12-1
+            if (range[0] === 12 && range[range.length - 1] === 1) {
+                return "12-1";
+            }
+            // Normal range
+            if (range.length > 1) {
+                return `${range[0]}-${range[range.length - 1]}`;
+            }
+            // Single hour
+            return `${range[0]}`;
+        });
+    
+        return formattedRanges.join('; ') + " o'clock";
     };
 
     // Helper to format PVR grade display
