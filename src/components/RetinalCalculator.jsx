@@ -3,6 +3,8 @@ import ClockFace from './clock/ClockFace';
 import RiskInputForm from './RiskInputForm';
 import RiskResults from './RiskResults';
 import { calculateRiskWithSteps } from '../utils/riskCalculations';
+import { formatDetachmentHours } from './clock/utils/formatDetachmentHours';
+
 
 const RetinalCalculator = () => {
     // State management with defaults
@@ -81,79 +83,7 @@ const RetinalCalculator = () => {
 
 
  
-    const formatDetachmentHours = (segments) => {
-        if (segments.length === 0) return 'None';
-        
-        // Check if it's a total RD (all segments selected)
-        if (segments.length >= 55) {
-            return "1-12 o'clock";
-        }
-    
-        // First, let's map segments to hours more accurately
-        // Each hour takes up 5 segments (60/12 = 5)
-        const hourMap = {};
-        segments.forEach(segment => {
-            // Normalize segment to 0-59 range
-            segment = segment % 60;
-            // Calculate hour (1-12)
-            let hour;
-            if (segment >= 55 || segment < 5) { // Hour 12
-                hour = 12;
-            } else {
-                hour = Math.floor(segment / 5) + 1;
-            }
-            hourMap[hour] = true;
-        });
-    
-        // Convert to sorted array of hours
-        const hours = Object.keys(hourMap).map(Number).sort((a, b) => a - b);
-    
-        // Find continuous ranges
-        const ranges = [];
-        let currentRange = [hours[0]];
-    
-        const isConsecutive = (a, b) => {
-            if (b === a + 1) return true;
-            if (a === 12 && b === 1) return true;
-            return false;
-        };
-    
-        for (let i = 1; i < hours.length; i++) {
-            if (isConsecutive(hours[i-1], hours[i])) {
-                currentRange.push(hours[i]);
-            } else {
-                if (currentRange.length > 0) {
-                    ranges.push([...currentRange]);
-                }
-                currentRange = [hours[i]];
-            }
-        }
-        ranges.push([...currentRange]);
-    
-        // Format ranges
-        const formattedRanges = ranges.map(range => {
-            // Special case for midnight crossing
-            if (range.includes(11) && range.includes(12) && range.includes(1)) {
-                return "11-1";
-            }
-            // Special case for ranges ending at 1 that started at 11
-            if (range[0] === 11 && range[range.length - 1] === 1) {
-                return "11-1";
-            }
-            // Special case for 12-1
-            if (range[0] === 12 && range[range.length - 1] === 1) {
-                return "12-1";
-            }
-            // Normal range
-            if (range.length > 1) {
-                return `${range[0]}-${range[range.length - 1]}`;
-            }
-            // Single hour
-            return `${range[0]}`;
-        });
-    
-        return formattedRanges.join('; ') + " o'clock";
-    };
+
 
     // Helper to format PVR grade display
     const formatPVRGrade = (grade) => {
