@@ -1,8 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import {
-  segmentToClockHour,
-  clockHourToSegmentsMap
-} from "./utils/clockMapping";
+import { interpolateSegments } from './utils/interpolateSegments.js';  
+
 
 const ClockFace = ({
   selectedHours,

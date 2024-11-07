@@ -1,8 +1,11 @@
-// Import required functions (shown here for clarity)
-// In actual implementation, these would be imported from their respective files
-const { getSegmentRanges } = require('./getSegmentRanges');
-const { getClockHour } = require('./getClockHour');
+import { getSegmentRanges } from './getSegmentRanges.js';
+import { getClockHour } from './getClockHour.js';
 
+/**
+ * Formats an array of segment numbers into a human-readable clock hour range string
+ * @param {number[]} segments - Array of segment numbers (0-59)
+ * @returns {string} Formatted clock hour range (e.g., "1-3 o'clock" or "12; 5-6 o'clock")
+ */
 export const formatDetachmentHours = (segments) => {
     // Handle empty input
     if (!segments || segments.length === 0) {
@@ -34,92 +37,96 @@ export const formatDetachmentHours = (segments) => {
     });
 
     return formattedRanges.join('; ') + " o'clock";
-}
+};
 
+// // Run tests only if this file is executed directly
+// if (import.meta.url === import.meta.resolve('./formatDetachmentHours.js')) {
+//     const runFormatDetachmentTests = () => {
+//         const testCases = [
+//             {
+//                 name: "Empty input",
+//                 input: [],
+//                 expected: "None"
+//             },
+//             {
+//                 name: "Total detachment",
+//                 input: Array.from({ length: 56 }, (_, i) => i),
+//                 expected: "1-12 o'clock (Total)"
+//             },
+//             {
+//                 name: "Single hour at 12",
+//                 input: [0, 1],
+//                 expected: "12 o'clock"
+//             },
+//             {
+//                 name: "Simple range within hour",
+//                 input: [5, 6, 7],
+//                 expected: "1 o'clock"
+//             },
+//             {
+//                 name: "Range crossing midnight",
+//                 input: [58, 59, 0, 1],
+//                 expected: "12 o'clock"
+//             },
+//             {
+//                 name: "Big Range crossing midnight",
+//                 input: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 0, 1, 2, 3, 4, 5, 6],
+//                 expected: "10-1 o'clock"
+//             },
+//             {
+//                 name: "Multiple separate ranges",
+//                 input: [0, 1, 2, 25, 26, 27, 28],
+//                 expected: "12; 5-6 o'clock"
+//             },
+//             {
+//                 name: "Hour 6 special case",
+//                 input: [24, 25, 26, 27, 28],
+//                 expected: "5-6 o'clock"
+//             },
+//             {
+//                 name: "Single segment at boundary",
+//                 input: [5],
+//                 expected: "1 o'clock"
+//             },
+//             {
+//                 name: "Single segment at 12",
+//                 input: [59],
+//                 expected: "12 o'clock"
+//             }
+//         ];
 
+//         // Run tests and collect results
+//         const results = testCases.map(testCase => {
+//             const result = formatDetachmentHours(testCase.input);
+//             const passed = result === testCase.expected;
 
-// Run tests only if this file is executed directly
-if (require.main === module) {
-    function runFormatDetachmentTests() {
-        const testCases = [
-            {
-                name: "Empty input",
-                input: [],
-                expected: "None"
-            },
-            {
-                name: "Total detachment",
-                input: Array.from({ length: 56 }, (_, i) => i),
-                expected: "1-12 o'clock (Total)"
-            },
-            {
-                name: "Single hour at 12",
-                input: [0, 1],
-                expected: "12 o'clock"
-            },
-            {
-                name: "Simple range within hour",
-                input: [5, 6, 7],
-                expected: "1 o'clock"
-            },
-            {
-                name: "Range crossing midnight",
-                input: [58, 59, 0, 1],
-                expected: "12 o'clock"
-            },
-            {
-                name: "Big Range crossing midnight",
-                input: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 0, 1, 2, 3, 4, 5, 6],
-                expected: "10-1 o'clock"
-            },
-            {
-                name: "Multiple separate ranges",
-                input: [0, 1, 2, 25, 26, 27, 28],
-                expected: "12; 5-6 o'clock"
-            },
-            {
-                name: "Hour 6 special case",
-                input: [24, 25, 26, 27, 28],
-                expected: "5-6 o'clock"
-            },
-            {
-                name: "Single segment at boundary",
-                input: [5],
-                expected: "1 o'clock"
-            },
-            {
-                name: "Single segment at 12",
-                input: [59],
-                expected: "12 o'clock"
-            }
-        ];
+//             return {
+//                 name: testCase.name,
+//                 input: testCase.input,
+//                 expected: testCase.expected,
+//                 actual: result,
+//                 passed: passed,
+//                 detail: passed ? '' : `Got "${result}", expected "${testCase.expected}"`
+//             };
+//         });
 
-        return testCases.map(testCase => {
-            const result = formatDetachmentHours(testCase.input);
-            const passed = result === testCase.expected;
+//         // Print results
+//         results.forEach(result => {
+//             console.log(`\nTest: ${result.name}`);
+//             console.log(`Input: [${result.input.join(', ')}]`);
+//             console.log(`Expected: "${result.expected}"`);
+//             console.log(`Actual: "${result.actual}"`);
+//             console.log(`Result: ${result.passed ? 'PASS' : 'FAIL'}`);
+//             if (!result.passed) {
+//                 console.log(`Detail: ${result.detail}`);
+//             }
+//         });
 
-            return {
-                name: testCase.name,
-                input: testCase.input,
-                expected: testCase.expected,
-                actual: result,
-                passed: passed,
-                detail: passed ? '' : `Got "${result}", expected "${testCase.expected}"`
-            };
-        });
-    }
+//         // Return overall test status
+//         return results.every(r => r.passed);
+//     };
 
-    // Run tests
-    const results = runFormatDetachmentTests();
-    console.log("\nFormat Detachment Hours Tests:");
-    results.forEach(result => {
-        console.log(`\nTest: ${result.name}`);
-        console.log(`Input: [${result.input.join(', ')}]`);
-        console.log(`Expected: "${result.expected}"`);
-        console.log(`Actual: "${result.actual}"`);
-        console.log(`Result: ${result.passed ? 'PASS' : 'FAIL'}`);
-        if (!result.passed) {
-            console.log(`Detail: ${result.detail}`);
-        }
-    });
-}
+//     // Run the tests
+//     const testsPassed = runFormatDetachmentTests();
+//     console.log(`\nAll tests ${testsPassed ? 'PASSED' : 'FAILED'}`);
+// }

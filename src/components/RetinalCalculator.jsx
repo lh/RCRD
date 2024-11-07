@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import ClockFace from './clock/ClockFace';
-import RiskInputForm from './RiskInputForm';
-import RiskResults from './RiskResults';
-import { calculateRiskWithSteps } from '../utils/riskCalculations';
-import { formatDetachmentHours } from './clock/utils/formatDetachmentHours';
+import ClockFace from './clock/ClockFace.jsx';
+import RiskInputForm from './RiskInputForm.jsx';
+import RiskResults from './RiskResults.jsx';
+import { calculateRiskWithSteps } from '../utils/riskCalculations.js';
+import { formatDetachmentHours } from './clock/utils/formatDetachmentHours.js';
 
 
 const RetinalCalculator = () => {
@@ -96,7 +96,7 @@ const RetinalCalculator = () => {
                 <div className="p-6">
                     <h2 className="text-2xl font-bold mb-2">Retinal Detachment Risk Calculator</h2>
                     <p className="text-sm text-gray-600 mb-6">
-                        Based on the UK BEAVRS database study of retinal detachment outcomes
+                    Based on the <a href="https://www.beavrs.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">UK BEAVRS</a> database <a href="https://www.nature.com/articles/s41433-023-02388-0 " target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">study</a> of retinal detachment outcomes (Yorston et al, 2023) 
                     </p>
 
                     <div className="space-y-6">

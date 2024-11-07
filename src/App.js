@@ -1,4 +1,4 @@
-import RetinalCalculator from './components/RetinalCalculator';
+import RetinalCalculator from './components/RetinalCalculator.jsx';
 
 function App() {
   return (

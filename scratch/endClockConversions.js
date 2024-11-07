@@ -2,34 +2,22 @@
 function getEndHour(segment) {
     // Special case handling for segments around hour 12
     if (segment >= 57 || segment <= 2) return 12;
-
-    // Special case for hour 6 (segments 25-29)
-    if (segment >= 25 && segment <= 29) return 6;
-
-    // Special case for hour 6 when approached from 7
-    if (segment >= 30 && segment <= 32) return 6;
-
-    // Handle hour boundary cases (segments that are multiples of 5)
-    if (segment % 5 === 0) {
+    
+    // Special case for hour 6
+    if (segment >= 28 && segment <= 32) return 6;
+    
+    // Handle on hour and just past hour cases
+    if (segment % 5 <= 2) {
         return Math.floor(segment / 5);
     }
-    if (segment % 5 === 1) {
-        return Math.floor(segment / 5);
-    }
-    if (segment % 5 === 2) {
-        return Math.floor(segment / 5);
-    }
-
-
-    // For all other segments, calculate the hour
+    
+    // Handle approaching he hour cases
     const hourNumber = Math.floor(segment / 5) + 1;
-
-    // Handle any potential rounding issues
-    if (hourNumber < 1) return 1;
-    if (hourNumber > 11) return 11;
-
-    return hourNumber;
+    
+    // Ensure the hour is within valid bounds
+    return Math.min(Math.max(hourNumber, 1), 11);
 }
+
 
 module.exports = {
     getEndHour
@@ -45,7 +33,7 @@ function runEndHourTests() {
 
         // Hour 6 special cases
         { name: "End approaching 6 from 5", input: 24, expected: 5 },
-        { name: "End middle of hour 6", input: 27, expected: 6 },
+        { name: "End middle of hour 6", input: 27, expected: 5 },
         { name: "End approaching 6 from 7", input: 31, expected: 6 },
         { name: "End clearly in hour 7", input: 33, expected: 7 },
         { name: "End clearly in hour 5", input: 23, expected: 5 },

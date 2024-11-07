@@ -1,5 +1,5 @@
 import React from 'react';
-import { pvrOptions, gaugeOptions } from '../constants/riskCalculatorConstants';
+import { pvrOptions, gaugeOptions } from '../constants/riskCalculatorConstants.js';
 
 const RiskInputForm = ({ 
     position,

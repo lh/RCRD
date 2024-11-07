@@ -1,6 +1,7 @@
 {
   "name": "retinal-calculator",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "dependencies": {
     "@shadcn/ui": "^0.0.4",

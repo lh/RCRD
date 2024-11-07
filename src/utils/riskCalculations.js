@@ -1,4 +1,4 @@
-import { coefficients } from '../constants/riskCalculatorConstants';
+import { coefficients } from '../constants/riskCalculatorConstants.js';
 
 export const getAgeGroup = (age) => {
     if (!age) return "45_to_64"; // default to reference category

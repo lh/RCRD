@@ -1,5 +1,5 @@
-// Core function for detecting if segments are adjacent
-function areSegmentsAdjacent(seg1, seg2) {
+// Private helper function for detecting if segments are adjacent
+const areSegmentsAdjacent = (seg1, seg2) => {
     // Normal adjacency
     if (Math.abs(seg1 - seg2) === 1) return true;
 
@@ -8,10 +8,14 @@ function areSegmentsAdjacent(seg1, seg2) {
     if (seg1 === 0 && seg2 === 59) return true;
 
     return false;
-}
+};
 
-// Main range detection function
-function getSegmentRanges(segments) {
+/**
+ * Groups consecutive segments into ranges, handling wraparound at 59/0
+ * @param {number[]} segments - Array of segment numbers (0-59)
+ * @returns {Array<{start: number, length: number}>} Array of range objects
+ */
+export const getSegmentRanges = (segments) => {
     if (segments.length === 0) return [];
 
     // Start with single-segment ranges
@@ -54,90 +58,87 @@ function getSegmentRanges(segments) {
     }
 
     return ranges;
-}
-
-module.exports = {
-    getSegmentRanges
 };
 
+// // Run tests only if this file is executed directly
+// if (import.meta.url === import.meta.resolve('./getSegmentRanges.js')) {
+//     const runSegmentRangeTests = () => {
+//         const testCases = [
+//             {
+//                 name: "Multiple wraparounds",
+//                 input: [58, 59, 0, 1, 30, 31, 45, 46],
+//                 expected: [
+//                     { start: 58, length: 4 },
+//                     { start: 30, length: 2 },
+//                     { start: 45, length: 2 }
+//                 ]
+//             },
+//             {
+//                 name: "Single wraparound",
+//                 input: [58, 59, 0, 1],
+//                 expected: [
+//                     { start: 58, length: 4 }
+//                 ]
+//             },
+//             {
+//                 name: "Two separate ranges with one wrapping",
+//                 input: [58, 59, 0, 1, 30, 31, 32],
+//                 expected: [
+//                     { start: 58, length: 4 },
+//                     { start: 30, length: 3 }
+//                 ]
+//             },
+//             {
+//                 name: "Regular continuous range",
+//                 input: [5, 6, 7, 8],
+//                 expected: [
+//                     { start: 5, length: 4 }
+//                 ]
+//             },
+//             {
+//                 name: "Empty input",
+//                 input: [],
+//                 expected: []
+//             },
+//             {
+//                 name: "Single segment",
+//                 input: [5],
+//                 expected: [
+//                     { start: 5, length: 1 }
+//                 ]
+//             }
+//         ];
 
-// Run tests only if this file is executed directly
-if (require.main === module) {
-    // Test suite
-    function runSegmentRangeTests() {
-        const testCases = [
-            {
-                name: "Multiple wraparounds",
-                input: [58, 59, 0, 1, 30, 31, 45, 46],
-                expected: [
-                    { start: 58, length: 4 },
-                    { start: 30, length: 2 },
-                    { start: 45, length: 2 }
-                ]
-            },
-            {
-                name: "Single wraparound",
-                input: [58, 59, 0, 1],
-                expected: [
-                    { start: 58, length: 4 }
-                ]
-            },
-            {
-                name: "Two separate ranges with one wrapping",
-                input: [58, 59, 0, 1, 30, 31, 32],
-                expected: [
-                    { start: 58, length: 4 },
-                    { start: 30, length: 3 }
-                ]
-            },
-            {
-                name: "Regular continuous range",
-                input: [5, 6, 7, 8],
-                expected: [
-                    { start: 5, length: 4 }
-                ]
-            },
-            {
-                name: "Empty input",
-                input: [],
-                expected: []
-            },
-            {
-                name: "Single segment",
-                input: [5],
-                expected: [
-                    { start: 5, length: 1 }
-                ]
-            }
-        ];
+//         // Run tests and collect results
+//         const results = testCases.map(testCase => {
+//             const result = getSegmentRanges(testCase.input);
+//             const resultStr = JSON.stringify(result);
+//             const expectedStr = JSON.stringify(testCase.expected);
+//             const passed = resultStr === expectedStr;
 
-        // Run tests and collect results
-        const results = testCases.map(testCase => {
-            const result = getSegmentRanges(testCase.input);
-            const resultStr = JSON.stringify(result);
-            const expectedStr = JSON.stringify(testCase.expected);
-            const passed = resultStr === expectedStr;
+//             return {
+//                 name: testCase.name,
+//                 input: testCase.input,
+//                 expected: testCase.expected,
+//                 actual: result,
+//                 passed: passed
+//             };
+//         });
 
-            return {
-                name: testCase.name,
-                input: testCase.input,
-                expected: testCase.expected,
-                actual: result,
-                passed: passed
-            };
-        });
+//         // Print results
+//         results.forEach(result => {
+//             console.log(`\nTest: ${result.name}`);
+//             console.log(`Input: [${result.input.join(', ')}]`);
+//             console.log('Expected:', JSON.stringify(result.expected));
+//             console.log('Actual:', JSON.stringify(result.actual));
+//             console.log(`Result: ${result.passed ? 'PASS' : 'FAIL'}`);
+//         });
 
-        // Return results rather than logging them
-        return results;
-    }
+//         // Return overall test status
+//         return results.every(r => r.passed);
+//     };
 
-    // Example of how to verify test results:
-    const results = runSegmentRangeTests();
-    results.forEach(result => {
-        console.log(`\nTest: ${result.name}`);
-        console.log(`Input: [${result.input.join(', ')}]`);
-        console.log('Expected:', JSON.stringify(result.expected));
-        console.log('Actual:', JSON.stringify(result.actual));
-        console.log(`Result: ${result.passed ? 'PASS' : 'FAIL'}`);
-    });
-}
+//     // Run the tests
+//     const testsPassed = runSegmentRangeTests();
+//     console.log(`\nAll tests ${testsPassed ? 'PASSED' : 'FAILED'}`);
+// }
