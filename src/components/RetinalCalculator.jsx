@@ -77,10 +77,10 @@ const RetinalCalculator = () => {
     };
 
     // Helper function to convert segment to clock hour
-    const segmentToHour = (segment) => {
-        const hour = Math.floor(segment / 5) % 12;
-        return hour === 0 ? 12 : hour;
-    };
+    // const segmentToHour = (segment) => {
+    //     const hour = Math.floor(segment / 5) % 12;
+    //     return hour === 0 ? 12 : hour;
+    // };
 
 
 
