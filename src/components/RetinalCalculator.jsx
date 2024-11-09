@@ -16,6 +16,7 @@ const RetinalCalculator = () => {
     const [hoveredHour, setHoveredHour] = useState(null);
     const [showMath, setShowMath] = useState(false);
     const [calculatedRisk, setCalculatedRisk] = useState(null);
+    const [isTouchDevice, setIsTouchDevice] = useState(false);
 
     // Common props for RiskInputForm
     const formProps = {
@@ -47,7 +48,7 @@ const RetinalCalculator = () => {
 
     const handleCalculate = () => {
         if (!age || detachmentSegments.length === 0) return;
-        
+
         const risk = calculateRiskWithSteps({
             age,
             pvrGrade,
@@ -82,7 +83,7 @@ const RetinalCalculator = () => {
     };
 
 
- 
+
 
 
     // Helper to format PVR grade display
@@ -96,7 +97,7 @@ const RetinalCalculator = () => {
                 <div className="p-6">
                     <h2 className="text-2xl font-bold mb-2">Retinal Detachment Risk Calculator</h2>
                     <p className="text-sm text-gray-600 mb-6">
-                    Based on the <a href="https://www.beavrs.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">UK BEAVRS</a> database <a href="https://www.nature.com/articles/s41433-023-02388-0 " target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">study</a> of retinal detachment outcomes (Yorston et al, 2023) 
+                        Based on the <a href="https://www.beavrs.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">UK BEAVRS</a> database <a href="https://www.nature.com/articles/s41433-023-02388-0 " target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">study</a> of retinal detachment outcomes (Yorston et al, 2023)
                     </p>
 
                     <div className="space-y-6">
@@ -116,6 +117,24 @@ const RetinalCalculator = () => {
                                         onHoverChange={handleHoverChange}
                                         onTearToggle={handleTearToggle}
                                         onSegmentToggle={handleSegmentToggle}
+                                        setDetachmentSegments={setDetachmentSegments}
+                                        onTouchDeviceChange={setIsTouchDevice}
+                                        readOnly={false}
+                                    />
+                                    <div
+                                        id="touch-debug"
+                                        className="text-xs font-mono bg-gray-100 p-2 mt-2 whitespace-pre overflow-auto"
+                                        style={{ maxHeight: '100px' }}
+                                    />
+                                    <div
+                                        style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            backgroundColor: isTouchDevice ? 'green' : 'red',
+                                            position: 'fixed',
+                                            bottom: '10px',
+                                            right: '10px'
+                                        }}
                                     />
                                     <div className="bg-gray-50 p-4 rounded-lg">
                                         <h3 className="text-sm font-medium text-gray-700">Current Selection:</h3>
@@ -123,8 +142,8 @@ const RetinalCalculator = () => {
                                             {selectedHours.length > 0 ? `Breaks at: ${selectedHours.join(', ')}` : 'No breaks marked'}
                                         </p>
                                         <p className={`text-sm ${detachmentSegments.length === 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                            {detachmentSegments.length > 0 
-                                                ? `Detachment segments: ${detachmentSegments.length}` 
+                                            {detachmentSegments.length > 0
+                                                ? `Detachment segments: ${detachmentSegments.length}`
                                                 : 'Detachment area required'}
                                         </p>
                                     </div>
@@ -144,8 +163,8 @@ const RetinalCalculator = () => {
                                                     {selectedHours.length > 0 ? `Breaks at: ${selectedHours.join(', ')}` : 'No breaks marked'}
                                                 </p>
                                                 <p className={`text-sm ${detachmentSegments.length === 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                                    {detachmentSegments.length > 0 
-                                                        ? `Detachment segments: ${detachmentSegments.length}` 
+                                                    {detachmentSegments.length > 0
+                                                        ? `Detachment segments: ${detachmentSegments.length}`
                                                         : 'Detachment area required'}
                                                 </p>
                                             </div>
@@ -159,6 +178,8 @@ const RetinalCalculator = () => {
                                             onHoverChange={handleHoverChange}
                                             onTearToggle={handleTearToggle}
                                             onSegmentToggle={handleSegmentToggle}
+                                            setDetachmentSegments={setDetachmentSegments}
+                                            readOnly={false}
                                         />
                                     </div>
                                     <div className="w-1/4">
@@ -178,7 +199,7 @@ const RetinalCalculator = () => {
                                         disabled={isCalculateDisabled}
                                         className={`w-full py-2 px-4 rounded-md text-white font-medium
                                             ${isCalculateDisabled
-                                                ? 'bg-gray-400 cursor-not-allowed' 
+                                                ? 'bg-gray-400 cursor-not-allowed'
                                                 : 'bg-blue-600 hover:bg-blue-700'}`}
                                     >
                                         Calculate Risk
@@ -203,7 +224,7 @@ const RetinalCalculator = () => {
                                     setShowMath={setShowMath}
                                     onReset={handleReset}
                                 />
-                                
+
                                 <div className="mt-8 border-t pt-6">
                                     <h3 className="text-lg font-semibold mb-4">Input Summary</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -227,10 +248,15 @@ const RetinalCalculator = () => {
                                                 selectedHours={selectedHours}
                                                 detachmentSegments={detachmentSegments}
                                                 hoveredHour={hoveredHour}
-                                                onHoverChange={() => {}}
-                                                onTearToggle={() => {}}
-                                                onSegmentToggle={() => {}}
+                                                onHoverChange={() => { }}
+                                                onTearToggle={() => { }}
+                                                onSegmentToggle={() => { }}
                                                 readOnly={true}
+                                            />
+                                            <div
+                                                id="touch-debug"
+                                                className="text-xs font-mono bg-gray-100 p-2 mt-2 whitespace-pre overflow-auto"
+                                                style={{ maxHeight: '100px' }}
                                             />
                                         </div>
                                     </div>
