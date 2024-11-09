@@ -1,0 +1,47 @@
+.
+├── App.css
+├── App.js
+├── App.test.js
+├── components
+│   ├── RetinalCalculator.jsx
+│   ├── RiskInputForm.jsx
+│   ├── RiskResults.jsx
+│   └── clock
+│       ├── ClockFace.jsx
+│       ├── ClockFace.test.jsx
+│       ├── Controls.jsx
+│       ├── MinimalClockSelector.jsx
+│       ├── Segment.jsx
+│       ├── hooks
+│       │   └── useClockInteractions.js
+│       ├── oldClockFace.jsx
+│       ├── styles
+│       │   └── clockStyles.js
+│       └── utils
+│           ├── clockCalculations.js
+│           ├── clockCoordinates.js
+│           ├── clockHourNotation.js
+│           ├── clockMapping.js
+│           ├── clockTests.js
+│           ├── formatDetachmentHours.js
+│           ├── getClockHour.js
+│           ├── getSegmentRanges.js
+│           ├── interpolateSegments.js
+│           ├── segmentCalculator.js
+│           ├── useLongPress.js
+│           └── useLongPress.test.js
+├── constants
+│   └── riskCalculatorConstants.js
+├── index.css
+├── index.js
+├── logo.svg
+├── reportWebVitals.js
+├── setupTests.js
+├── tests
+│   └── clockFace
+│       └── segmentCalculatorTests.js
+├── tree.txt
+└── utils
+    └── riskCalculations.js
+
+10 directories, 35 files

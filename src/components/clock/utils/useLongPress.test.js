@@ -1,67 +1,44 @@
 // src/components/clock/utils/useLongPress.test.js
-import { renderHook, act } from '@testing-library/react-hooks';
-import { useLongPress, LONG_PRESS_DURATION } from './useLongPress';
+import { renderHook, act } from '@testing-library/react';
+import { useLongPress } from './useLongPress';
 
 describe('useLongPress', () => {
-    beforeEach(() => {
-        jest.useFakeTimers();
+  test('should handle long press', () => {
+    const callback = jest.fn();
+    const { result } = renderHook(() => useLongPress(callback, 500));
+
+    // Test implementation here
+    act(() => {
+      // Simulate press start
+      result.current.onTouchStart({ preventDefault: jest.fn() });
     });
 
-    afterEach(() => {
-        jest.useRealTimers();
+    // Fast-forward time
+    jest.advanceTimersByTime(600);
+
+    act(() => {
+      // Simulate press end
+      result.current.onTouchEnd({ preventDefault: jest.fn() });
     });
 
-    it('should trigger callback on long press', () => {
-        const onLongPress = jest.fn();
-        const { result } = renderHook(() => useLongPress(onLongPress));
+    expect(callback).toHaveBeenCalled();
+  });
 
-        // Simulate touch start
-        act(() => {
-            result.current.handleTouchStart({
-                preventDefault: jest.fn(),
-                stopPropagation: jest.fn(),
-                touches: [{ clientX: 100, clientY: 100 }]
-            });
-        });
+  test('should not trigger on short press', () => {
+    const callback = jest.fn();
+    const { result } = renderHook(() => useLongPress(callback, 500));
 
-        // Advance timer
-        act(() => {
-            jest.advanceTimersByTime(LONG_PRESS_DURATION);
-        });
-
-        // Simulate touch end
-        act(() => {
-            result.current.handleTouchEnd({
-                preventDefault: jest.fn(),
-                stopPropagation: jest.fn(),
-                changedTouches: [{ clientX: 101, clientY: 101 }]
-            });
-        });
-
-        expect(onLongPress).toHaveBeenCalled();
+    act(() => {
+      result.current.onTouchStart({ preventDefault: jest.fn() });
     });
 
-    it('should not trigger on short press', () => {
-        const onLongPress = jest.fn();
-        const { result } = renderHook(() => useLongPress(onLongPress));
+    // Only wait 400ms (less than threshold)
+    jest.advanceTimersByTime(400);
 
-        act(() => {
-            result.current.handleTouchStart({
-                preventDefault: jest.fn(),
-                stopPropagation: jest.fn(),
-                touches: [{ clientX: 100, clientY: 100 }]
-            });
-        });
-
-        act(() => {
-            jest.advanceTimersByTime(LONG_PRESS_DURATION - 100);
-            result.current.handleTouchEnd({
-                preventDefault: jest.fn(),
-                stopPropagation: jest.fn(),
-                changedTouches: [{ clientX: 101, clientY: 101 }]
-            });
-        });
-
-        expect(onLongPress).not.toHaveBeenCalled();
+    act(() => {
+      result.current.onTouchEnd({ preventDefault: jest.fn() });
     });
+
+    expect(callback).not.toHaveBeenCalled();
+  });
 });
