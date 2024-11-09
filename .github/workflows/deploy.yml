@@ -28,25 +28,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Build
+      - name: Build the project
         run: npm run build
-        env:
-          PUBLIC_URL: /RCRD
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Deploy to GitHub Pages 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.5.0  # Specify exact version
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          branch: gh-pages  # The branch the action should deploy to
-          folder: build     # The folder the action should deploy
-          clean: true      # Automatically remove deleted files
-          token: ${{ secrets.GITHUB_TOKEN }}  # Use built-in token
-          git-config-name: github-actions[bot]  # Set Git config
-          git-config-email: github-actions[bot]@users.noreply.github.com
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
