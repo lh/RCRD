@@ -12,7 +12,9 @@ permissions:
   id-token: write
 
 jobs:
-  build-and-deploy:
+  # First job: Build and test
+  build:
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,6 +33,24 @@ jobs:
         run: npm run build
         env:
           PUBLIC_URL: /RCRD
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: build
+
+  # Second job: Deploy (depends on build)
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-output
+          path: build
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
