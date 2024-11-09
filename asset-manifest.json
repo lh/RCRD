@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/RCRD/static/css/main.033b6685.css",
+    "main.js": "/RCRD/static/js/main.b02d3add.js",
+    "static/js/488.d5001222.chunk.js": "/RCRD/static/js/488.d5001222.chunk.js",
+    "index.html": "/RCRD/index.html",
+    "main.033b6685.css.map": "/RCRD/static/css/main.033b6685.css.map",
+    "main.b02d3add.js.map": "/RCRD/static/js/main.b02d3add.js.map",
+    "488.d5001222.chunk.js.map": "/RCRD/static/js/488.d5001222.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.033b6685.css",
+    "static/js/main.b02d3add.js"
+  ]
+}
