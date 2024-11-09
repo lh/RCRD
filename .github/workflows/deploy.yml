@@ -6,19 +6,23 @@ on:
       - develop
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN
 permissions:
   contents: write
   pages: write
   id-token: write
+  actions: write
 
 jobs:
-  # First job: Build and test
-  build:
-    name: Build
+  build-and-deploy:
+    concurrency: ci-${{ github.ref }}  # Ensure only one deployment runs at a time
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout 🛎️
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true  # Important for deployment
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -34,27 +38,15 @@ jobs:
         env:
           PUBLIC_URL: /RCRD
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-output
-          path: build
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-  # Second job: Deploy (depends on build)
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Deploy to GitHub Pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.5.0  # Specify exact version
         with:
-          name: build-output
-          path: build
-
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          folder: build
-          branch: gh-pages
-          clean: true
+          branch: gh-pages  # The branch the action should deploy to
+          folder: build     # The folder the action should deploy
+          clean: true      # Automatically remove deleted files
+          token: ${{ secrets.GITHUB_TOKEN }}  # Use built-in token
+          git-config-name: github-actions[bot]  # Set Git config
+          git-config-email: github-actions[bot]@users.noreply.github.com
