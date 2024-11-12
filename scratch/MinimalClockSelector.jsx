@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import Controls from './Controls';
-import ClockFace from './ClockFace';
+import Controls from '../src/components/clock/Controls';
+import ClockFace from '../src/components/clock/ClockFace';
 
 const MinimalClockSelector = ({ onChange }) => {
   const [selectedHours, setSelectedHours] = useState([]);
