@@ -1,0 +1,50 @@
+Testing Guidelines for RCRD Application:
+
+Component Selection Strategy:
+Start with the simplest components/utilities first (e.g., useLongPress.test.js)
+Work your way up to more complex components
+Handle one test file at a time, ensuring all tests pass before moving on
+Element Selection Best Practices:
+Avoid using getByRole('generic') as it can match multiple elements
+When testing divs without semantic roles, use container.querySelector() with specific class combinations
+For nested elements, use closest() and parentElement to navigate the DOM tree correctly
+If testing nested components, ensure you're selecting the correct level of the component hierarchy
+Event Testing:
+Use fireEvent.click() for button interactions
+For keyboard accessibility tests, combine focus() and click events rather than just keyDown
+When testing state changes (like toggles), verify both the initial and changed states
+Component Structure Testing:
+Test both default and specified prop behaviors
+Verify class names for styling (especially with Tailwind)
+Check responsive design classes (e.g., 'md:' prefixed classes)
+Test conditional rendering based on props (e.g., isTouchDevice)
+Test Organization:
+Group related tests using describe blocks
+Use clear, descriptive test names
+Mock external dependencies (e.g., Lucide icons)
+Clean up mocks in afterEach blocks
+Common Patterns:
+For expandable/collapsible elements, test both the trigger and the expanded content
+For interactive elements, test both the visual state and the callback behavior
+For styled components, verify both the presence and absence of classes
+Error Prevention:
+Don't modify component code to make tests pass
+Instead, adapt tests to work with the existing component structure
+Use the component's actual structure to inform test selectors
+Be aware of the complete DOM structure when selecting elements
+Testing Hierarchy:
+Start with basic rendering tests
+Then test prop variations
+Then test interactions
+Finally test edge cases and accessibility
+Debugging Approach:
+When tests fail, examine the full error message for DOM structure
+Use the error output to understand what elements are actually present
+Adjust selectors based on the actual component structure
+Consider the component's parent/child relationships
+Maintenance:
+Keep tests focused on behavior, not implementation
+Use consistent patterns across similar components
+Document any special testing considerations in the test file
+Maintain test isolation to prevent inter-test dependencies
+This approach ensures reliable tests that verify component behavior without requiring modifications to the components themselves.
