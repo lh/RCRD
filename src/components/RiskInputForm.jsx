@@ -17,51 +17,63 @@ const RiskInputForm = ({
 
     const isAgeValid = (value) => {
         console.log('isAgeValid called with:', value, 'type:', typeof value);
-        if (!value && value !== 0) return false;
+        if (!value && value !== 0) {
+            console.log('-> value is empty');
+            return false;
+        }
         const numValue = parseInt(value, 10);
+        console.log('-> parsed value:', numValue);
         const isValid = !isNaN(numValue) && numValue >= 18 && numValue <= 100;
-        console.log('numValue:', numValue, 'isValid:', isValid);
+        console.log('-> isValid:', isValid);
         return isValid;
     };
 
     const handleAgeChange = (e) => {
         const newValue = e.target.value;
         console.log('handleAgeChange:', newValue);
+        console.log('-> before setAge, current age:', age);
         setAge(newValue);
+        console.log('-> after setAge');
     };
 
-    const renderAgeInput = () => (
-        <div className="space-y-2">
-            <label 
-                htmlFor={`age-input${isMobile ? '-mobile' : ''}`}
-                className="block text-sm font-medium text-gray-700"
-                data-testid="age-label"
-            >
-                Age (years)
-            </label>
-            <input
-                id={`age-input${isMobile ? '-mobile' : ''}`}
-                type="number"
-                className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                    ${!isAgeValid(age) ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
-                value={age || ''}
-                onChange={handleAgeChange}
-                min="18"
-                max="100"
-                placeholder="Enter age"
-                required
-                data-testid="age-input"
-                role="spinbutton"
-                aria-required="true"
-                aria-valuemin="18"
-                aria-valuemax="100"
-                aria-invalid={!isAgeValid(age)}
-            />
-            {!age && (
-                <p className="text-sm text-red-600">Age is required</p>
-            )}
-        </div>
-    );
+    const renderAgeInput = () => {
+        console.log('renderAgeInput, age:', age);
+        const valid = isAgeValid(age);
+        console.log('-> valid:', valid);
+        
+        return (
+            <div className="space-y-2">
+                <label 
+                    htmlFor={`age-input${isMobile ? '-mobile' : ''}`}
+                    className="block text-sm font-medium text-gray-700"
+                    data-testid="age-label"
+                >
+                    Age (years)
+                </label>
+                <input
+                    id={`age-input${isMobile ? '-mobile' : ''}`}
+                    type="number"
+                    className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                        ${!valid ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
+                    value={age || ''}
+                    onChange={handleAgeChange}
+                    min="18"
+                    max="100"
+                    placeholder="Enter age"
+                    required
+                    data-testid="age-input"
+                    role="spinbutton"
+                    aria-required="true"
+                    aria-valuemin="18"
+                    aria-valuemax="100"
+                    aria-invalid={!valid}
+                />
+                {!age && (
+                    <p className="text-sm text-red-600">Age is required</p>
+                )}
+            </div>
+        );
+    };
 
     const renderPVRGrade = () => (
         <div className="space-y-2">

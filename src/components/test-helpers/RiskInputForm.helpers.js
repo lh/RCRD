@@ -9,16 +9,28 @@ export const mockProps = {
   setPvrGrade: jest.fn(),
   vitrectomyGauge: '',
   setVitrectomyGauge: jest.fn(),
-  position: 'left'
 };
 
-export const renderDesktop = (props = {}) => 
-  render(<RiskInputForm {...mockProps} {...props} isMobile={false} />);
+export const renderDesktop = (props = {}) => {
+  const mergedProps = {
+    ...mockProps,
+    position: 'left',
+    ...props,
+  };
 
-export const renderMobile = (props = {}) =>
-  render(<RiskInputForm {...mockProps} {...props} isMobile={true} />);
+  return render(<RiskInputForm {...mergedProps} />);
+};
 
-// Reset all mocks between tests
+export const renderMobile = (props = {}) => {
+  const mergedProps = {
+    ...mockProps,
+    isMobile: true,
+    ...props,
+  };
+
+  return render(<RiskInputForm {...mergedProps} />);
+};
+
 export const resetMocks = () => {
   mockProps.setAge.mockReset();
   mockProps.setPvrGrade.mockReset();

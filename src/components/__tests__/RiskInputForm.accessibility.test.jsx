@@ -1,7 +1,27 @@
-import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
-import { mockProps, renderDesktop, renderMobile, resetMocks } from '../test-helpers/RiskInputForm.helpers';
+import React, { useState } from 'react';
+import { screen, fireEvent, act, waitFor, render } from '@testing-library/react';
+import { mockProps, renderMobile, resetMocks } from '../test-helpers/RiskInputForm.helpers';
 import { pvrOptions, gaugeOptions } from '../../constants/riskCalculatorConstants';
+import RiskInputForm from '../RiskInputForm';
+
+// Wrapper component that manages its own state for testing
+const TestWrapper = ({ position = 'left' }) => {
+  const [age, setAge] = useState('');
+  const [pvrGrade, setPvrGrade] = useState('');
+  const [vitrectomyGauge, setVitrectomyGauge] = useState('');
+
+  return (
+    <RiskInputForm
+      position={position}
+      age={age}
+      setAge={setAge}
+      pvrGrade={pvrGrade}
+      setPvrGrade={setPvrGrade}
+      vitrectomyGauge={vitrectomyGauge}
+      setVitrectomyGauge={setVitrectomyGauge}
+    />
+  );
+};
 
 describe('RiskInputForm Accessibility', () => {
   beforeEach(() => {
@@ -10,7 +30,7 @@ describe('RiskInputForm Accessibility', () => {
 
   describe('Age Input', () => {
     test('renders age input with proper label association in desktop view', () => {
-      renderDesktop();
+      render(<TestWrapper />);
       
       const label = screen.getByTestId('age-label');
       const input = screen.getByTestId('age-input');
@@ -30,7 +50,7 @@ describe('RiskInputForm Accessibility', () => {
     });
 
     test('includes required ARIA attributes', () => {
-      renderDesktop();
+      render(<TestWrapper />);
 
       const input = screen.getByLabelText(/age \(years\)/i);
 
@@ -41,8 +61,8 @@ describe('RiskInputForm Accessibility', () => {
       expect(input).toHaveAttribute('aria-invalid', 'true'); // Initially invalid as empty
     });
 
-    test('updates aria-invalid based on validation state', () => {
-      renderDesktop();
+    test('updates aria-invalid based on validation state', async () => {
+      render(<TestWrapper />);
 
       const input = screen.getByLabelText(/age \(years\)/i);
 
@@ -50,22 +70,37 @@ describe('RiskInputForm Accessibility', () => {
       expect(input).toHaveAttribute('aria-invalid', 'true');
 
       // Valid age
-      fireEvent.change(input, { target: { value: '50' } });
-      expect(input).toHaveAttribute('aria-invalid', 'false');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '50' } });
+      });
+
+      await waitFor(() => {
+        expect(input).toHaveAttribute('aria-invalid', 'false');
+      });
 
       // Invalid age (too low)
-      fireEvent.change(input, { target: { value: '17' } });
-      expect(input).toHaveAttribute('aria-invalid', 'true');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '17' } });
+      });
+
+      await waitFor(() => {
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+      });
 
       // Invalid age (too high)
-      fireEvent.change(input, { target: { value: '101' } });
-      expect(input).toHaveAttribute('aria-invalid', 'true');
+      await act(async () => {
+        fireEvent.change(input, { target: { value: '101' } });
+      });
+
+      await waitFor(() => {
+        expect(input).toHaveAttribute('aria-invalid', 'true');
+      });
     });
   });
 
   describe('PVR Grade Selection', () => {
     test('radio buttons have proper label associations in desktop view', () => {
-      renderDesktop({ position: 'left' });
+      render(<TestWrapper position="left" />);
 
       pvrOptions.forEach(option => {
         const radio = screen.getByRole('radio', { name: option.label });
@@ -89,7 +124,7 @@ describe('RiskInputForm Accessibility', () => {
     });
 
     test('radio group has proper ARIA attributes', () => {
-      renderDesktop({ position: 'left' });
+      render(<TestWrapper position="left" />);
 
       const radioGroup = screen.getByRole('radiogroup', { name: /pvr grade/i });
       expect(radioGroup).toHaveAttribute('aria-required', 'true');
@@ -99,7 +134,7 @@ describe('RiskInputForm Accessibility', () => {
 
   describe('Vitrectomy Gauge Selection', () => {
     test('radio buttons have proper label associations in desktop view', () => {
-      renderDesktop({ position: 'right' });
+      render(<TestWrapper position="right" />);
 
       gaugeOptions.forEach(option => {
         const radio = screen.getByRole('radio', { name: option.label });
@@ -123,7 +158,7 @@ describe('RiskInputForm Accessibility', () => {
     });
 
     test('radio group has proper ARIA attributes', () => {
-      renderDesktop({ position: 'right' });
+      render(<TestWrapper position="right" />);
 
       const radioGroup = screen.getByRole('radiogroup', { name: /vitrectomy gauge/i });
       expect(radioGroup).toHaveAttribute('aria-required', 'true');
