@@ -17,10 +17,14 @@ const RiskInputForm = ({
 
     const renderAgeInput = () => (
         <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+            <label 
+                htmlFor={`age-input${isMobile ? '-mobile' : ''}`}
+                className="block text-sm font-medium text-gray-700"
+            >
                 Age (years)
             </label>
             <input
+                id={`age-input${isMobile ? '-mobile' : ''}`}
                 type="number"
                 className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                     ${!age ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
