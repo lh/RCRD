@@ -91,6 +91,11 @@ describe('RetinalCalculator Helper Functions', () => {
     vitrectomyGauge: '25g'
   };
 
+  const getEnabledCalculateButton = () => {
+    const buttons = screen.getAllByTestId('calculate-button');
+    return buttons.find(button => !button.disabled);
+  };
+
   beforeEach(() => {
     // Set up mocks
     jest.spyOn(riskCalculations, 'calculateRiskWithSteps').mockReturnValue(mockRiskResult);
@@ -132,21 +137,23 @@ describe('RetinalCalculator Helper Functions', () => {
     expect(detachmentText).toBeInTheDocument();
     
     // Calculate risk
-    const calculateButton = screen.getByText('Calculate Risk');
+    const calculateButton = getEnabledCalculateButton();
+    expect(calculateButton).toBeInTheDocument();
     expect(calculateButton).not.toBeDisabled();
     expect(calculateButton).toHaveClass('bg-blue-600');
     
     // Click the button and wait for state update
     await act(async () => {
       fireEvent.click(calculateButton);
-      // Verify calculateRiskWithSteps was called with correct args
-      expect(riskCalculations.calculateRiskWithSteps).toHaveBeenCalledWith({
-        age: '65',
-        pvrGrade: 'none',
-        vitrectomyGauge: '25g',
-        selectedHours: [],
-        detachmentSegments: [25]
-      });
+    });
+
+    // Verify calculateRiskWithSteps was called with correct args
+    expect(riskCalculations.calculateRiskWithSteps).toHaveBeenCalledWith({
+      age: '65',
+      pvrGrade: 'none',
+      vitrectomyGauge: '25g',
+      selectedHours: [],
+      detachmentSegments: [25]
     });
     
     // Wait for and verify PVR grade format in summary

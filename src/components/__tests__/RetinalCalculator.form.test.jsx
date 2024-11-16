@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, within, fireEvent } from '@testing-library/react';
+import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { getMobileView } from '../test-helpers/RetinalCalculator.helpers';
@@ -105,7 +105,17 @@ describe('RetinalCalculator Form', () => {
     calculateRiskWithSteps.mockReturnValue(mockRisk);
   });
 
-  test('calculates risk when form is valid', () => {
+  const getEnabledCalculateButton = () => {
+    const buttons = screen.getAllByTestId('calculate-button');
+    return buttons.find(button => !button.disabled);
+  };
+
+  const getDisabledCalculateButton = () => {
+    const buttons = screen.getAllByTestId('calculate-button');
+    return buttons.find(button => button.disabled);
+  };
+
+  test('calculates risk when form is valid', async () => {
     const { container } = render(<RetinalCalculator />);
     const { mobileView } = getMobileView(container);
     
@@ -116,8 +126,12 @@ describe('RetinalCalculator Form', () => {
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('risk-results')).toBeInTheDocument();
+    });
     
     expect(calculateRiskWithSteps).toHaveBeenCalledWith({
       age: '65',
@@ -126,14 +140,13 @@ describe('RetinalCalculator Form', () => {
       selectedHours: [],
       detachmentSegments: [25]
     });
-    expect(screen.getByTestId('risk-results')).toBeInTheDocument();
   });
 
   test('disables calculation when form is invalid', () => {
     const { container } = render(<RetinalCalculator />);
     const { mobileContainer } = getMobileView(container);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    const calculateButton = getDisabledCalculateButton();
     expect(calculateButton).toBeDisabled();
     
     // Add age but no detachment
@@ -146,7 +159,7 @@ describe('RetinalCalculator Form', () => {
     expect(within(mobileSelection).getByText(/detachment area required/i)).toBeInTheDocument();
   });
 
-  test('resets calculator state', () => {
+  test('resets calculator state', async () => {
     const { container } = render(<RetinalCalculator />);
     const { mobileView } = getMobileView(container);
     
@@ -157,23 +170,32 @@ describe('RetinalCalculator Form', () => {
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
+    
+    await waitFor(() => {
+      expect(screen.getByTestId('risk-results')).toBeInTheDocument();
+    });
     
     // Reset
     const resetButton = screen.getByTestId('reset-button');
     fireEvent.click(resetButton);
     
-    // Verify reset state
-    expect(screen.queryByTestId('risk-results')).not.toBeInTheDocument();
-    expect(screen.getByText(/age and detachment area required/i)).toBeInTheDocument();
+    // Wait for and verify reset state
+    await waitFor(() => {
+      expect(screen.queryByTestId('risk-results')).not.toBeInTheDocument();
+    });
+    
+    const buttonSection = getDisabledCalculateButton().parentElement;
+    const validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
     
     // Verify form reset
     const newAgeInput = screen.getByTestId('age-input-mobile');
     expect(newAgeInput.value).toBe('');
   });
 
-  test('displays read-only clock face in results view', () => {
+  test('displays read-only clock face in results view', async () => {
     const { container } = render(<RetinalCalculator />);
     const { mobileView } = getMobileView(container);
     
@@ -184,16 +206,22 @@ describe('RetinalCalculator Form', () => {
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
     
-    // Verify read-only state
-    const tearButtons = screen.getAllByTestId('tear-toggle');
-    const segmentToggleButtons = screen.getAllByTestId('segment-toggle');
-    const hoverButtons = screen.getAllByTestId('hover-change');
-    
-    tearButtons.forEach(button => expect(button).toBeDisabled());
-    segmentToggleButtons.forEach(button => expect(button).toBeDisabled());
-    hoverButtons.forEach(button => expect(button).toBeDisabled());
+    // Wait for results and find the read-only clock face
+    await waitFor(() => {
+      const resultsSection = screen.getByTestId('risk-results').parentElement;
+      const readOnlyClockFace = within(resultsSection).getByTestId('clock-face');
+      
+      // Check each button type individually
+      const tearButton = within(readOnlyClockFace).getByTestId('tear-toggle');
+      const segmentButton = within(readOnlyClockFace).getByTestId('segment-toggle');
+      const hoverButton = within(readOnlyClockFace).getByTestId('hover-change');
+      
+      expect(tearButton).toBeDisabled();
+      expect(segmentButton).toBeDisabled();
+      expect(hoverButton).toBeDisabled();
+    });
   });
 });

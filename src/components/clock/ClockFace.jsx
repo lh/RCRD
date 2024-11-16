@@ -1,10 +1,8 @@
 import React, { useState, useRef, useCallback } from "react";
-// import { interpolateSegments } from './utils/interpolateSegments.js';  
-import { calculateSegmentsForHourRange } from './utils/segmentCalculator.js';
 
 const ClockFace = ({
   selectedHours,
-  detachmentSegments,
+  detachmentSegments: initialDetachmentSegments,
   hoveredHour,
   onHoverChange,
   onTearToggle,
@@ -23,9 +21,12 @@ const ClockFace = ({
 
   // State
   const [isDrawing, setIsDrawing] = useState(false);
+  const [drawStartSegment, setDrawStartSegment] = useState(null);
   const [lastPosition, setLastPosition] = useState(null);
   const [touchStartTime, setTouchStartTime] = useState(null);
   const [touchStartPosition, setTouchStartPosition] = useState(null);
+  const [lastAngle, setLastAngle] = useState(null);
+  const [currentDetachmentSegments, setCurrentDetachmentSegments] = useState(initialDetachmentSegments);
   const svgRef = useRef(null);
 
   // Utility functions
@@ -53,11 +54,32 @@ const ClockFace = ({
   const getSegmentFromPoint = useCallback((clientX, clientY) => {
     const svgRect = svgRef.current.getBoundingClientRect();
     const centerX = svgRect.left + svgRect.width / 2;
-    const centerY = svgRect.top + svgRect.height / 2; const relX = clientX - centerX;
+    const centerY = svgRect.top + svgRect.height / 2;
+    const relX = clientX - centerX;
     const relY = -(clientY - centerY);
     const angle = cartesianToPolar(relX, relY);
-    return degreeToSegment(angle);
+    return { segment: degreeToSegment(angle), angle };
   }, []);
+
+  const getSegmentsBetween = (start, end, isCounterClockwise) => {
+    const segments = [];
+    if (isCounterClockwise) {
+      let i = start;
+      while (i !== end) {
+        segments.push(i);
+        i = (i - 1 + 60) % 60;
+      }
+      segments.push(end);
+    } else {
+      let i = start;
+      while (i !== end) {
+        segments.push(i);
+        i = (i + 1) % 60;
+      }
+      segments.push(end);
+    }
+    return segments;
+  };
 
   // Event handlers for tears
   const handleTearToggle = useCallback((hour, e) => {
@@ -73,69 +95,81 @@ const ClockFace = ({
     e.preventDefault();
 
     const pointer = e.touches?.[0] || e;
-    const segment = getSegmentFromPoint(pointer.clientX, pointer.clientY);
+    const { segment, angle } = getSegmentFromPoint(pointer.clientX, pointer.clientY);
 
     if (segment !== null) {
       setIsDrawing(true);
+      setDrawStartSegment(segment);
       setLastPosition(segment);
-
-      // Calculate hour for first segment
-      const currentHour = Math.floor(segment / 5) + 1;
-      const initialSegments = calculateSegmentsForHourRange(currentHour, currentHour);
-      setDetachmentSegments(initialSegments);
+      setLastAngle(angle);
+      setCurrentDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
+      setDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
 
       if (document.getElementById('touch-debug')) {
         document.getElementById('touch-debug').textContent = JSON.stringify({
           action: 'start',
           segment,
-          hour: currentHour,
-          segments: initialSegments
+          segments: [`segment${segment}`]
         }, null, 2);
       }
     }
-  }, [getSegmentFromPoint, readOnly, setDetachmentSegments]);
+  }, [getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
 
   const handleDrawing = useCallback((e) => {
-    if (!isDrawing || readOnly) return;
+    if (!isDrawing || readOnly || drawStartSegment === null || lastAngle === null) return;
     e.preventDefault();
 
     const pointer = e.touches?.[0] || e;
-    const currentSegment = getSegmentFromPoint(pointer.clientX, pointer.clientY);
+    const { segment: currentSegment, angle: currentAngle } = getSegmentFromPoint(pointer.clientX, pointer.clientY);
 
     if (currentSegment !== null && currentSegment !== lastPosition) {
       const debugEl = document.getElementById('touch-debug');
 
-      // Get hour for current segment
-      const currentHour = Math.floor(currentSegment / 5) + 1;
+      // Determine drawing direction based on angle change
+      let angleDiff = currentAngle - lastAngle;
+      if (angleDiff > 180) angleDiff -= 360;
+      if (angleDiff < -180) angleDiff += 360;
+      const isCounterClockwise = angleDiff < 0;
 
-      // If we have existing segments, extend from first segment to current
-      if (detachmentSegments.length > 0) {
-        const startHour = Math.floor(detachmentSegments[0] / 5) + 1;
-        const segmentsToAdd = calculateSegmentsForHourRange(startHour, currentHour);
+      // Calculate segments between start and current
+      const segmentsToAdd = getSegmentsBetween(lastPosition, currentSegment, isCounterClockwise);
 
-        if (debugEl) {
-          debugEl.textContent = JSON.stringify({
-            action: 'draw',
-            currentSegment,
-            currentHour,
-            startHour,
-            segmentsToAdd,
-            totalSegments: segmentsToAdd.length
-          }, null, 2);
-        }
-
-        setDetachmentSegments(segmentsToAdd);
+      if (debugEl) {
+        debugEl.textContent = JSON.stringify({
+          action: 'draw',
+          startSegment: drawStartSegment,
+          currentSegment,
+          segmentsToAdd,
+          totalSegments: segmentsToAdd.length,
+          isCounterClockwise
+        }, null, 2);
       }
 
+      // Create a Set of existing segments (without the "segment" prefix)
+      const existingSegments = new Set(
+        initialDetachmentSegments.map(s => parseInt(s.replace('segment', '')))
+      );
+
+      // Add new segments to the set
+      segmentsToAdd.forEach(segment => existingSegments.add(segment));
+
+      // Convert back to array with "segment" prefix
+      const newSegments = Array.from(existingSegments).map(s => `segment${s}`);
+
+      setCurrentDetachmentSegments(newSegments);
+      setDetachmentSegments(newSegments);
       setLastPosition(currentSegment);
+      setLastAngle(currentAngle);
     }
-  }, [isDrawing, lastPosition, getSegmentFromPoint, readOnly, detachmentSegments, setDetachmentSegments]);
+  }, [isDrawing, drawStartSegment, lastPosition, lastAngle, getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
 
   const handleDrawingEnd = useCallback((e) => {
     if (!isDrawing || readOnly) return;
     e.preventDefault();
     setIsDrawing(false);
+    setDrawStartSegment(null);
     setLastPosition(null);
+    setLastAngle(null);
   }, [isDrawing, readOnly]);
 
 // Event handlers for tears
@@ -311,7 +345,7 @@ const handleTearTouchEnd = useCallback((hour) => (e) => {
           {/* Detachment segments */}
           <g className="pointer-events-auto" style={{ isolation: 'isolate' }}>
             {[...Array(60)].map((_, i) => {
-              const isHighlighted = detachmentSegments.includes(i);
+              const isHighlighted = currentDetachmentSegments.includes(`segment${i}`);
               const degreeStart = segmentToDegree(i);
               const degreeEnd = segmentToDegree(i + 1);
               const posStart = polarToCartesian(degreeStart, innerRadius);

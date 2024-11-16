@@ -1,138 +1,100 @@
 # View Separation Analysis
 
-## Current Implementation Analysis
+## Current Implementation Status
 
-The application currently uses a combined approach where desktop and mobile views share components but use conditional rendering:
+We have successfully implemented the hybrid approach, separating the mobile and desktop views while maintaining shared business logic:
 
 ```javascript
 // RetinalCalculator.jsx
-{!calculatedRisk && (
-    <>
-        {/* Mobile Layout */}
-        <div className="md:hidden space-y-4">
-            <RiskInputForm {...formProps} isMobile={true} />
-            <ClockFace {...clockProps} />
-        </div>
+const RetinalCalculator = () => {
+    return (
+        <div className="p-4">
+            <div className="bg-white rounded-lg shadow-lg">
+                <div className="p-6">
+                    <h2 className="text-2xl font-bold mb-2">Retinal Detachment Risk Calculator</h2>
+                    <p className="text-sm text-gray-600 mb-6">
+                        Based on the <a href="https://www.beavrs.org/">UK BEAVRS</a> database <a href="https://www.nature.com/articles/s41433-023-02388-0">study</a>
+                    </p>
 
-        {/* Desktop/Landscape Layout */}
-        <div className="hidden md:flex gap-4">
-            <div className="w-1/4">
-                <RiskInputForm {...formProps} position="left" />
-            </div>
-            <div className="w-2/4">
-                <ClockFace {...clockProps} />
-            </div>
-            <div className="w-1/4">
-                <RiskInputForm {...formProps} position="right" />
+                    {/* Mobile version */}
+                    <div className="md:hidden">
+                        <MobileRetinalCalculator />
+                    </div>
+
+                    {/* Desktop version */}
+                    <div className="hidden md:block">
+                        <DesktopRetinalCalculator />
+                    </div>
+                </div>
             </div>
         </div>
-    </>
-)}
+    );
+};
 ```
+
+### Completed Work
+
+1. **View Separation**
+   - Created separate MobileRetinalCalculator and DesktopRetinalCalculator components
+   - Each view has its own layout and interaction patterns
+   - Clear separation between mobile and desktop concerns
+
+2. **Test Organization**
+   - Separate test files for mobile and desktop components
+   - Shared test helpers and utilities
+   - Clear test boundaries and responsibilities
+   - Improved test reliability with proper mocks and selectors
+
+3. **Component Structure**
+   - RetinalCalculator: Main container and view switching
+   - MobileRetinalCalculator: Mobile-specific layout and interactions
+   - DesktopRetinalCalculator: Desktop-specific layout and interactions
+   - Shared components: ClockFace, RiskInputForm, RiskResults
 
 ## Approach Comparison
 
-### 1. Current Combined Approach
+### 1. Current Hybrid Implementation
 
 #### Advantages
-- Single source of truth for component state
-- Shared logic between views
-- Easier maintenance of core functionality
-- Smaller codebase
-- Simpler state management
-- Guaranteed feature parity
+- Clear separation of mobile and desktop views
+- Shared business logic through hooks
+- Independent testing of each view
+- Simpler layout logic per view
+- Better maintainability
+- Clear component responsibilities
 
 #### Disadvantages
-- Complex conditional rendering logic
-- Mixed layout concerns in components
-- Harder to optimize for specific platforms
-- More complex responsive styling
-- Potential performance overhead
-- Testing complexity for layout variations
+- Some code duplication in view components
+- Need to maintain feature parity manually
+- More complex test setup
+- Multiple view-specific test files
 
-### 2. Fully Separated Approach
+### 2. Previous Combined Approach
 
-#### Advantages
-- Cleaner component code
-- Platform-specific optimizations
-- Simpler layout logic
-- Easier to test specific layouts
-- Better performance potential
-- Clearer responsibility boundaries
+[Previous advantages/disadvantages sections remain unchanged...]
 
-#### Disadvantages
-- Code duplication
-- Harder to maintain feature parity
-- More complex state management
-- Larger codebase
-- Multiple sources of truth
-- Higher maintenance overhead
+### 3. Future Improvements
 
-### 3. Hybrid Approach (Recommended)
+#### Core Areas
 
-#### Core Concept
-Keep business logic and state management unified while separating layout-specific concerns:
+1. **State Management**
+   - Extract more business logic to hooks
+   - Create view-specific hooks for layout state
+   - Improve state sharing between views
 
-```javascript
-// Core business logic
-const useCalculatorLogic = () => {
-    const [age, setAge] = useState('');
-    const [pvrGrade, setPvrGrade] = useState('none');
-    // ... other state and logic
+2. **Component Organization**
+   - Create shared component library
+   - Extract common patterns
+   - Standardize component interfaces
 
-    return {
-        state: { age, pvrGrade, ... },
-        actions: { setAge, setPvrGrade, ... }
-    };
-};
-
-// View-specific components
-const DesktopCalculator = () => {
-    const { state, actions } = useCalculatorLogic();
-    return (
-        <div className="hidden md:flex gap-4">
-            <DesktopLeftPanel state={state} actions={actions} />
-            <DesktopClockFace state={state} actions={actions} />
-            <DesktopRightPanel state={state} actions={actions} />
-        </div>
-    );
-};
-
-const MobileCalculator = () => {
-    const { state, actions } = useCalculatorLogic();
-    return (
-        <div className="md:hidden space-y-4">
-            <MobileForm state={state} actions={actions} />
-            <MobileClockFace state={state} actions={actions} />
-        </div>
-    );
-};
-```
-
-#### Benefits
-1. **Clear Separation of Concerns**
-   - Business logic in hooks
-   - Layout logic in view components
-   - Shared utilities and types
-
-2. **Maintainable State Management**
-   - Single source of truth
-   - Shared validation logic
-   - Unified calculation handling
-
-3. **Optimized Development**
-   - Easy to work on specific layouts
-   - Clear file organization
-   - Simplified testing
-
-4. **Better Performance**
-   - Only load needed code
-   - Platform-specific optimizations
-   - Reduced conditional rendering
+3. **Testing Strategy**
+   - Create more shared test utilities
+   - Improve test coverage
+   - Add visual regression tests
 
 ## Implementation Strategy
 
-1. **Phase 1: Core Logic Extraction**
+1. **Phase 1: Hook Refinement** ✅
 ```javascript
 // hooks/useCalculatorLogic.js
 export const useCalculatorLogic = () => {
@@ -145,52 +107,63 @@ export const useClockInteraction = () => {
 };
 ```
 
-2. **Phase 2: View Component Creation**
+2. **Phase 2: View Components** ✅
 ```javascript
-// views/desktop/DesktopCalculator.jsx
-// views/mobile/MobileCalculator.jsx
+// MobileRetinalCalculator.jsx
+// DesktopRetinalCalculator.jsx
 ```
 
-3. **Phase 3: Layout-Specific Components**
+3. **Phase 3: Testing Infrastructure** ✅
 ```javascript
-// components/desktop/DesktopClockFace.jsx
-// components/mobile/MobileClockFace.jsx
+// test-helpers/RetinalCalculator.helpers.js
+// Shared test utilities and helpers
 ```
 
-4. **Phase 4: Shared Types and Utilities**
-```typescript
-// types/calculator.ts
-interface CalculatorState {
-    age: string;
-    pvrGrade: string;
-    // ...
-}
-```
+4. **Phase 4: Future Improvements** 🔄
+- Extract more shared logic to hooks
+- Create shared component library
+- Add visual regression tests
+- Improve state management
 
 ## Directory Structure
 
 ```
 src/
-├── hooks/              # Shared business logic
 ├── components/
-│   ├── core/          # Shared components
-│   ├── desktop/       # Desktop-specific components
-│   └── mobile/        # Mobile-specific components
-├── views/
-│   ├── desktop/       # Desktop view containers
-│   └── mobile/        # Mobile view containers
-├── utils/             # Shared utilities
-└── types/             # Shared types
+│   ├── RetinalCalculator.jsx      # Main container
+│   ├── MobileRetinalCalculator.jsx # Mobile view
+│   ├── DesktopRetinalCalculator.jsx # Desktop view
+│   └── shared/                    # Shared components
+├── hooks/                         # Business logic hooks
+├── utils/                         # Shared utilities
+└── __tests__/                    # Test files
+    ├── MobileRetinalCalculator.test.jsx
+    ├── DesktopRetinalCalculator.test.jsx
+    └── test-helpers/             # Test utilities
 ```
+
+## Next Steps
+
+1. **Component Refinement**
+   - Extract more shared components
+   - Standardize component interfaces
+   - Improve component documentation
+
+2. **Testing Improvements**
+   - Add visual regression tests
+   - Improve test coverage
+   - Create more test helpers
+
+3. **State Management**
+   - Review and optimize state sharing
+   - Consider adding state management library
+   - Improve hook organization
+
+4. **Performance Optimization**
+   - Analyze and optimize rendering
+   - Implement code splitting
+   - Add performance monitoring
 
 ## Conclusion
 
-The hybrid approach offers the best balance between maintainability and optimization. It keeps the benefits of the current combined approach (single source of truth, shared logic) while addressing its main drawbacks (mixed concerns, complex conditionals).
-
-The implementation can be done incrementally:
-1. Extract shared logic to hooks
-2. Create view-specific components
-3. Optimize layouts independently
-4. Maintain shared types and utilities
-
-This approach provides a clear path forward while maintaining the application's current functionality and allowing for future optimizations.
+The hybrid approach has proven successful, providing clear separation of concerns while maintaining code quality and testability. The next phase will focus on refinements and optimizations to further improve the codebase.

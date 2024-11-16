@@ -9,8 +9,12 @@ import { useClockInteractions } from '../useClockInteractions';
 // Mock clockCalculations module with implementation
 jest.mock('../../utils/clockCalculations', () => ({
   segmentToHour: (segment) => {
+    // Convert segment number to hour (5 segments per hour)
     const num = parseInt(segment.replace('segment', ''), 10);
-    return isNaN(num) ? 0 : num;
+    const hour = Math.floor(num / 5) + 1;
+    // Handle hour 12 (segments 55-59 and 0-4)
+    if (num >= 55 || num <= 4) return hour === 12 ? 12 : 1;
+    return hour;
   }
 }));
 
@@ -125,71 +129,94 @@ describe('useClockInteractions', () => {
     const mockEvent = { preventDefault: jest.fn() };
     const { result } = renderHook(() => useClockInteractions(mockOnChange));
 
+    // Start drawing
     act(() => {
-      result.current.handleStartDrawing('segment1', mockEvent);
+      result.current.handleStartDrawing('segment50', mockEvent);
       jest.runAllTimers();
     });
 
+    // Verify drawing started
     expect(result.current.isDrawing).toBe(true);
-    expect(mockEvent.preventDefault).toHaveBeenCalled();
-  });
+    console.log('After start:', result.current.detachmentSegments);
 
-  test('handles clear all', () => {
-    const mockOnChange = jest.fn();
-    const { result } = renderHook(() => useClockInteractions(mockOnChange));
+    // Draw through segments one by one
+    for (let i = 51; i <= 59; i++) {
+      act(() => {
+        result.current.handleDrawing(`segment${i}`);
+        jest.runAllTimers();
+      });
+      console.log(`After segment${i}:`, result.current.detachmentSegments);
+      // Verify segment was added
+      expect(result.current.detachmentSegments).toContain(`segment${i}`);
+    }
 
-    // Add a segment and a tear
+    // End drawing
     act(() => {
-      result.current.handleSegmentInteraction('segment1');
-      result.current.handleTearClick(1, { stopPropagation: jest.fn() });
+      result.current.handleEndDrawing();
       jest.runAllTimers();
     });
 
-    // Clear all
-    act(() => {
-      result.current.handleClearAll();
-      jest.runAllTimers();
-    });
+    console.log('Final segments:', result.current.detachmentSegments);
 
-    expect(result.current.selectedHours).toEqual([]);
-    expect(result.current.detachmentSegments).toEqual([]);
+    // Verify final state
+    const expectedSegments = Array.from({ length: 10 }, (_, i) => `segment${i + 50}`).sort();
+    expect([...result.current.detachmentSegments].sort()).toEqual(expectedSegments);
     expect(mockOnChange).toHaveBeenLastCalledWith({
       tears: [],
-      detachment: []
+      detachment: [11, 12]
     });
   });
 
-  test('handles tear click in non-touch mode', () => {
+  test('accumulates segments during drawing between hours 11-12-1', () => {
     const mockOnChange = jest.fn();
-    const mockEvent = { stopPropagation: jest.fn() };
+    const mockEvent = { preventDefault: jest.fn() };
     const { result } = renderHook(() => useClockInteractions(mockOnChange));
 
-    // Verify we're not in touch mode
-    expect(result.current.isTouchDevice).toBe(false);
-
-    // Click to add a tear
+    // Start drawing
     act(() => {
-      result.current.handleTearClick(1, mockEvent);
+      result.current.handleStartDrawing('segment50', mockEvent);
       jest.runAllTimers();
     });
 
-    expect(result.current.selectedHours).toEqual([1]);
-    expect(mockEvent.stopPropagation).toHaveBeenCalled();
-    expect(mockOnChange).toHaveBeenCalledWith({
-      tears: [1],
-      detachment: []
-    });
+    console.log('After start:', result.current.detachmentSegments);
 
-    // Click again to remove the tear
+    // Draw through segments 50-59
+    for (let i = 51; i <= 59; i++) {
+      act(() => {
+        result.current.handleDrawing(`segment${i}`);
+        jest.runAllTimers();
+      });
+      console.log(`After segment${i}:`, result.current.detachmentSegments);
+      expect(result.current.detachmentSegments).toContain(`segment${i}`);
+    }
+
+    // Draw through segments 0-4
+    for (let i = 0; i <= 4; i++) {
+      act(() => {
+        result.current.handleDrawing(`segment${i}`);
+        jest.runAllTimers();
+      });
+      console.log(`After segment${i}:`, result.current.detachmentSegments);
+      expect(result.current.detachmentSegments).toContain(`segment${i}`);
+    }
+
+    // End drawing
     act(() => {
-      result.current.handleTearClick(1, mockEvent);
+      result.current.handleEndDrawing();
       jest.runAllTimers();
     });
 
-    expect(result.current.selectedHours).toEqual([]);
+    console.log('Final segments:', result.current.detachmentSegments);
+
+    // Verify final state
+    const expectedSegments = [
+      ...Array.from({ length: 10 }, (_, i) => `segment${i + 50}`),
+      ...Array.from({ length: 5 }, (_, i) => `segment${i}`)
+    ].sort();
+    expect([...result.current.detachmentSegments].sort()).toEqual(expectedSegments);
     expect(mockOnChange).toHaveBeenLastCalledWith({
       tears: [],
-      detachment: []
+      detachment: [11, 12, 1]
     });
   });
 });

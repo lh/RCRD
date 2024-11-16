@@ -5,28 +5,36 @@
 ```mermaid
 graph TD
     A[App] --> B[RetinalCalculator]
-    B --> C[RiskInputForm]
-    B --> D[ClockFace]
-    B --> E[RiskResults]
-    D --> F[Segment Components]
+    B --> C[MobileRetinalCalculator]
+    B --> D[DesktopRetinalCalculator]
+    C --> E[RiskInputForm Mobile]
+    C --> F[ClockFace Mobile]
+    C --> G[RiskResults Mobile]
+    D --> H[RiskInputForm Desktop]
+    D --> I[ClockFace Desktop]
+    D --> J[RiskResults Desktop]
+    I --> K[Segment Components]
     
     %% Utilities
-    G[Utils] --> H[riskCalculations]
-    G --> I[clockUtils]
-    I --> J[segmentCalculator]
-    I --> K[clockCoordinates]
+    L[Utils] --> M[riskCalculations]
+    L --> N[clockUtils]
+    N --> O[segmentCalculator]
+    N --> P[clockCoordinates]
     
     %% Data Flow
-    B -- "age, pvrGrade, gauge" --> C
-    B -- "segments, tears" --> D
-    B -- "risk results" --> E
-    H -- "calculation results" --> E
+    C -- "age, pvrGrade, gauge" --> E
+    C -- "segments, tears" --> F
+    C -- "risk results" --> G
+    D -- "age, pvrGrade, gauge" --> H
+    D -- "segments, tears" --> I
+    D -- "risk results" --> J
+    M -- "calculation results" --> G
+    M -- "calculation results" --> J
     
     %% State Management
-    B -- "state management" --> L[useState Hooks]
-    L --> M[Form State]
-    L --> N[Clock State]
-    L --> O[Results State]
+    B -- "view switching" --> Q[Layout State]
+    C -- "mobile state" --> R[Mobile Hooks]
+    D -- "desktop state" --> S[Desktop Hooks]
 ```
 
 ## Core Functionality Analysis
@@ -67,17 +75,39 @@ graph TD
 
 ## Component Analysis
 
-### RetinalCalculator (Main Container)
+### RetinalCalculator (Container)
 - **Responsibilities**
-  - Central state management
+  - View switching based on screen size
   - Layout coordination
-  - Risk calculation orchestration
-  - Mobile/desktop view switching
-- **State Management**
-  - Form inputs (age, PVR grade, gauge)
-  - Clock selections (tears, detachment segments)
-  - Calculation results
-  - UI state (hover, touch device)
+  - Component composition
+- **Key Features**
+  - Responsive design
+  - Clean separation of mobile/desktop views
+  - Consistent header across views
+
+### MobileRetinalCalculator
+- **Responsibilities**
+  - Mobile-specific layout
+  - Touch interaction handling
+  - Vertical form layout
+  - Single clock face instance
+- **Key Features**
+  - Touch-optimized interface
+  - Compact layout
+  - Simplified interaction model
+  - Mobile-specific validations
+
+### DesktopRetinalCalculator
+- **Responsibilities**
+  - Desktop-specific layout
+  - Mouse interaction handling
+  - Three-column layout
+  - Synchronized form instances
+- **Key Features**
+  - Mouse-optimized interface
+  - Split-screen layout
+  - Advanced interaction model
+  - Desktop-specific validations
 
 ### RiskInputForm
 - **Responsibilities**
@@ -152,21 +182,23 @@ if (endSegment < startSegment) {
 
 ## Areas for Improvement
 
-### 1. State Management
-- **Current**: Uses React useState hooks at the RetinalCalculator level
+### 1. View Management
+- **Current**: Separate mobile and desktop components with shared logic
 - **Potential Improvements**:
-  - Implement useReducer for complex state logic
-  - Add state persistence for form data
-  - Create custom hooks for clock state
-  - Add state validation middleware
+  - Extract more shared logic to hooks
+  - Create view-specific hooks
+  - Improve state sharing between views
+  - Add view transition animations
+  - Enhance view-specific testing
 
 ### 2. Component Organization
-- **Current**: Flat component structure with some nesting
+- **Current**: View-based component structure
 - **Potential Improvements**:
-  - Create feature-based folder structure
-  - Split ClockFace into smaller components
-  - Extract common form elements
-  - Implement proper component boundaries
+  - Create shared component library
+  - Extract common patterns
+  - Standardize component interfaces
+  - Improve component documentation
+  - Add component storybook
 
 ### 3. Form Handling
 - **Current**: Basic form validation with some accessibility
@@ -219,32 +251,35 @@ if (endSegment < startSegment) {
   - Implement proper accessibility patterns
 
 ### 8. Testing
-- **Current**: Basic component tests
+- **Current**: Comprehensive test suite with view-specific tests
 - **Potential Improvements**:
   - Add end-to-end testing
   - Implement visual regression tests
   - Add performance testing
-  - Enhance unit test coverage
+  - Further enhance unit test coverage
   - Add integration tests
   - Implement proper test organization
 
 ## Implementation Priorities
 
+### Highest Priority
+- ✅ Separate mobile and desktop views
+- ✅ Fix desktop clockface
+- ✅ Implement proper test organization
+
 ### High Priority
+- Create shared component library
+- Extract common view patterns
 - Enhance form accessibility
 - Improve validation feedback
 - Add error boundaries
-- Implement proper TypeScript
-- Add comprehensive error handling
-- Improve mobile touch interactions
 
 ### Medium Priority
-- Refactor state management
-- Enhance mobile experience
+- Create view-specific hooks
+- Add view transitions
+- Improve state sharing
 - Add loading states
-- Improve test coverage
-- Implement proper form validation
-- Add keyboard navigation
+- Enhance test coverage
 
 ### Low Priority
 - Add animation effects
@@ -252,14 +287,22 @@ if (endSegment < startSegment) {
 - Add advanced features
 - Optimize performance
 - Add analytics
-- Implement advanced visualizations
 
 ## Conclusion
 
-The application demonstrates a well-structured approach to medical risk calculation with a strong focus on visual interaction through the clock face component. The mathematical model is properly implemented with clear separation of concerns between calculation logic and user interface.
+The application has been successfully refactored to separate mobile and desktop views while maintaining a clean architecture and shared business logic. The new structure provides better maintainability and clearer responsibility boundaries between views.
 
-The main areas for improvement focus on enhancing user experience, maintainability, and robustness rather than fundamental architectural changes. The suggested improvements can be implemented incrementally without disrupting the existing functionality.
+Recent improvements include:
+- Clear separation of mobile and desktop components
+- Improved test organization and reliability
+- Better component boundaries and responsibilities
+- Maintained shared business logic while separating view concerns
 
-Priority should be given to improving accessibility and form validation, followed by state management refactoring and enhanced mobile support. The clock face interaction model could benefit from more robust touch handling and keyboard navigation support.
+Next steps focus on:
+1. Creating a shared component library
+2. Extracting common view patterns
+3. Improving state sharing between views
+4. Enhancing view-specific testing
+5. Adding view transitions and animations
 
-The application provides a solid foundation for future enhancements, with clear separation of concerns and modular architecture that will support additional features and optimizations.
+The application now has a solid foundation for view-specific optimizations while maintaining code quality and testability. Future enhancements can be implemented incrementally with clear boundaries between shared and view-specific concerns.

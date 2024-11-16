@@ -1,13 +1,7 @@
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
-import RetinalCalculator from '../RetinalCalculator';
+import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import DesktopRetinalCalculator from '../DesktopRetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
-
-/**
- * @deprecated These tests have been moved to DesktopRetinalCalculator.test.jsx
- * This file is kept for historical reference but all tests are skipped.
- * The desktop view functionality is now tested directly in the DesktopRetinalCalculator component.
- */
 
 // Mock child components
 jest.mock('../clock/ClockFace', () => {
@@ -16,12 +10,10 @@ jest.mock('../clock/ClockFace', () => {
     onSegmentToggle, 
     onHoverChange,
     readOnly,
-    onTouchDeviceChange,
     setDetachmentSegments 
   }) {
-    const viewClass = onTouchDeviceChange ? 'mobile-view' : 'desktop-view';
     return (
-      <div data-testid="clock-face" className={viewClass}>
+      <div data-testid="clock-face">
         <button 
           onClick={() => onSegmentToggle(25)} 
           data-testid="segment-toggle"
@@ -42,21 +34,20 @@ jest.mock('../RiskInputForm', () => {
     setPvrGrade, 
     vitrectomyGauge,
     setVitrectomyGauge,
-    position,
-    isMobile 
+    position
   }) {
     return (
-      <div data-testid={`risk-form-${position || 'mobile'}`}>
+      <div data-testid={`risk-form-${position}`}>
         <input 
           type="number"
           value={age}
           onChange={(e) => setAge(e.target.value)}
-          data-testid={`age-input-${position || 'mobile'}`}
+          data-testid={`age-input-${position}`}
         />
         <select
           value={pvrGrade}
           onChange={(e) => setPvrGrade(e.target.value)}
-          data-testid={`pvr-grade-${position || 'mobile'}`}
+          data-testid={`pvr-grade-${position}`}
         >
           <option value="none">No PVR</option>
           <option value="b">B</option>
@@ -64,7 +55,7 @@ jest.mock('../RiskInputForm', () => {
         <select
           value={vitrectomyGauge}
           onChange={(e) => setVitrectomyGauge(e.target.value)}
-          data-testid={`gauge-${position || 'mobile'}`}
+          data-testid={`gauge-${position}`}
         >
           <option value="23g">23g</option>
           <option value="25g">25g</option>
@@ -77,7 +68,7 @@ jest.mock('../RiskInputForm', () => {
 jest.mock('../../utils/riskCalculations');
 jest.mock('../clock/utils/formatDetachmentHours');
 
-describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
+describe('DesktopRetinalCalculator', () => {
   const mockRisk = {
     probability: '25.5',
     steps: [],
@@ -89,23 +80,13 @@ describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
     calculateRiskWithSteps.mockReturnValue(mockRisk);
   });
 
-  // Helper function to get desktop view elements
-  const getDesktopElements = () => {
-    const desktopView = screen.getAllByTestId('clock-face')
-      .find(face => face.classList.contains('desktop-view'));
-    
-    if (!desktopView) {
-      throw new Error('Desktop view not found');
-    }
-
-    return {
-      clockFace: desktopView,
-      segmentButton: within(desktopView).getByTestId('segment-toggle')
-    };
+  const getEnabledCalculateButton = () => {
+    const buttons = screen.getAllByTestId('calculate-button');
+    return buttons.find(button => !button.disabled);
   };
 
   test('syncs form values between left and right panels', () => {
-    render(<RetinalCalculator />);
+    render(<DesktopRetinalCalculator />);
     
     // Set value in left panel
     const leftAgeInput = screen.getByTestId('age-input-left');
@@ -124,8 +105,8 @@ describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
     expect(leftPvrSelect.value).toBe('b');
   });
 
-  test('handles interactions in desktop form', () => {
-    render(<RetinalCalculator />);
+  test('handles form interactions and calculation', () => {
+    render(<DesktopRetinalCalculator />);
     
     // Set form values
     const leftAgeInput = screen.getByTestId('age-input-left');
@@ -134,11 +115,12 @@ describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
     const rightPvrSelect = screen.getByTestId('pvr-grade-right');
     fireEvent.change(rightPvrSelect, { target: { value: 'b' } });
     
-    // Get desktop elements and interact with them
-    const { segmentButton } = getDesktopElements();
+    // Interact with clock face
+    const segmentButton = screen.getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    // Calculate risk
+    const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
     
     expect(calculateRiskWithSteps).toHaveBeenCalledWith(
@@ -149,34 +131,38 @@ describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
     );
   });
 
-  test('maintains desktop layout after calculation', () => {
-    render(<RetinalCalculator />);
+  test('displays calculation results with correct layout', async () => {
+    render(<DesktopRetinalCalculator />);
     
     // Fill form and calculate
     const leftAgeInput = screen.getByTestId('age-input-left');
     fireEvent.change(leftAgeInput, { target: { value: '65' } });
     
-    const { segmentButton } = getDesktopElements();
+    const segmentButton = screen.getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = screen.getByText(/calculate risk/i);
+    const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
+    
+    // Wait for results to appear
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /input summary/i })).toBeInTheDocument();
+    });
     
     // Verify results layout
     const inputSummaryHeading = screen.getByRole('heading', { name: /input summary/i });
     const resultsGrid = inputSummaryHeading.parentElement.querySelector('.grid');
     expect(resultsGrid).toBeInTheDocument();
-    expect(resultsGrid).toHaveClass('grid-cols-1', 'md:grid-cols-2', 'gap-6');
+    expect(resultsGrid).toHaveClass('grid-cols-2', 'gap-6');
     
     // Verify risk display
     const riskHeading = screen.getByText(/estimated risk of failure/i);
     expect(riskHeading).toBeInTheDocument();
     expect(riskHeading.textContent).toMatch(/25\.5%/);
     
-    // Verify clock face is still present
-    const { clockFace } = getDesktopElements();
+    // Verify clock face is present
+    const clockFace = screen.getByTestId('clock-face');
     expect(clockFace).toBeInTheDocument();
-    expect(clockFace).toHaveClass('desktop-view');
     
     // Verify input summary sections
     const summarySection = screen.getByRole('heading', { name: /input summary/i }).parentElement;
@@ -184,8 +170,16 @@ describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
     expect(summarySection).toHaveTextContent(/pvr grade:/i);
     expect(summarySection).toHaveTextContent(/vitrectomy gauge:/i);
     
-    // Verify reset button
+    // Verify reset functionality
     const resetButton = screen.getByRole('button', { name: /reset calculator/i });
     expect(resetButton).toBeInTheDocument();
+    
+    fireEvent.click(resetButton);
+    
+    // Wait for the form to reset
+    await waitFor(() => {
+      const updatedLeftAgeInput = screen.getByTestId('age-input-left');
+      expect(updatedLeftAgeInput.value).toBe('');
+    });
   });
 });
