@@ -1,186 +1,197 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RiskInputForm from '../RiskInputForm';
-import { pvrOptions, gaugeOptions } from '../../constants/riskCalculatorConstants';
+import { pvrOptions } from '../../constants/riskCalculatorConstants';
+
+// Mock child components
+jest.mock('../GaugeSelection', () => {
+    return function MockGaugeSelection({ value, onChange, disabled }) {
+        return (
+            <div data-testid="gauge-selection">
+                <select
+                    value={value || ''}
+                    onChange={e => onChange(e.target.value)}
+                    disabled={disabled}
+                    data-testid="gauge-select"
+                >
+                    <option value="">Select gauge...</option>
+                    <option value="20g">20 gauge</option>
+                    <option value="23g">23 gauge</option>
+                    <option value="25g">25 gauge</option>
+                    <option value="27g">27 gauge</option>
+                    <option value="not_recorded">Not recorded</option>
+                </select>
+            </div>
+        );
+    };
+});
+
+jest.mock('../TamponadeSelection', () => {
+    return function MockTamponadeSelection({ value, onChange, disabled }) {
+        return (
+            <div data-testid="tamponade-selection">
+                <select
+                    value={value || ''}
+                    onChange={e => onChange(e.target.value)}
+                    disabled={disabled}
+                    data-testid="tamponade-select"
+                >
+                    <option value="">Select tamponade...</option>
+                    <option value="sf6">SF6 gas</option>
+                    <option value="c2f6">C2F6 gas</option>
+                    <option value="c3f8">C3F8 gas</option>
+                    <option value="air">Air</option>
+                    <option value="light_oil">Light oil</option>
+                    <option value="heavy_oil">Heavy oil</option>
+                </select>
+            </div>
+        );
+    };
+});
+
+jest.mock('../CryotherapySelection', () => {
+    return function MockCryotherapySelection({ value, onChange, disabled }) {
+        return (
+            <div data-testid="cryotherapy-selection">
+                <select
+                    value={value || ''}
+                    onChange={e => onChange(e.target.value)}
+                    disabled={disabled}
+                    data-testid="cryotherapy-select"
+                >
+                    <option value="">Select option...</option>
+                    <option value="no">No</option>
+                    <option value="yes">Yes</option>
+                </select>
+            </div>
+        );
+    };
+});
 
 describe('RiskInputForm', () => {
-  const mockProps = {
-    age: '',
-    setAge: jest.fn(),
-    pvrGrade: '',
-    setPvrGrade: jest.fn(),
-    vitrectomyGauge: '',
-    setVitrectomyGauge: jest.fn(),
-    position: 'left',
-  };
+    const mockProps = {
+        age: '45',
+        setAge: jest.fn(),
+        pvrGrade: 'none',
+        setPvrGrade: jest.fn(),
+        vitrectomyGauge: '25g',
+        setVitrectomyGauge: jest.fn(),
+        cryotherapy: 'no',
+        setCryotherapy: jest.fn(),
+        tamponade: 'sf6',
+        setTamponade: jest.fn(),
+        position: 'left',
+        onReset: jest.fn()
+    };
 
-  describe('Age Input', () => {
-    test.skip('renders age input with validation', () => {
-      // TODO: Test skipped due to accessibility improvements needed
-      // Current: Age input lacks proper accessibility attributes
-      // Expected: Input should have proper label association and ARIA attributes
-      // Required changes:
-      // 1. Add id/htmlFor association between label and input
-      // 2. Add role="spinbutton"
-      // 3. Add aria-label="Age (years)"
-      // 4. Add aria-required="true"
-      // See meta/risk-input-form-implementation-notes.md
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      const ageInput = screen.getByLabelText(/age \(years\)/i);
-      expect(ageInput).toBeInTheDocument();
-      expect(ageInput).toHaveAttribute('type', 'number');
-      expect(ageInput).toHaveAttribute('min', '0');
-      expect(ageInput).toHaveAttribute('max', '120');
-      expect(ageInput).toHaveAttribute('role', 'spinbutton');
-      expect(ageInput).toHaveAttribute('aria-label', 'Age (years)');
-      expect(ageInput).toHaveAttribute('aria-required', 'true');
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    test('shows error message when age is empty', () => {
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      expect(screen.getByText(/age is required/i)).toBeInTheDocument();
+    test('renders all selection components with correct props', () => {
+        render(<RiskInputForm {...mockProps} position="right" />);
+
+        // Verify gauge selection
+        const gaugeSelect = screen.getByTestId('gauge-select');
+        expect(gaugeSelect).toHaveValue('25g');
+        fireEvent.change(gaugeSelect, { target: { value: '23g' } });
+        expect(mockProps.setVitrectomyGauge).toHaveBeenCalledWith('23g');
+
+        // Verify tamponade selection
+        const tamponadeSelect = screen.getByTestId('tamponade-select');
+        expect(tamponadeSelect).toHaveValue('sf6');
+        fireEvent.change(tamponadeSelect, { target: { value: 'c2f6' } });
+        expect(mockProps.setTamponade).toHaveBeenCalledWith('c2f6');
+
+        // Verify cryotherapy selection
+        const cryoSelect = screen.getByTestId('cryotherapy-select');
+        expect(cryoSelect).toHaveValue('no');
+        fireEvent.change(cryoSelect, { target: { value: 'yes' } });
+        expect(mockProps.setCryotherapy).toHaveBeenCalledWith('yes');
     });
 
-    test.skip('calls setAge when input changes', () => {
-      // TODO: Test skipped due to accessibility improvements needed
-      // Current: Cannot reliably find age input due to missing accessibility attributes
-      // Expected: Should be able to find input by label and trigger change event
-      // See meta/risk-input-form-implementation-notes.md
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      const ageInput = screen.getByLabelText(/age \(years\)/i);
-      fireEvent.change(ageInput, { target: { value: '45' } });
-      
-      expect(mockProps.setAge).toHaveBeenCalledWith('45');
+    test('disables all inputs when disabled prop is true', () => {
+        render(<RiskInputForm {...mockProps} disabled={true} />);
+
+        // Age input should be disabled
+        expect(screen.getByRole('spinbutton')).toBeDisabled();
+
+        // PVR grade radios should be disabled
+        const pvrRadios = screen.getAllByRole('radio');
+        pvrRadios.forEach(radio => {
+            expect(radio).toBeDisabled();
+        });
+
+        // Treatment options should be disabled
+        expect(screen.getByTestId('gauge-select')).toBeDisabled();
+        expect(screen.getByTestId('tamponade-select')).toBeDisabled();
+        expect(screen.getByTestId('cryotherapy-select')).toBeDisabled();
     });
 
-    test.skip('validates age is between 18 and 100', () => {
-      // TODO: Implement age range validation
-      // Current behavior: Allows 0-120
-      // Expected behavior: Should only allow 18-100
-      // Rationale: Medical context requires adult patients
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      const ageInput = screen.getByLabelText(/age \(years\)/i);
-      
-      // Test invalid ages
-      fireEvent.change(ageInput, { target: { value: '17' } });
-      expect(screen.getByText(/age must be at least 18/i)).toBeInTheDocument();
-      
-      fireEvent.change(ageInput, { target: { value: '101' } });
-      expect(screen.getByText(/age must be 100 or less/i)).toBeInTheDocument();
-      
-      // Test valid age
-      fireEvent.change(ageInput, { target: { value: '50' } });
-      expect(screen.queryByText(/age must be/i)).not.toBeInTheDocument();
-    });
-  });
+    test('preserves all values when switching positions', () => {
+        const { rerender } = render(
+            <RiskInputForm 
+                {...mockProps} 
+                position="right"
+                age="65"
+                pvrGrade="C"
+                vitrectomyGauge="23g"
+                cryotherapy="yes"
+                tamponade="c2f6"
+            />
+        );
 
-  describe('PVR Grade Selection', () => {
-    test('renders all PVR grade options', () => {
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      pvrOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        expect(radio).toBeInTheDocument();
-      });
-    });
+        // Switch positions
+        rerender(
+            <RiskInputForm 
+                {...mockProps} 
+                position="left"
+                age="65"
+                pvrGrade="C"
+                vitrectomyGauge="23g"
+                cryotherapy="yes"
+                tamponade="c2f6"
+            />
+        );
 
-    test('calls setPvrGrade when option selected', () => {
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      const pvrOption = screen.getByRole('radio', { name: pvrOptions[0].label });
-      fireEvent.click(pvrOption);
-      
-      expect(mockProps.setPvrGrade).toHaveBeenCalledWith(pvrOptions[0].value);
-    });
-  });
+        // Switch back
+        rerender(
+            <RiskInputForm 
+                {...mockProps} 
+                position="right"
+                age="65"
+                pvrGrade="C"
+                vitrectomyGauge="23g"
+                cryotherapy="yes"
+                tamponade="c2f6"
+            />
+        );
 
-  describe('Vitrectomy Gauge Selection', () => {
-    test('renders all gauge options when position is right', () => {
-      render(<RiskInputForm {...mockProps} position="right" />);
-      
-      gaugeOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        expect(radio).toBeInTheDocument();
-      });
+        // Verify all values are preserved
+        expect(screen.getByTestId('gauge-select')).toHaveValue('23g');
+        expect(screen.getByTestId('tamponade-select')).toHaveValue('c2f6');
+        expect(screen.getByTestId('cryotherapy-select')).toHaveValue('yes');
     });
 
-    test('calls setVitrectomyGauge when option selected', () => {
-      render(<RiskInputForm {...mockProps} position="right" />);
-      
-      const gaugeOption = screen.getByRole('radio', { name: gaugeOptions[0].label });
-      fireEvent.click(gaugeOption);
-      
-      expect(mockProps.setVitrectomyGauge).toHaveBeenCalledWith(gaugeOptions[0].value);
-    });
-  });
+    test('resets form correctly', () => {
+        render(
+            <RiskInputForm 
+                {...mockProps} 
+                position="right"
+                isMobile={true}
+            />
+        );
 
-  describe('Mobile Layout', () => {
-    test.skip('renders all inputs in mobile layout', () => {
-      // TODO: Test skipped due to accessibility improvements needed
-      // Current: Age input lacks proper accessibility attributes in mobile layout
-      // Expected: All inputs should have proper ARIA attributes and label associations
-      // See meta/risk-input-form-implementation-notes.md
-      render(<RiskInputForm {...mockProps} isMobile={true} />);
-      
-      // Check if all inputs are present in mobile layout
-      expect(screen.getByLabelText(/age \(years\)/i)).toBeInTheDocument();
-      pvrOptions.forEach(option => {
-        expect(screen.getByRole('radio', { name: option.label })).toBeInTheDocument();
-      });
-      gaugeOptions.forEach(option => {
-        expect(screen.getByRole('radio', { name: option.label })).toBeInTheDocument();
-      });
-    });
+        // Change all values
+        fireEvent.change(screen.getByTestId('gauge-select'), { target: { value: '23g' } });
+        fireEvent.change(screen.getByTestId('tamponade-select'), { target: { value: 'c2f6' } });
+        fireEvent.change(screen.getByTestId('cryotherapy-select'), { target: { value: 'yes' } });
 
-    test('adds mobile suffix to input IDs', () => {
-      render(<RiskInputForm {...mockProps} isMobile={true} />);
-      
-      const pvrInput = screen.getByRole('radio', { name: pvrOptions[0].label });
-      expect(pvrInput.id).toContain('-mobile');
-    });
-  });
+        // Reset form
+        const form = screen.getByRole('form');
+        fireEvent.reset(form);
 
-  describe('Position-based Rendering', () => {
-    test.skip('renders age and PVR inputs when position is left', () => {
-      // TODO: Test skipped due to accessibility improvements needed
-      // Current: Cannot reliably find age input due to missing accessibility attributes
-      // Expected: Should be able to find input by label in left position
-      // See meta/risk-input-form-implementation-notes.md
-      render(<RiskInputForm {...mockProps} position="left" />);
-      
-      expect(screen.getByLabelText(/age \(years\)/i)).toBeInTheDocument();
-      expect(screen.getByRole('radio', { name: pvrOptions[0].label })).toBeInTheDocument();
-      expect(screen.queryByRole('radio', { name: gaugeOptions[0].label })).not.toBeInTheDocument();
+        // Verify onReset was called
+        expect(mockProps.onReset).toHaveBeenCalledTimes(1);
     });
-
-    test('renders only gauge inputs when position is right', () => {
-      render(<RiskInputForm {...mockProps} position="right" />);
-      
-      expect(screen.queryByLabelText(/age/i)).not.toBeInTheDocument();
-      expect(screen.queryByRole('radio', { name: pvrOptions[0].label })).not.toBeInTheDocument();
-      expect(screen.getByRole('radio', { name: gaugeOptions[0].label })).toBeInTheDocument();
-    });
-  });
-
-  describe('Form Submission', () => {
-    test.skip('prevents default form submission in mobile view', () => {
-      // TODO: Test skipped due to form submission improvements needed
-      // Current: handleSubmit doesn't return explicit false value
-      // Expected: Should return false after preventing default
-      // See meta/risk-input-form-implementation-notes.md
-      render(<RiskInputForm {...mockProps} isMobile={true} />);
-      
-      const form = document.querySelector('form');
-      const mockSubmit = jest.fn(e => e.preventDefault());
-      form.onsubmit = mockSubmit;
-      
-      fireEvent.submit(form);
-      
-      expect(mockSubmit).toHaveReturnedWith(false);
-    });
-  });
 });

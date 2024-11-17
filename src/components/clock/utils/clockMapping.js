@@ -1,57 +1,170 @@
+import { CLOCK } from './clockConstants.js';
+
 /**
- * Maps segment numbers (0-59) to clock hours (1-12)
- * @type {number[]}
+ * Types of hour mapping needed by different parts of the system
  */
-export const segmentToClockHourMap = Array(60).fill(0).map((_, segment) => {
-  if ([0,1,2,3,56,57,58,59].includes(segment)) return 12;
-  if ([4,5,6,7,8].includes(segment)) return 1;
-  if ([9,10,11,12,13].includes(segment)) return 2;
-  if ([14,15,16,17,18].includes(segment)) return 3;
-  if ([19,20,21,22,23].includes(segment)) return 4;
-  if ([24,25,26].includes(segment)) return 5;
-  if ([27,28,29,30,31,32].includes(segment)) return 6;
-  if ([33,34,35].includes(segment)) return 7;
-  if ([36,37,38,39,40].includes(segment)) return 8;
-  if ([41,42,43,44,45].includes(segment)) return 9;
-  if ([46,47,48,49,50].includes(segment)) return 10;
-  if ([51,52,53,54,55].includes(segment)) return 11;
-  return 0; // Should never happen with 0-59 segments
-});
-
-/**
-* Converts a segment number to its corresponding clock hour
-* @param {number} segment - The segment number (0-59)
-* @returns {number} The clock hour (1-12)
-*/
-export const segmentToClockHour = (segment) => {
-  return segmentToClockHourMap[segment];
+export const MAPPING_TYPE = {
+    RISK: 'risk',           // For risk calculations (single hour)
+    DISPLAY: 'display',     // For display formatting (can map to multiple hours)
+    SELECTION: 'selection', // For clock face interaction (single hour)
+    MEDICAL: 'medical'      // Applies medical domain rules
 };
 
 /**
-* Maps clock hours to their corresponding segments
-* @type {Map<number, number[]>}
-*/
-export const clockHourToSegmentsMap = new Map([
-  [12, [0,1,2,3,56,57,58,59]],
-  [1, [4,5,6,7,8]],
-  [2, [9,10,11,12,13]],
-  [3, [14,15,16,17,18]],
-  [4, [19,20,21,22,23]],
-  [5, [24,25,26]],
-  [6, [27,28,29,30,31,32]],
-  [7, [33,34,35]],
-  [8, [36,37,38,39,40]],
-  [9, [41,42,43,44,45]],
-  [10, [46,47,48,49,50]],
-  [11, [51,52,53,54,55]]
-]);
-
-/**
-* Gets all segments corresponding to a given clock hour
-* @param {number} hour - The clock hour (1-12)
-* @returns {number[]} Array of segment numbers for that hour
-*/
-export const getSegmentsForClockHour = (hour) => {
-  return clockHourToSegmentsMap.get(hour) || [];
+ * Converts an angle to its corresponding segment number
+ * @param {number} angle - Angle in degrees
+ * @returns {number} Segment number (0-23)
+ */
+export const getSegmentForAngle = (angle) => {
+    // Normalize angle to 0-360 range
+    const normalizedAngle = ((angle % 360) + 360) % 360;
+    // Convert to segment (15° per segment)
+    return Math.floor(normalizedAngle / CLOCK.DEGREES_PER_SEGMENT);
 };
 
+/**
+ * Converts a segment number to its corresponding hour
+ * @param {number} segment - Segment number (0-23)
+ * @returns {number} Hour (1-12)
+ */
+const segmentToHour = (segment) => {
+    // Normalize segment to 0-23 range
+    const normalizedSegment = ((segment % CLOCK.SEGMENTS) + CLOCK.SEGMENTS) % CLOCK.SEGMENTS;
+    
+    // Special case for segments 23 and 0 (hour 12)
+    if (normalizedSegment === 23 || normalizedSegment === 0) {
+        return 12;
+    }
+    
+    // For all other segments: hour = ceil(segment/2)
+    const hour = Math.ceil(normalizedSegment / 2);
+    return hour > 12 ? hour - 12 : hour;
+};
+
+/**
+ * Applies medical domain rules to add implied hours
+ * @param {Set<number>} hours - Set of detected hours
+ * @returns {Set<number>} Updated hours with medical implications
+ */
+const applyMedicalRules = (hours) => {
+    // Copy the set to avoid modifying the input
+    const updatedHours = new Set(hours);
+    
+    // Rule: Hour 6 is included if hours 5 or 7 are present
+    if (CLOCK.IMPLICATIONS.AUTOMATIC_INCLUSION.HOUR_6.some(h => updatedHours.has(h))) {
+        updatedHours.add(6);
+    }
+    
+    // Rule: Hour 3 is included if segments in hours 2-4 are present
+    if (CLOCK.IMPLICATIONS.AUTOMATIC_INCLUSION.HOUR_3.some(h => updatedHours.has(h))) {
+        updatedHours.add(3);
+    }
+    
+    // Rule: Hour 9 is included if segments in hours 8-10 are present
+    if (CLOCK.IMPLICATIONS.AUTOMATIC_INCLUSION.HOUR_9.some(h => updatedHours.has(h))) {
+        updatedHours.add(9);
+    }
+    
+    return updatedHours;
+};
+
+/**
+ * Converts a segment number to its corresponding clock hour(s)
+ * @param {number} segment - Segment number (0-23)
+ * @param {string} mappingType - Type of mapping needed (from MAPPING_TYPE)
+ * @returns {Object} Hour mapping information
+ */
+export const getHourMapping = (segment, mappingType = MAPPING_TYPE.RISK) => {
+    const normalizedSegment = ((segment % CLOCK.SEGMENTS) + CLOCK.SEGMENTS) % CLOCK.SEGMENTS;
+    const baseHour = segmentToHour(normalizedSegment);
+    
+    let hours = new Set([baseHour]);
+    
+    // For DISPLAY and MEDICAL types, handle special cases
+    if (mappingType === MAPPING_TYPE.DISPLAY || mappingType === MAPPING_TYPE.MEDICAL) {
+        // Handle midnight crossing segments
+        if (normalizedSegment === 23) {
+            hours = new Set([11, 12]); // Last segment maps to both 11 and 12
+        } else if (normalizedSegment === 0) {
+            hours = new Set([12, 1]);  // First segment maps to both 12 and 1
+        }
+        
+        // Apply medical rules for MEDICAL type
+        if (mappingType === MAPPING_TYPE.MEDICAL) {
+            hours = applyMedicalRules(hours);
+        }
+    }
+    
+    return {
+        hours,
+        segment: normalizedSegment,
+        angle: normalizedSegment * CLOCK.DEGREES_PER_SEGMENT
+    };
+};
+
+/**
+ * Converts a segment ID string to clock hour(s)
+ * @param {string} segmentId - Segment ID (e.g., 'segment12')
+ * @param {string} mappingType - Type of mapping needed
+ * @returns {Object} Hour mapping information
+ */
+export const getHourMappingFromId = (segmentId, mappingType = MAPPING_TYPE.RISK) => {
+    const segment = parseInt(segmentId.replace('segment', ''), 10);
+    return getHourMapping(segment, mappingType);
+};
+
+/**
+ * Converts an array of segments to their corresponding hours
+ * @param {Array<number|string>} segments - Array of segments or segment IDs
+ * @param {string} mappingType - Type of mapping needed
+ * @returns {Set<number>} Set of unique hours
+ */
+export const getHoursFromSegments = (segments, mappingType = MAPPING_TYPE.RISK) => {
+    const hours = new Set();
+    segments.forEach(seg => {
+        const segment = typeof seg === 'string' ? parseInt(seg.replace('segment', ''), 10) : seg;
+        const mapping = getHourMapping(segment, mappingType);
+        mapping.hours.forEach(h => hours.add(h));
+    });
+    
+    // Apply medical rules if needed
+    return mappingType === MAPPING_TYPE.MEDICAL ? applyMedicalRules(hours) : hours;
+};
+
+/**
+ * Gets segments for a given hour range
+ * @param {number} startHour - Starting hour (1-12)
+ * @param {number} endHour - Ending hour (1-12)
+ * @returns {number[]} Array of segment numbers
+ */
+export const getSegmentsForHours = (startHour, endHour) => {
+    // Special case for full clock
+    if (startHour === 12 && endHour === 12) {
+        return Array.from({ length: CLOCK.SEGMENTS }, (_, i) => i);
+    }
+    
+    // Convert hours to segments
+    const startSegment = startHour === 12 ? 23 : ((startHour - 1) * 2) + 1;
+    const endSegment = endHour === 12 ? 0 : (endHour * 2);
+    
+    const segments = [];
+    
+    // Handle wraparound case (e.g., 11-1 o'clock)
+    if (endSegment < startSegment) {
+        // Add segments from start to end of clock
+        for (let i = startSegment; i < CLOCK.SEGMENTS; i++) {
+            segments.push(i);
+        }
+        // Add segments from start of clock to end
+        for (let i = 0; i <= endSegment; i++) {
+            segments.push(i);
+        }
+    } else {
+        // Normal case
+        for (let i = startSegment; i <= endSegment; i++) {
+            segments.push(i);
+        }
+    }
+    
+    return segments;
+};

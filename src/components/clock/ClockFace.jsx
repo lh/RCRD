@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from "react";
+import { CLOCK } from './utils/clockConstants.js';
 
 const ClockFace = ({
   selectedHours,
@@ -44,11 +45,11 @@ const ClockFace = ({
   };
 
   const degreeToSegment = (degree) => {
-    return Math.floor(degree / 6) % 60;
+    return Math.floor(degree / CLOCK.DEGREES_PER_SEGMENT) % CLOCK.SEGMENTS;
   };
 
   const segmentToDegree = (segment) => {
-    return (segment * 6) % 360;
+    return (segment * CLOCK.DEGREES_PER_SEGMENT) % 360;
   };
 
   const getSegmentFromPoint = useCallback((clientX, clientY) => {
@@ -63,21 +64,25 @@ const ClockFace = ({
 
   const getSegmentsBetween = (start, end, isCounterClockwise) => {
     const segments = [];
+    const maxIterations = CLOCK.SEGMENTS; // Safety limit
+    let iterations = 0;
+    
     if (isCounterClockwise) {
       let i = start;
-      while (i !== end) {
+      while (i !== end && iterations < maxIterations) {
         segments.push(i);
-        i = (i - 1 + 60) % 60;
+        i = ((i - 1) + CLOCK.SEGMENTS) % CLOCK.SEGMENTS;
+        iterations++;
       }
-      segments.push(end);
     } else {
       let i = start;
-      while (i !== end) {
+      while (i !== end && iterations < maxIterations) {
         segments.push(i);
-        i = (i + 1) % 60;
+        i = (i + 1) % CLOCK.SEGMENTS;
+        iterations++;
       }
-      segments.push(end);
     }
+    segments.push(end); // Add the end segment
     return segments;
   };
 
@@ -104,14 +109,6 @@ const ClockFace = ({
       setLastAngle(angle);
       setCurrentDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
       setDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
-
-      if (document.getElementById('touch-debug')) {
-        document.getElementById('touch-debug').textContent = JSON.stringify({
-          action: 'start',
-          segment,
-          segments: [`segment${segment}`]
-        }, null, 2);
-      }
     }
   }, [getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
 
@@ -123,8 +120,6 @@ const ClockFace = ({
     const { segment: currentSegment, angle: currentAngle } = getSegmentFromPoint(pointer.clientX, pointer.clientY);
 
     if (currentSegment !== null && currentSegment !== lastPosition) {
-      const debugEl = document.getElementById('touch-debug');
-
       // Determine drawing direction based on angle change
       let angleDiff = currentAngle - lastAngle;
       if (angleDiff > 180) angleDiff -= 360;
@@ -134,20 +129,9 @@ const ClockFace = ({
       // Calculate segments between start and current
       const segmentsToAdd = getSegmentsBetween(lastPosition, currentSegment, isCounterClockwise);
 
-      if (debugEl) {
-        debugEl.textContent = JSON.stringify({
-          action: 'draw',
-          startSegment: drawStartSegment,
-          currentSegment,
-          segmentsToAdd,
-          totalSegments: segmentsToAdd.length,
-          isCounterClockwise
-        }, null, 2);
-      }
-
       // Create a Set of existing segments (without the "segment" prefix)
       const existingSegments = new Set(
-        initialDetachmentSegments.map(s => parseInt(s.replace('segment', '')))
+        initialDetachmentSegments.map(s => parseInt(s.replace('segment', ''), 10))
       );
 
       // Add new segments to the set
@@ -172,66 +156,42 @@ const ClockFace = ({
     setLastAngle(null);
   }, [isDrawing, readOnly]);
 
-// Event handlers for tears
-const handleTearTouchStart = useCallback((hour) => (e) => {
-  if (readOnly) return;
-  e.preventDefault();
-  e.stopPropagation();
+  // Event handlers for tears
+  const handleTearTouchStart = useCallback((hour) => (e) => {
+    if (readOnly) return;
+    e.preventDefault();
+    e.stopPropagation();
 
-  const touch = e.touches[0];
-  setTouchStartTime(Date.now());
-  setTouchStartPosition({ x: touch.clientX, y: touch.clientY });
+    const touch = e.touches[0];
+    setTouchStartTime(Date.now());
+    setTouchStartPosition({ x: touch.clientX, y: touch.clientY });
+    return false;
+  }, [readOnly]);
 
-  // Add debug output
-  if (document.getElementById('touch-debug')) {
-    document.getElementById('touch-debug').textContent = JSON.stringify({
-      action: 'tear-touch-start',
-      hour,
-      timestamp: Date.now()
-    }, null, 2);
-  }
-  return false;
-}, [readOnly]);
+  const handleTearTouchEnd = useCallback((hour) => (e) => {
+    if (readOnly) return;
+    e.preventDefault();
+    e.stopPropagation();
 
-// Event handlers for tears
-const handleTearTouchEnd = useCallback((hour) => (e) => {
-  if (readOnly) return;
-  e.preventDefault();
-  e.stopPropagation();
+    if (!touchStartTime || !touchStartPosition) return;
 
-  if (!touchStartTime || !touchStartPosition) return;
+    const touchEndTime = Date.now();
+    const pressDuration = touchEndTime - touchStartTime;
+    const touch = e.changedTouches[0];
 
-  const touchEndTime = Date.now();
-  const pressDuration = touchEndTime - touchStartTime;
-  const touch = e.changedTouches[0];
+    const moveDistance = touchStartPosition ? Math.hypot(
+      touch.clientX - touchStartPosition.x,
+      touch.clientY - touchStartPosition.y
+    ) : 0;
 
-  // Calculate movement distance
-  const moveDistance = touchStartPosition ? Math.hypot(
-    touch.clientX - touchStartPosition.x,
-    touch.clientY - touchStartPosition.y
-  ) : 0;
+    if (pressDuration >= LONG_PRESS_DURATION && moveDistance < 10) {
+      onTearToggle(hour);
+    }
 
-  // Only toggle if it was a long press and finger didn't move much
-  if (pressDuration >= LONG_PRESS_DURATION && moveDistance < 10) {
-    onTearToggle(hour);
-  }
-
-  // Add debug output
-  if (document.getElementById('touch-debug')) {
-    document.getElementById('touch-debug').textContent = JSON.stringify({
-      action: 'tear-touch-end',
-      hour,
-      duration: pressDuration,
-      moveDistance,
-      wasLongPress: pressDuration >= LONG_PRESS_DURATION,
-      timestamp: Date.now()
-    }, null, 2);
-  }
-
-  setTouchStartTime(null);
-  setTouchStartPosition(null);
-  return false;
-}, [readOnly, touchStartTime, touchStartPosition, onTearToggle]);
+    setTouchStartTime(null);
+    setTouchStartPosition(null);
+    return false;
+  }, [readOnly, touchStartTime, touchStartPosition, onTearToggle]);
 
   // Style constants and helper functions
   const styles = {
@@ -344,7 +304,7 @@ const handleTearTouchEnd = useCallback((hour) => (e) => {
 
           {/* Detachment segments */}
           <g className="pointer-events-auto" style={{ isolation: 'isolate' }}>
-            {[...Array(60)].map((_, i) => {
+            {[...Array(CLOCK.SEGMENTS)].map((_, i) => {
               const isHighlighted = currentDetachmentSegments.includes(`segment${i}`);
               const degreeStart = segmentToDegree(i);
               const degreeEnd = segmentToDegree(i + 1);

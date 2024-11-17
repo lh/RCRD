@@ -1,132 +1,98 @@
-import { getSegmentRanges } from './getSegmentRanges.js';
-import { getClockHour } from './getClockHour.js';
+import { CLOCK } from './clockConstants.js';
 
 /**
  * Formats an array of segment numbers into a human-readable clock hour range string
- * @param {number[]} segments - Array of segment numbers (0-59)
+ * @param {number[]} segments - Array of segment numbers (0-23)
  * @returns {string} Formatted clock hour range (e.g., "1-3 o'clock" or "12; 5-6 o'clock")
  */
 export const formatDetachmentHours = (segments) => {
-    // Handle empty input
     if (!segments || segments.length === 0) {
         return "None";
     }
 
-    // Handle total detachment case
-    if (segments.length >= 55) {
+    // Consider it total detachment if more than 80% of segments are marked
+    if (segments.length >= Math.floor(CLOCK.SEGMENTS * 0.8)) {
         return "1-12 o'clock (Total)";
     }
 
-    // Get continuous ranges of segments
-    const ranges = getSegmentRanges(segments);
-
-    // Convert each range to clock hours
-    const hourRanges = ranges.map(range => {
-        const startHour = getClockHour(range.start);
-        const endSegment = (range.start + range.length - 1) % 60;
-        const endHour = getClockHour(endSegment);
-        return { startHour, endHour };
-    });
-
-    // Format the ranges into a string
-    const formattedRanges = hourRanges.map(range => {
-        if (range.startHour === range.endHour) {
-            return `${range.startHour}`;
+    // Convert segments to hours using the new 2-segments-per-hour system
+    const segmentToHour = (segment) => {
+        // Normalize segment to 0-23 range
+        const normalizedSegment = ((segment % CLOCK.SEGMENTS) + CLOCK.SEGMENTS) % CLOCK.SEGMENTS;
+        
+        // Special case for segments 23 and 0 (hour 12)
+        if (normalizedSegment === 23 || normalizedSegment === 0) {
+            return 12;
         }
-        return `${range.startHour}-${range.endHour}`;
+        
+        // For all other segments: hour = ceil(segment/2)
+        const hour = Math.ceil(normalizedSegment / CLOCK.SEGMENTS_PER_HOUR);
+        return hour > 12 ? hour - 12 : hour;
+    };
+
+    // Get unique hours from segments
+    const hours = new Set();
+    const segmentNumbers = segments.map(segStr => {
+        if (typeof segStr === 'string') {
+            return parseInt(segStr.replace('segment', ''), 10);
+        }
+        return segStr;
     });
 
-    return formattedRanges.join('; ') + " o'clock";
+    segmentNumbers.forEach(segment => {
+        hours.add(segmentToHour(segment));
+    });
+
+    // Convert to array and handle midnight crossing
+    const hourList = Array.from(hours);
+
+    // Check for midnight crossing
+    const hasHour11 = hourList.includes(11);
+    const hasHour12 = hourList.includes(12);
+    const hasHour1 = hourList.includes(1);
+    const hasMidnightCrossing = 
+        (hasHour11 && hasHour12) || 
+        (hasHour11 && hasHour1) || 
+        (hasHour12 && hasHour1);
+
+    // Sort hours based on midnight crossing
+    if (hasMidnightCrossing) {
+        // For midnight crossing, ensure 11→12→1 order
+        hourList.sort((a, b) => {
+            // Map hours to a continuous sequence: 11→12→1 becomes 11→12→13
+            const normalize = h => h === 1 ? 13 : h;
+            return normalize(a) - normalize(b);
+        });
+    } else {
+        hourList.sort((a, b) => a - b);
+    }
+
+    // Build ranges
+    const ranges = [];
+    let currentRange = { start: hourList[0], end: hourList[0] };
+
+    for (let i = 1; i < hourList.length; i++) {
+        const hour = hourList[i];
+        const prevHour = currentRange.end;
+
+        const isConsecutive = 
+            hour === prevHour + 1 || 
+            (prevHour === 12 && hour === 1) ||
+            (prevHour === 11 && hour === 12);
+
+        if (isConsecutive) {
+            currentRange.end = hour;
+        } else {
+            ranges.push(currentRange);
+            currentRange = { start: hour, end: hour };
+        }
+    }
+    ranges.push(currentRange);
+
+    // Format ranges
+    return ranges
+        .map(range => range.start === range.end ? 
+            `${range.start}` : 
+            `${range.start}-${range.end}`)
+        .join('; ') + " o'clock";
 };
-
-// // Run tests only if this file is executed directly
-// if (import.meta.url === import.meta.resolve('./formatDetachmentHours.js')) {
-//     const runFormatDetachmentTests = () => {
-//         const testCases = [
-//             {
-//                 name: "Empty input",
-//                 input: [],
-//                 expected: "None"
-//             },
-//             {
-//                 name: "Total detachment",
-//                 input: Array.from({ length: 56 }, (_, i) => i),
-//                 expected: "1-12 o'clock (Total)"
-//             },
-//             {
-//                 name: "Single hour at 12",
-//                 input: [0, 1],
-//                 expected: "12 o'clock"
-//             },
-//             {
-//                 name: "Simple range within hour",
-//                 input: [5, 6, 7],
-//                 expected: "1 o'clock"
-//             },
-//             {
-//                 name: "Range crossing midnight",
-//                 input: [58, 59, 0, 1],
-//                 expected: "12 o'clock"
-//             },
-//             {
-//                 name: "Big Range crossing midnight",
-//                 input: [50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 0, 1, 2, 3, 4, 5, 6],
-//                 expected: "10-1 o'clock"
-//             },
-//             {
-//                 name: "Multiple separate ranges",
-//                 input: [0, 1, 2, 25, 26, 27, 28],
-//                 expected: "12; 5-6 o'clock"
-//             },
-//             {
-//                 name: "Hour 6 special case",
-//                 input: [24, 25, 26, 27, 28],
-//                 expected: "5-6 o'clock"
-//             },
-//             {
-//                 name: "Single segment at boundary",
-//                 input: [5],
-//                 expected: "1 o'clock"
-//             },
-//             {
-//                 name: "Single segment at 12",
-//                 input: [59],
-//                 expected: "12 o'clock"
-//             }
-//         ];
-
-//         // Run tests and collect results
-//         const results = testCases.map(testCase => {
-//             const result = formatDetachmentHours(testCase.input);
-//             const passed = result === testCase.expected;
-
-//             return {
-//                 name: testCase.name,
-//                 input: testCase.input,
-//                 expected: testCase.expected,
-//                 actual: result,
-//                 passed: passed,
-//                 detail: passed ? '' : `Got "${result}", expected "${testCase.expected}"`
-//             };
-//         });
-
-//         // Print results
-//         results.forEach(result => {
-//             console.log(`\nTest: ${result.name}`);
-//             console.log(`Input: [${result.input.join(', ')}]`);
-//             console.log(`Expected: "${result.expected}"`);
-//             console.log(`Actual: "${result.actual}"`);
-//             console.log(`Result: ${result.passed ? 'PASS' : 'FAIL'}`);
-//             if (!result.passed) {
-//                 console.log(`Detail: ${result.detail}`);
-//             }
-//         });
-
-//         // Return overall test status
-//         return results.every(r => r.passed);
-//     };
-
-//     // Run the tests
-//     const testsPassed = runFormatDetachmentTests();
-//     console.log(`\nAll tests ${testsPassed ? 'PASSED' : 'FAILED'}`);
-// }

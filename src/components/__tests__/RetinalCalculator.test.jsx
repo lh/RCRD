@@ -1,67 +1,52 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
+import { MODEL_TYPE } from '../../constants/modelTypes';
 
-// Mock child components
+// Mock the calculator components
 jest.mock('../MobileRetinalCalculator', () => {
-  return function MockMobileRetinalCalculator() {
-    return <div data-testid="mobile-calculator">Mobile Version</div>;
-  };
+    return function MockMobileCalculator({ modelType }) {
+        return <div data-testid="mobile-calculator" data-model={modelType}>Mobile View</div>;
+    };
 });
 
 jest.mock('../DesktopRetinalCalculator', () => {
-  return function MockDesktopRetinalCalculator() {
-    return <div data-testid="desktop-calculator">Desktop Version</div>;
-  };
+    return function MockDesktopCalculator({ modelType }) {
+        return <div data-testid="desktop-calculator" data-model={modelType}>Desktop View</div>;
+    };
 });
 
 describe('RetinalCalculator', () => {
-  test('renders mobile version for small screens', () => {
-    render(<RetinalCalculator />);
-    
-    // Mobile version should be visible
-    const mobileSection = screen.getByTestId('mobile-calculator');
-    expect(mobileSection).toBeInTheDocument();
-    expect(mobileSection.closest('.md\\:hidden')).toBeInTheDocument();
-    
-    // Desktop version should be hidden
-    const desktopSection = screen.getByTestId('desktop-calculator');
-    expect(desktopSection.closest('.hidden.md\\:block')).toBeInTheDocument();
-  });
+    test('uses full model by default', () => {
+        render(<RetinalCalculator />);
 
-  test('renders desktop version for large screens', () => {
-    // Mock window.matchMedia for desktop view
-    window.matchMedia = jest.fn().mockImplementation(query => ({
-      matches: query === '(min-width: 768px)',
-      media: query,
-      onchange: null,
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    }));
+        // Both calculators should receive full model type
+        const mobileCalculator = screen.getByTestId('mobile-calculator');
+        const desktopCalculator = screen.getByTestId('desktop-calculator');
+        expect(mobileCalculator).toHaveAttribute('data-model', MODEL_TYPE.FULL);
+        expect(desktopCalculator).toHaveAttribute('data-model', MODEL_TYPE.FULL);
+    });
 
-    render(<RetinalCalculator />);
-    
-    // Desktop version should be visible
-    const desktopSection = screen.getByTestId('desktop-calculator');
-    expect(desktopSection.closest('.hidden.md\\:block')).toBeInTheDocument();
-    
-    // Mobile version should be hidden
-    const mobileSection = screen.getByTestId('mobile-calculator');
-    expect(mobileSection.closest('.md\\:hidden')).toBeInTheDocument();
-  });
+    test('renders mobile view for small screens', () => {
+        render(<RetinalCalculator />);
+        const mobileView = screen.getByTestId('mobile-calculator');
+        expect(mobileView).toHaveClass('md:hidden');
+    });
 
-  test('renders header content correctly', () => {
-    render(<RetinalCalculator />);
-    
-    // Check title
-    expect(screen.getByRole('heading', { 
-      name: /retinal detachment risk calculator/i 
-    })).toBeInTheDocument();
-    
-    // Check study links
-    expect(screen.getByRole('link', { name: /uk beavrs/i }))
-      .toHaveAttribute('href', 'https://www.beavrs.org/');
-    expect(screen.getByRole('link', { name: /study/i }))
-      .toHaveAttribute('href', 'https://www.nature.com/articles/s41433-023-02388-0 ');
-  });
+    test('renders desktop view for large screens', () => {
+        render(<RetinalCalculator />);
+        const desktopView = screen.getByTestId('desktop-calculator').closest('.hidden.md\\:block');
+        expect(desktopView).toBeInTheDocument();
+    });
+
+    test('renders header content', () => {
+        render(<RetinalCalculator />);
+        
+        // Title should be present
+        expect(screen.getByText('Retinal Detachment Risk Calculator')).toBeInTheDocument();
+        
+        // Links should be present
+        expect(screen.getByText('UK BEAVRS')).toHaveAttribute('href', 'https://www.beavrs.org/');
+        expect(screen.getByText('study')).toHaveAttribute('href', 'https://www.nature.com/articles/s41433-023-02388-0');
+    });
 });

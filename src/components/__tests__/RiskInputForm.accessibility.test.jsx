@@ -1,168 +1,205 @@
-import React, { useState } from 'react';
-import { screen, fireEvent, act, waitFor, render } from '@testing-library/react';
-import { mockProps, renderMobile, resetMocks } from '../test-helpers/RiskInputForm.helpers';
-import { pvrOptions, gaugeOptions } from '../../constants/riskCalculatorConstants';
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import RiskInputForm from '../RiskInputForm';
+import { pvrOptions } from '../../constants/riskCalculatorConstants';
 
-// Wrapper component that manages its own state for testing
-const TestWrapper = ({ position = 'left' }) => {
-  const [age, setAge] = useState('');
-  const [pvrGrade, setPvrGrade] = useState('');
-  const [vitrectomyGauge, setVitrectomyGauge] = useState('');
+// Mock child components with accessibility attributes
+jest.mock('../GaugeSelection', () => {
+    return function MockGaugeSelection({ is25Gauge, setIs25Gauge, detailedGauge, setDetailedGauge }) {
+        return (
+            <div 
+                data-testid="gauge-selection"
+                role="group"
+                aria-labelledby="gauge-heading"
+            >
+                <h3 id="gauge-heading" className="sr-only">Gauge Selection</h3>
+                <button 
+                    onClick={() => setIs25Gauge(!is25Gauge)}
+                    data-testid="gauge-toggle"
+                    aria-pressed={is25Gauge}
+                >
+                    {is25Gauge ? '25 gauge' : 'Not 25 gauge'}
+                </button>
+                {!is25Gauge && (
+                    <select
+                        value={detailedGauge || ''}
+                        onChange={e => setDetailedGauge(e.target.value)}
+                        data-testid="detailed-gauge"
+                        aria-label="Detailed gauge selection"
+                    >
+                        <option value="">Select gauge...</option>
+                        <option value="20g">20 gauge</option>
+                        <option value="23g">23 gauge</option>
+                        <option value="27g">27 gauge</option>
+                    </select>
+                )}
+            </div>
+        );
+    };
+});
 
-  return (
-    <RiskInputForm
-      position={position}
-      age={age}
-      setAge={setAge}
-      pvrGrade={pvrGrade}
-      setPvrGrade={setPvrGrade}
-      vitrectomyGauge={vitrectomyGauge}
-      setVitrectomyGauge={setVitrectomyGauge}
-    />
-  );
-};
+jest.mock('../TamponadeSelection', () => {
+    return function MockTamponadeSelection({ useOil, setUseOil, useSF6, setUseSF6 }) {
+        return (
+            <div 
+                data-testid="tamponade-selection"
+                role="group"
+                aria-labelledby="tamponade-heading"
+            >
+                <h3 id="tamponade-heading" className="sr-only">Tamponade Selection</h3>
+                <button 
+                    onClick={() => setUseOil(!useOil)}
+                    data-testid="oil-toggle"
+                    aria-pressed={useOil}
+                >
+                    {useOil ? 'Oil' : 'Gas'}
+                </button>
+                {!useOil && (
+                    <button 
+                        onClick={() => setUseSF6(!useSF6)}
+                        data-testid="sf6-toggle"
+                        aria-pressed={useSF6}
+                    >
+                        {useSF6 ? 'SF6' : 'C2F6'}
+                    </button>
+                )}
+            </div>
+        );
+    };
+});
 
-describe('RiskInputForm Accessibility', () => {
-  beforeEach(() => {
-    resetMocks();
-  });
+describe('RiskInputForm - Accessibility', () => {
+    const mockProps = {
+        age: '45',
+        setAge: jest.fn(),
+        pvrGrade: 'none',
+        setPvrGrade: jest.fn(),
+        vitrectomyGauge: '25g',
+        setVitrectomyGauge: jest.fn(),
+        position: 'left'
+    };
 
-  describe('Age Input', () => {
-    test('renders age input with proper label association in desktop view', () => {
-      render(<TestWrapper />);
-      
-      const label = screen.getByTestId('age-label');
-      const input = screen.getByTestId('age-input');
-      
-      expect(label).toHaveAttribute('for', 'age-input');
-      expect(input).toHaveAttribute('id', 'age-input');
+    beforeEach(() => {
+        jest.clearAllMocks();
     });
 
-    test('renders age input with proper label association in mobile view', () => {
-      renderMobile();
+    describe('ARIA Attributes', () => {
+        test('age input has proper ARIA attributes', () => {
+            render(<RiskInputForm {...mockProps} position="left" />);
+            
+            const ageInput = screen.getByLabelText(/age \(years\)/i);
+            expect(ageInput).toHaveAttribute('role', 'spinbutton');
+            expect(ageInput).toHaveAttribute('aria-required', 'true');
+            expect(ageInput).toHaveAttribute('aria-valuemin', '18');
+            expect(ageInput).toHaveAttribute('aria-valuemax', '100');
+        });
 
-      const label = screen.getByText(/age \(years\)/i);
-      const input = screen.getByLabelText(/age \(years\)/i);
+        test('PVR grade radio group has proper ARIA attributes', () => {
+            render(<RiskInputForm {...mockProps} position="left" />);
+            
+            const radioGroup = screen.getByRole('radiogroup', { name: /pvr grade/i });
+            expect(radioGroup).toHaveAttribute('aria-required', 'true');
+        });
 
-      expect(label).toHaveAttribute('for', 'age-input-mobile');
-      expect(input).toHaveAttribute('id', 'age-input-mobile');
+        test('sets aria-invalid on age input when invalid', () => {
+            render(<RiskInputForm {...mockProps} age="" position="left" />);
+            
+            const ageInput = screen.getByLabelText(/age \(years\)/i);
+            expect(ageInput).toHaveAttribute('aria-invalid', 'true');
+            
+            userEvent.type(ageInput, '45');
+            expect(ageInput).toHaveAttribute('aria-invalid', 'false');
+        });
     });
 
-    test('includes required ARIA attributes', () => {
-      render(<TestWrapper />);
+    describe('Keyboard Navigation', () => {
+        test('supports keyboard navigation through PVR options', () => {
+            render(<RiskInputForm {...mockProps} position="left" />);
+            
+            const firstOption = screen.getByRole('radio', { name: pvrOptions[0].label });
+            firstOption.focus();
+            expect(document.activeElement).toBe(firstOption);
 
-      const input = screen.getByLabelText(/age \(years\)/i);
+            userEvent.tab();
+            const secondOption = screen.getByRole('radio', { name: pvrOptions[1].label });
+            expect(document.activeElement).toBe(secondOption);
+        });
 
-      expect(input).toHaveAttribute('role', 'spinbutton');
-      expect(input).toHaveAttribute('aria-required', 'true');
-      expect(input).toHaveAttribute('aria-valuemin', '18');
-      expect(input).toHaveAttribute('aria-valuemax', '100');
-      expect(input).toHaveAttribute('aria-invalid', 'true'); // Initially invalid as empty
+        test('maintains tab order in mobile layout', () => {
+            render(<RiskInputForm {...mockProps} isMobile={true} />);
+            
+            const elements = [
+                screen.getByLabelText(/age/i),
+                screen.getByRole('radio', { name: pvrOptions[0].label }),
+                screen.getByTestId('gauge-toggle'),
+                screen.getByTestId('oil-toggle')
+            ];
+
+            elements.forEach((element, index) => {
+                element.focus();
+                expect(document.activeElement).toBe(element);
+                if (index < elements.length - 1) {
+                    userEvent.tab();
+                }
+            });
+        });
     });
 
-    test('updates aria-invalid based on validation state', async () => {
-      render(<TestWrapper />);
+    describe('Focus Management', () => {
+        test('maintains focus when switching between gauge options', () => {
+            render(<RiskInputForm {...mockProps} position="right" />);
+            
+            const gaugeToggle = screen.getByTestId('gauge-toggle');
+            gaugeToggle.focus();
+            fireEvent.click(gaugeToggle);
+            expect(document.activeElement).toBe(gaugeToggle);
+        });
 
-      const input = screen.getByLabelText(/age \(years\)/i);
+        test('moves focus to SF6 toggle when oil is deselected', () => {
+            render(<RiskInputForm {...mockProps} position="right" />);
+            
+            const oilToggle = screen.getByTestId('oil-toggle');
+            oilToggle.focus();
+            fireEvent.click(oilToggle);
+            fireEvent.click(oilToggle);
 
-      // Initially invalid (empty)
-      expect(input).toHaveAttribute('aria-invalid', 'true');
-
-      // Valid age
-      await act(async () => {
-        fireEvent.change(input, { target: { value: '50' } });
-      });
-
-      await waitFor(() => {
-        expect(input).toHaveAttribute('aria-invalid', 'false');
-      });
-
-      // Invalid age (too low)
-      await act(async () => {
-        fireEvent.change(input, { target: { value: '17' } });
-      });
-
-      await waitFor(() => {
-        expect(input).toHaveAttribute('aria-invalid', 'true');
-      });
-
-      // Invalid age (too high)
-      await act(async () => {
-        fireEvent.change(input, { target: { value: '101' } });
-      });
-
-      await waitFor(() => {
-        expect(input).toHaveAttribute('aria-invalid', 'true');
-      });
-    });
-  });
-
-  describe('PVR Grade Selection', () => {
-    test('radio buttons have proper label associations in desktop view', () => {
-      render(<TestWrapper position="left" />);
-
-      pvrOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        const label = screen.getByText(option.label);
-
-        expect(radio).toHaveAttribute('id', `pvr-${option.value}`);
-        expect(label).toHaveAttribute('for', `pvr-${option.value}`);
-      });
+            const sf6Toggle = screen.getByTestId('sf6-toggle');
+            expect(document.activeElement).toBe(sf6Toggle);
+        });
     });
 
-    test('radio buttons have proper label associations in mobile view', () => {
-      renderMobile();
+    describe('Screen Reader Text', () => {
+        test('provides error messages for screen readers', () => {
+            render(<RiskInputForm {...mockProps} age="" position="left" />);
+            
+            const errorMessage = screen.getByText(/age is required/i);
+            expect(errorMessage).toHaveClass('text-red-600');
+        });
 
-      pvrOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        const label = screen.getByText(option.label);
-
-        expect(radio).toHaveAttribute('id', `pvr-${option.value}-mobile`);
-        expect(label).toHaveAttribute('for', `pvr-${option.value}-mobile`);
-      });
+        test('includes visually hidden labels', () => {
+            render(<RiskInputForm {...mockProps} position="right" />);
+            
+            expect(screen.getByText('Gauge Selection')).toHaveClass('sr-only');
+            expect(screen.getByText('Tamponade Selection')).toHaveClass('sr-only');
+        });
     });
 
-    test('radio group has proper ARIA attributes', () => {
-      render(<TestWrapper position="left" />);
+    describe('Form Validation', () => {
+        test('announces validation errors to screen readers', () => {
+            render(<RiskInputForm {...mockProps} age="15" position="left" />);
+            
+            const ageInput = screen.getByLabelText(/age \(years\)/i);
+            expect(ageInput).toHaveAttribute('aria-invalid', 'true');
+            expect(ageInput).toHaveAttribute('aria-errormessage');
+        });
 
-      const radioGroup = screen.getByRole('radiogroup', { name: /pvr grade/i });
-      expect(radioGroup).toHaveAttribute('aria-required', 'true');
-      expect(radioGroup).toHaveAttribute('aria-label', 'PVR Grade');
+        test('provides clear feedback for required fields', () => {
+            render(<RiskInputForm {...mockProps} age="" position="left" />);
+            
+            const ageInput = screen.getByLabelText(/age \(years\)/i);
+            expect(ageInput).toHaveAttribute('aria-required', 'true');
+            expect(screen.getByText(/age is required/i)).toBeInTheDocument();
+        });
     });
-  });
-
-  describe('Vitrectomy Gauge Selection', () => {
-    test('radio buttons have proper label associations in desktop view', () => {
-      render(<TestWrapper position="right" />);
-
-      gaugeOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        const label = screen.getByText(option.label);
-
-        expect(radio).toHaveAttribute('id', `gauge-${option.value}`);
-        expect(label).toHaveAttribute('for', `gauge-${option.value}`);
-      });
-    });
-
-    test('radio buttons have proper label associations in mobile view', () => {
-      renderMobile();
-
-      gaugeOptions.forEach(option => {
-        const radio = screen.getByRole('radio', { name: option.label });
-        const label = screen.getByText(option.label);
-
-        expect(radio).toHaveAttribute('id', `gauge-${option.value}-mobile`);
-        expect(label).toHaveAttribute('for', `gauge-${option.value}-mobile`);
-      });
-    });
-
-    test('radio group has proper ARIA attributes', () => {
-      render(<TestWrapper position="right" />);
-
-      const radioGroup = screen.getByRole('radiogroup', { name: /vitrectomy gauge/i });
-      expect(radioGroup).toHaveAttribute('aria-required', 'true');
-      expect(radioGroup).toHaveAttribute('aria-label', 'Vitrectomy Gauge');
-    });
-  });
 });

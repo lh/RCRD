@@ -1,128 +1,176 @@
-import { coefficients } from '../constants/riskCalculatorConstants.js';
+/**
+ * Risk calculation functions based on the BEAVRS database study
+ */
 
-export const getAgeGroup = (age) => {
-    if (!age) return "45_to_64"; // default to reference category
+import { PAPER_COEFFICIENTS } from '../constants/paperCoefficients.js';
+import { ClockHourNotation } from '../components/clock/utils/clockHourNotation.js';
+import { MODEL_TYPE } from '../constants/modelTypes.js';
+import { isSignificant } from '../constants/paperCoefficients.js';
+
+/**
+ * Get age group category for risk calculation
+ * @param {string} age - Patient age
+ * @returns {string} Age group category
+ */
+export function getAgeGroup(age) {
     const ageNum = parseInt(age);
-    if (ageNum < 45) return "under_45";
-    if (ageNum >= 80) return "80_plus";
-    if (ageNum >= 65) return "65_to_79";
-    return "45_to_64";
-};
+    if (ageNum < 45) return "<45";
+    if (ageNum < 65) return "45-64";
+    if (ageNum < 80) return "65-79";
+    if (ageNum >= 80) return "80+";
+    return "45-64"; // Default to reference category
+}
 
-export const getBreakLocation = (selectedHours) => {
-    if (selectedHours.length === 0) return "no_break";
+/**
+ * Get break location category for risk calculation
+ * @param {number[]} selectedHours - Array of selected break hours
+ * @returns {string} Break location category
+ */
+export function getBreakLocation(selectedHours) {
+    if (!selectedHours || selectedHours.length === 0) return "none";
 
-    const has4or8 = selectedHours.includes(4) || selectedHours.includes(8);
-    const has5to7 = selectedHours.includes(5) || selectedHours.includes(6) || selectedHours.includes(7);
+    // Check for breaks in 5-7 range (highest priority)
+    if (selectedHours.some(h => h >= 5 && h <= 7)) return "5-7";
 
-    if (has5to7) return "5_to_7";  // 5-7 takes precedence
-    if (has4or8) return "4_or_8";
-    return "9_to_3";  // reference category
-};
+    // Check for breaks at 4 or 8
+    if (selectedHours.some(h => h === 4 || h === 8)) return "4-8";
 
-export const getInferiorDetachment = (detachmentSegments) => {
-    const affectedHours = Array.from(new Set(detachmentSegments.map(seg =>
-        Math.floor(seg / 5) + 1
-    )));
+    // Default to 9-3 location
+    return "9-3";
+}
 
-    const has6 = affectedHours.includes(6);
-    const has3to5 = [3, 4, 5].some(h => affectedHours.includes(h));
+/**
+ * Check if detachment is total (23 or more segments)
+ * @param {Array<string|number>} segments - Array of segment IDs or numbers
+ * @returns {string} "yes" if total detachment, "no" otherwise
+ */
+export function isTotalRD(segments) {
+    if (!segments || segments.length === 0) return "no";
+    // Consider it total detachment if 23 or more segments are marked
+    return segments.length >= 23 ? "yes" : "no";
+}
 
-    if (has6) return "6_hours";
-    if (has3to5) return "3_to_5";
-    return "less_than_3";  // reference category
-};
+/**
+ * Get inferior detachment category based on number of inferior hours affected
+ * @param {Array<string|number>} segments - Array of segment IDs or numbers
+ * @returns {string} Inferior detachment category
+ */
+export function getInferiorDetachment(segments) {
+    if (!segments || segments.length === 0) return "less_than_3";
 
-export const isTotalRD = (detachmentSegments) => {
-    const affectedHours = Array.from(new Set(detachmentSegments.map(seg =>
-        Math.floor(seg / 5) + 1
-    )));
-    return affectedHours.length >= 10 ? "yes" : "no";
-};
+    // Convert segment IDs to numbers
+    const segmentNums = segments.map(segment => {
+        return typeof segment === 'string' ? 
+            parseInt(segment.replace('segment', ''), 10) : segment;
+    });
 
-export const getPVRGrade = (pvrGrade) => {
-    return pvrGrade === 'C' ? "C" : "none_A_B";
-};
+    // Count inferior hours (3-9)
+    const inferiorHours = [3, 4, 5, 6, 7, 8, 9];
+    const inferiorCount = inferiorHours.filter(hour => 
+        ClockHourNotation.segmentsTouchHour(segmentNums, hour)
+    ).length;
 
-export const calculateRiskWithSteps = ({
+    if (inferiorCount >= 6) return "6_hours";
+    if (inferiorCount >= 3) return "3_to_5";
+    return "less_than_3";
+}
+
+/**
+ * Get PVR grade category for risk calculation
+ * @param {string} pvrGrade - PVR grade
+ * @returns {string} PVR grade category
+ */
+export function getPVRGrade(pvrGrade) {
+    return pvrGrade === 'C' ? 'C' : 'none';
+}
+
+/**
+ * Calculate risk with detailed steps
+ * @param {Object} params - Risk calculation parameters
+ * @returns {Object} Risk calculation results with steps
+ */
+export function calculateRiskWithSteps({
     age,
     pvrGrade,
     vitrectomyGauge,
-    selectedHours,
-    detachmentSegments
-}) => {
+    selectedHours = [],
+    detachmentSegments = [],
+    cryotherapy = 'no',
+    tamponade = 'sf6',
+    modelType = MODEL_TYPE.FULL
+}) {
     const steps = [];
-    let logit = coefficients.constant;
-    steps.push({
-        label: "Constant",
-        value: coefficients.constant.toFixed(3)
-    });
+    let logit = PAPER_COEFFICIENTS.constant;
+    steps.push({ step: 'Constant', value: PAPER_COEFFICIENTS.constant });
 
-    // Age coefficient
+    // Helper function to add coefficient if it should be included
+    const addCoefficient = (category, value, label) => {
+        const coeff = PAPER_COEFFICIENTS[category][value] || 0;
+        const isSignificantCoeff = isSignificant(category, value);
+
+        // Debug logging
+        console.log(`${label}: category=${category}, value=${value}, coefficient=${coeff}, significant=${isSignificantCoeff}`);
+
+        if (modelType === MODEL_TYPE.SIGNIFICANT && !isSignificantCoeff) {
+            steps.push({ 
+                step: label, 
+                value: coeff, 
+                category: value,
+                excluded: true,
+                debug: `Category: ${category}, Value: ${value}, Significant: ${isSignificantCoeff}`
+            });
+            return 0;
+        } else {
+            steps.push({ 
+                step: label, 
+                value: coeff, 
+                category: value,
+                debug: `Category: ${category}, Value: ${value}, Significant: ${isSignificantCoeff}`
+            });
+            return coeff;
+        }
+    };
+
+    // Age group
     const ageGroup = getAgeGroup(age);
-    const ageCoef = coefficients.age_group[ageGroup];
-    logit += ageCoef;
-    steps.push({
-        label: "Age group",
-        value: ageCoef.toFixed(3),
-        detail: `(${ageGroup.replace(/_/g, ' ')})`
-    });
+    logit += addCoefficient('age', ageGroup, 'Age group');
 
-    // Break location coefficient
-    const breakLoc = getBreakLocation(selectedHours);
-    const breakCoef = coefficients.break_location[breakLoc];
-    logit += breakCoef;
-    steps.push({
-        label: "Break location",
-        value: breakCoef.toFixed(3),
-        detail: `(${breakLoc.replace(/_/g, ' ')} o'clock)`
-    });
+    // Break location
+    const breakLocation = getBreakLocation(selectedHours);
+    logit += addCoefficient('breakLocation', breakLocation, 'Break location');
 
-    // RD location coefficients
-    const totalRD = isTotalRD(detachmentSegments);
-    if (totalRD === "yes") {
-        const rdCoef = coefficients.total_rd.yes;
-        logit += rdCoef;
-        steps.push({
-            label: "Total RD",
-            value: rdCoef.toFixed(3)
-        });
-    } else {
-        const infDet = getInferiorDetachment(detachmentSegments);
-        const infDetCoef = coefficients.inferior_detachment[infDet];
-        logit += infDetCoef;
-        steps.push({
-            label: "Inferior detachment",
-            value: infDetCoef.toFixed(3),
-            detail: `(${infDet.replace(/_/g, ' ')} o'clock)`
-        });
-    }
+    // Inferior detachment
+    const inferiorDetachment = getInferiorDetachment(detachmentSegments);
+    logit += addCoefficient('inferiorDetachment', inferiorDetachment, 'Inferior detachment');
 
-    // PVR grade coefficient
-    const pvrType = getPVRGrade(pvrGrade);
-    const pvrCoef = coefficients.pvr_grade[pvrType];
-    logit += pvrCoef;
-    steps.push({
-        label: "PVR grade",
-        value: pvrCoef.toFixed(3),
-        detail: `(grade ${pvrType === "C" ? "C" : "None/A/B"})`
-    });
+    // Total RD
+    const isTotal = isTotalRD(detachmentSegments);
+    logit += addCoefficient('totalDetachment', isTotal, 'Total RD');
 
-    // Vitrectomy gauge coefficient
-    const gaugeCoef = coefficients.gauge[vitrectomyGauge.toLowerCase()];
-    logit += gaugeCoef;
-    steps.push({
-        label: "Vitrectomy gauge",
-        value: gaugeCoef.toFixed(3),
-        detail: `(${vitrectomyGauge}, odds ratio ${Math.exp(gaugeCoef).toFixed(3)})`
-    });
+    // PVR grade
+    const pvrCategory = getPVRGrade(pvrGrade);
+    logit += addCoefficient('pvrGrade', pvrCategory, 'PVR grade');
 
-    // Final calculations
-    const probability = 1 / (1 + Math.exp(-logit));
+    // Vitrectomy gauge
+    logit += addCoefficient('vitrectomyGauge', vitrectomyGauge, 'Vitrectomy gauge');
+
+    // Cryotherapy
+    logit += addCoefficient('cryotherapy', cryotherapy, 'Cryotherapy');
+
+    // Tamponade
+    logit += addCoefficient('tamponade', tamponade, 'Tamponade');
+
+    // Calculate probability
+    const probability = 100 / (1 + Math.exp(-logit));
 
     return {
+        probability,
         steps,
-        logit: logit.toFixed(3),
-        probability: (probability * 100).toFixed(1)
+        logit,
+        age: ageGroup,
+        pvrGrade: pvrCategory,
+        vitrectomyGauge,
+        cryotherapy,
+        tamponade
     };
-};
+}

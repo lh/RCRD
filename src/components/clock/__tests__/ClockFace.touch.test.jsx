@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import ClockFace from '../ClockFace';
 import { calculateSegmentsForHourRange } from '../utils/segmentCalculator';
+import { CLOCK } from '../utils/clockConstants';
 
 jest.mock('../utils/segmentCalculator', () => ({
   calculateSegmentsForHourRange: jest.fn()
@@ -23,10 +24,10 @@ describe('ClockFace Touch Interactions', () => {
     jest.clearAllMocks();
     calculateSegmentsForHourRange.mockImplementation((start, end) => {
       const segments = [];
-      const startSegment = (start - 1) * 5;
-      const endSegment = (end - 1) * 5;
+      const startSegment = (start - 1) * 2;
+      const endSegment = (end - 1) * 2 + 1;
       for (let i = startSegment; i <= endSegment; i++) {
-        segments.push(i);
+        segments.push(i % CLOCK.SEGMENTS);
       }
       return segments;
     });
@@ -207,7 +208,7 @@ describe('ClockFace Touch Interactions', () => {
       for (let i = 1; i < segments.length; i++) {
         const currentSegment = segments[i];
         // When crossing midnight, we'll see a large jump from low numbers to high numbers
-        if (currentSegment > 50 && prevSegment < 10) {
+        if (currentSegment > 20 && prevSegment < 4) {
           crossedMidnight = true;
         } else if (!crossedMidnight && currentSegment > prevSegment) {
           isCounterClockwise = false;

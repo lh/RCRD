@@ -2,7 +2,7 @@ import React from 'react';
 import ClockFace from './clock/ClockFace.jsx';
 import RiskInputForm from './RiskInputForm.jsx';
 import RiskResults from './RiskResults.jsx';
-import { useRetinalCalculator } from './clock/hooks/useRetinalCalculator';
+import { useRetinalCalculator } from './clock/hooks/useRetinalCalculator.js';
 import { formatDetachmentHours } from './clock/utils/formatDetachmentHours.js';
 
 const DesktopRetinalCalculator = () => {
@@ -14,12 +14,21 @@ const DesktopRetinalCalculator = () => {
         pvrGrade: calculator.pvrGrade,
         setPvrGrade: calculator.setPvrGrade,
         vitrectomyGauge: calculator.vitrectomyGauge,
-        setVitrectomyGauge: calculator.setVitrectomyGauge
+        setVitrectomyGauge: calculator.setVitrectomyGauge,
+        cryotherapy: calculator.cryotherapy,
+        setCryotherapy: calculator.setCryotherapy,
+        tamponade: calculator.tamponade,
+        setTamponade: calculator.setTamponade
+    };
+
+    // Extract segment numbers from segment IDs
+    const getSegmentNumbers = (segmentIds) => {
+        return segmentIds.map(id => parseInt(id.replace('segment', ''), 10));
     };
 
     return (
         <div className="space-y-6">
-            {!calculator.calculatedRisk && (
+            {!calculator.calculatedRisks && (
                 <>
                     <div className="flex gap-4">
                         <div className="w-1/4">
@@ -88,13 +97,16 @@ const DesktopRetinalCalculator = () => {
             )}
 
             {/* Results with Summary */}
-            {calculator.calculatedRisk && (
+            {calculator.calculatedRisks && (
                 <div className="space-y-6">
                     <RiskResults
-                        risk={calculator.calculatedRisk}
+                        fullModelRisk={calculator.calculatedRisks.full}
+                        significantModelRisk={calculator.calculatedRisks.significant}
                         showMath={calculator.showMath}
                         setShowMath={calculator.setShowMath}
                         onReset={calculator.handleReset}
+                        selectedHours={calculator.selectedHours}
+                        detachmentSegments={calculator.detachmentSegments}
                     />
 
                     <div className="mt-8 border-t pt-6">
@@ -104,8 +116,10 @@ const DesktopRetinalCalculator = () => {
                                 <p className="text-sm"><span className="font-medium">Age:</span> {calculator.age} years</p>
                                 <p className="text-sm"><span className="font-medium">PVR Grade:</span> {calculator.formatPVRGrade(calculator.pvrGrade)}</p>
                                 <p className="text-sm"><span className="font-medium">Vitrectomy Gauge:</span> {calculator.vitrectomyGauge}</p>
+                                <p className="text-sm"><span className="font-medium">Cryotherapy:</span> {calculator.cryotherapy}</p>
+                                <p className="text-sm"><span className="font-medium">Tamponade:</span> {calculator.tamponade}</p>
                                 <p className="text-sm"><span className="font-medium">Breaks:</span> {calculator.formatHoursList(calculator.selectedHours)}</p>
-                                <p className="text-sm"><span className="font-medium">Detachment:</span> {formatDetachmentHours(calculator.detachmentSegments)}</p>
+                                <p className="text-sm"><span className="font-medium">Detachment:</span> {formatDetachmentHours(getSegmentNumbers(calculator.detachmentSegments))}</p>
                                 <div className="pt-4">
                                     <button
                                         onClick={calculator.handleReset}
@@ -120,9 +134,9 @@ const DesktopRetinalCalculator = () => {
                                     selectedHours={calculator.selectedHours}
                                     detachmentSegments={calculator.detachmentSegments}
                                     hoveredHour={calculator.hoveredHour}
-                                    onHoverChange={() => { }}
-                                    onTearToggle={() => { }}
-                                    onSegmentToggle={() => { }}
+                                    onHoverChange={() => {}}
+                                    onTearToggle={() => {}}
+                                    onSegmentToggle={() => {}}
                                     readOnly={true}
                                 />
                             </div>

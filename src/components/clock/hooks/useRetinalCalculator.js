@@ -1,16 +1,19 @@
 import { useState } from 'react';
 import { calculateRiskWithSteps } from '../../../utils/riskCalculations.js';
+import { MODEL_TYPE } from '../../../constants/modelTypes.js';
 
 export const useRetinalCalculator = () => {
-    // State management with defaults
-    const [age, setAge] = useState('');
+    // State management with new defaults
+    const [age, setAge] = useState('50');  // Default age 50
     const [pvrGrade, setPvrGrade] = useState('none');
     const [vitrectomyGauge, setVitrectomyGauge] = useState('25g');
     const [selectedHours, setSelectedHours] = useState([]);
     const [detachmentSegments, setDetachmentSegments] = useState([]);
     const [hoveredHour, setHoveredHour] = useState(null);
     const [showMath, setShowMath] = useState(false);
-    const [calculatedRisk, setCalculatedRisk] = useState(null);
+    const [calculatedRisks, setCalculatedRisks] = useState(null);
+    const [cryotherapy, setCryotherapy] = useState('yes');  // Default to cryotherapy used
+    const [tamponade, setTamponade] = useState('c2f6');  // Default to C2F6 gas
 
     const handleHoverChange = (hour) => {
         setHoveredHour(hour);
@@ -33,23 +36,42 @@ export const useRetinalCalculator = () => {
     const handleCalculate = () => {
         if (!age || detachmentSegments.length === 0) return;
 
-        const risk = calculateRiskWithSteps({
+        const inputs = {
             age,
             pvrGrade,
             vitrectomyGauge,
             selectedHours,
-            detachmentSegments
+            detachmentSegments,
+            cryotherapy,
+            tamponade
+        };
+
+        // Calculate both model results
+        const fullRisk = calculateRiskWithSteps({
+            ...inputs,
+            modelType: MODEL_TYPE.FULL
         });
-        setCalculatedRisk(risk);
+
+        const significantRisk = calculateRiskWithSteps({
+            ...inputs,
+            modelType: MODEL_TYPE.SIGNIFICANT
+        });
+
+        setCalculatedRisks({
+            full: fullRisk,
+            significant: significantRisk
+        });
     };
 
     const handleReset = () => {
-        setAge('');
+        setAge('50');  // Reset to default age 50
         setPvrGrade('none');
         setVitrectomyGauge('25g');
         setSelectedHours([]);
         setDetachmentSegments([]);
-        setCalculatedRisk(null);
+        setCryotherapy('yes');  // Reset to default cryotherapy used
+        setTamponade('c2f6');  // Reset to default C2F6 gas
+        setCalculatedRisks(null);
         setShowMath(false);
     };
 
@@ -73,8 +95,10 @@ export const useRetinalCalculator = () => {
         detachmentSegments,
         hoveredHour,
         showMath,
-        calculatedRisk,
+        calculatedRisks,
         isCalculateDisabled,
+        cryotherapy,
+        tamponade,
 
         // Setters
         setAge,
@@ -82,6 +106,8 @@ export const useRetinalCalculator = () => {
         setVitrectomyGauge,
         setDetachmentSegments,
         setShowMath,
+        setCryotherapy,
+        setTamponade,
 
         // Handlers
         handleHoverChange,

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { segmentToHour } from '../utils/clockCalculations';
+import { ClockHourNotation } from '../utils/clockHourNotation';
 
 export const useClockInteractions = (onChange) => {
   const [selectedHours, setSelectedHours] = useState([]);
@@ -98,9 +99,16 @@ export const useClockInteractions = (onChange) => {
     }
     
     setDetachmentSegments(newSelection);
+
+    // Get raw segment numbers for formatting
+    const rawSegments = newSelection.map(s => parseInt(s.replace('segment', ''), 10));
+    const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+    const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
     onChange?.({ 
       tears: selectedHours, 
-      detachment: Array.from(new Set(newSelection.map(s => segmentToHour(parseInt(s.replace('segment', ''), 10))))) 
+      detachment: hours,
+      formattedDetachment
     });
   };
 
@@ -133,9 +141,16 @@ export const useClockInteractions = (onChange) => {
         ? selectedHours.filter(h => h !== hour)
         : [...selectedHours, hour];
       setSelectedHours(newSelection);
+
+      // Get raw segment numbers for formatting
+      const rawSegments = detachmentSegments.map(s => parseInt(s.replace('segment', ''), 10));
+      const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+      const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
       onChange?.({ 
         tears: newSelection, 
-        detachment: Array.from(new Set(detachmentSegments.map(s => segmentToHour(parseInt(s.replace('segment', ''), 10))))) 
+        detachment: hours,
+        formattedDetachment
       });
     }
   };
@@ -158,9 +173,16 @@ export const useClockInteractions = (onChange) => {
         ? [...selectedHours, hour]
         : selectedHours.filter(h => h !== hour);
       setSelectedHours(newSelection);
+
+      // Get raw segment numbers for formatting
+      const rawSegments = detachmentSegments.map(s => parseInt(s.replace('segment', ''), 10));
+      const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+      const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
       onChange?.({ 
         tears: newSelection, 
-        detachment: Array.from(new Set(detachmentSegments.map(s => segmentToHour(parseInt(s.replace('segment', ''), 10))))) 
+        detachment: hours,
+        formattedDetachment
       });
     }, longPressThreshold);
 
@@ -176,7 +198,11 @@ export const useClockInteractions = (onChange) => {
   const handleClearAll = () => {
     setSelectedHours([]);
     setDetachmentSegments([]);
-    onChange?.({ tears: [], detachment: [] });
+    onChange?.({ 
+      tears: [], 
+      detachment: [],
+      formattedDetachment: "None"
+    });
   };
 
   useEffect(() => {

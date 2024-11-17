@@ -1,104 +1,144 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import RiskResults from '../RiskResults';
+import { MODEL_TYPE } from '../../constants/modelTypes';
 
 describe('RiskResults', () => {
-  const mockRisk = {
-    probability: '25.5',
-    logit: '-1.082',
-    steps: [
-      { label: 'Constant', value: '-1.611' },
-      { label: 'Age group', value: '0.236', detail: '(65 to 79)' },
-      { label: 'Break location', value: '0.428', detail: '(4 or 8 o\'clock)' },
-      { label: 'Inferior detachment', value: '0.441', detail: '(3 to 5 o\'clock)' },
-      { label: 'PVR grade', value: '0.000', detail: '(grade None/A/B)' },
-      { label: 'Vitrectomy gauge', value: '-0.408', detail: '(23g, odds ratio 0.665)' }
-    ]
-  };
+    // Example case from the paper: 82-year-old patient with total RD, PVR grade C,
+    // break at 6 o'clock, using 23g vitrectomy and silicone oil
+    const mockRiskData = {
+        probability: 74.5,
+        logit: 1.074,
+        steps: [
+            {
+                label: 'Age group',
+                value: 0.498,
+                detail: '(≥80 years)',
+                category: 'age',
+            },
+            {
+                label: 'Break location',
+                value: 0.607,
+                detail: '(5-7 o\'clock)',
+                category: 'breakLocation',
+            },
+            {
+                label: 'Total detachment',
+                value: 0.663,
+                detail: '(Yes)',
+                category: 'totalDetachment',
+            },
+            {
+                label: 'Inferior detachment',
+                value: 0.435,
+                detail: '(6 hours)',
+                category: 'inferiorDetachment',
+            },
+            {
+                label: 'PVR grade',
+                value: 0.220,
+                detail: '(Grade C)',
+                category: 'pvrGrade',
+            },
+            {
+                label: 'Vitrectomy gauge',
+                value: -0.408,
+                detail: '(23g)',
+                category: 'vitrectomyGauge',
+            },
+            {
+                label: 'Tamponade',
+                value: 0.670,
+                detail: '(Light oil)',
+                category: 'tamponade',
+            }
+        ]
+    };
 
-  const mockProps = {
-    risk: mockRisk,
-    showMath: false,
-    setShowMath: jest.fn()
-  };
-
-  test('displays risk probability', () => {
-    render(<RiskResults {...mockProps} />);
-    
-    expect(screen.getByText(/estimated risk of failure: 25.5%/i)).toBeInTheDocument();
-  });
-
-  test('toggles calculation steps visibility when button clicked', () => {
-    render(<RiskResults {...mockProps} />);
-    
-    const toggleButton = screen.getByRole('button', { name: /show calculation steps/i });
-    expect(screen.queryByText(/constant:/i)).not.toBeInTheDocument();
-    
-    fireEvent.click(toggleButton);
-    expect(mockProps.setShowMath).toHaveBeenCalledWith(true);
-  });
-
-  test('displays calculation steps when showMath is true', () => {
-    render(<RiskResults {...mockProps} showMath={true} />);
-    
-    mockRisk.steps.forEach(step => {
-      expect(screen.getByText(new RegExp(step.label + ':', 'i'))).toBeInTheDocument();
-      expect(screen.getByText(step.value)).toBeInTheDocument();
-      if (step.detail) {
-        expect(screen.getByText(step.detail)).toBeInTheDocument();
-      }
+    test('uses full model by default', () => {
+        render(<RiskResults risk={mockRiskData} />);
+        expect(screen.getByText(/includes all coefficients from Table 2/i)).toBeInTheDocument();
     });
-  });
 
-  test('displays total logit when steps are shown', () => {
-    render(<RiskResults {...mockProps} showMath={true} />);
-    
-    expect(screen.getByText(/total logit:/i)).toBeInTheDocument();
-    expect(screen.getByText(mockRisk.logit)).toBeInTheDocument();
-  });
+    test('renders full model results correctly', () => {
+        render(<RiskResults risk={mockRiskData} />);
 
-  test('displays probability formula when steps are shown', () => {
-    render(<RiskResults {...mockProps} showMath={true} />);
-    
-    expect(screen.getByText(/probability = 1 \/ \(1 \+ e/i)).toBeInTheDocument();
-    expect(screen.getByText(/= 25.5%/i)).toBeInTheDocument();
-  });
+        // Check probability and logit
+        expect(screen.getByText('74.5%')).toBeInTheDocument();
+        expect(screen.getByText('1.074')).toBeInTheDocument();
 
-  test('shows up chevron when math is displayed', () => {
-    render(<RiskResults {...mockProps} showMath={true} />);
-    
-    const chevronUp = screen.getByRole('button').querySelector('svg');
-    expect(chevronUp).toBeInTheDocument();
-  });
+        // All coefficients should be shown with their values
+        mockRiskData.steps.forEach(step => {
+            expect(screen.getByText(step.label + ':')).toBeInTheDocument();
+            expect(screen.getByText(step.value.toString())).toBeInTheDocument();
+            expect(screen.getByText(step.detail)).toBeInTheDocument();
+        });
 
-  test('shows down chevron when math is hidden', () => {
-    render(<RiskResults {...mockProps} showMath={false} />);
-    
-    const chevronDown = screen.getByRole('button').querySelector('svg');
-    expect(chevronDown).toBeInTheDocument();
-  });
+        // Should show full model note
+        expect(screen.getByText(/includes all coefficients from Table 2/i)).toBeInTheDocument();
+    });
 
-  test('handles empty steps array', () => {
-    const emptyRisk = {
-      ...mockRisk,
-      steps: []
-    };
-    
-    render(<RiskResults {...mockProps} risk={emptyRisk} showMath={true} />);
-    
-    expect(screen.getByText(/total logit:/i)).toBeInTheDocument();
-    expect(screen.getByText(/probability = 1 \/ \(1 \+ e/i)).toBeInTheDocument();
-  });
+    test('allows switching to significant model', () => {
+        render(<RiskResults risk={mockRiskData} />);
 
-  test('handles missing detail in steps', () => {
-    const riskWithoutDetails = {
-      ...mockRisk,
-      steps: [{ label: 'Test Step', value: '1.000' }]
-    };
-    
-    render(<RiskResults {...mockProps} risk={riskWithoutDetails} showMath={true} />);
-    
-    expect(screen.getByText(/test step:/i)).toBeInTheDocument();
-    expect(screen.getByText('1.000')).toBeInTheDocument();
-  });
+        // Find and click the model toggle
+        const toggle = screen.getByRole('switch');
+        fireEvent.click(toggle);
+
+        // 23g vitrectomy should show as excluded (p ≥ 0.05)
+        expect(screen.getByText('Vitrectomy gauge:')).toBeInTheDocument();
+        expect(screen.getByText('0.000')).toBeInTheDocument();
+        expect(screen.getByText(/excluded due to p ≥ 0.05/i)).toBeInTheDocument();
+
+        // Other coefficients should be shown normally
+        expect(screen.getByText('Age group:')).toBeInTheDocument();
+        expect(screen.getByText('0.498')).toBeInTheDocument();
+
+        // Should show significant model note
+        expect(screen.getByText(/uses only statistically significant coefficients/i)).toBeInTheDocument();
+    });
+
+    test('allows switching back to full model', () => {
+        render(<RiskResults risk={mockRiskData} />);
+
+        // Switch to significant model
+        const toggle = screen.getByRole('switch');
+        fireEvent.click(toggle);
+
+        // Switch back to full model
+        fireEvent.click(toggle);
+
+        // All coefficients should be shown with their values
+        mockRiskData.steps.forEach(step => {
+            expect(screen.getByText(step.label + ':')).toBeInTheDocument();
+            expect(screen.getByText(step.value.toString())).toBeInTheDocument();
+            expect(screen.getByText(step.detail)).toBeInTheDocument();
+        });
+
+        // Should show full model note
+        expect(screen.getByText(/includes all coefficients from Table 2/i)).toBeInTheDocument();
+    });
+
+    test('handles null risk data', () => {
+        render(<RiskResults risk={null} />);
+        expect(screen.queryByText('Risk Calculation Results')).not.toBeInTheDocument();
+    });
+
+    test('preserves model selection when risk data updates', () => {
+        const { rerender } = render(<RiskResults risk={mockRiskData} />);
+
+        // Switch to significant model
+        const toggle = screen.getByRole('switch');
+        fireEvent.click(toggle);
+
+        // Verify significant model is shown
+        expect(screen.getByText(/uses only statistically significant coefficients/i)).toBeInTheDocument();
+
+        // Update with new risk data
+        const newRiskData = { ...mockRiskData, probability: 80.0 };
+        rerender(<RiskResults risk={newRiskData} />);
+
+        // Should still show significant model
+        expect(screen.getByText(/uses only statistically significant coefficients/i)).toBeInTheDocument();
+    });
 });

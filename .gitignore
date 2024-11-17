@@ -19,3 +19,6 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# copyright issues
+/meta/Yorston_RD_risk_BEAVRS.pdf
