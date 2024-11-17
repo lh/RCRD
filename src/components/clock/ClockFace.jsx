@@ -28,6 +28,7 @@ const ClockFace = ({
   const [touchStartPosition, setTouchStartPosition] = useState(null);
   const [lastAngle, setLastAngle] = useState(null);
   const [currentDetachmentSegments, setCurrentDetachmentSegments] = useState(initialDetachmentSegments);
+  const [drawMode, setDrawMode] = useState(null); // 'add' or 'remove'
   const svgRef = useRef(null);
 
   // Utility functions
@@ -103,17 +104,27 @@ const ClockFace = ({
     const { segment, angle } = getSegmentFromPoint(pointer.clientX, pointer.clientY);
 
     if (segment !== null) {
+      const segmentId = `segment${segment}`;
+      const isSegmentSelected = initialDetachmentSegments.includes(segmentId);
+      
       setIsDrawing(true);
       setDrawStartSegment(segment);
       setLastPosition(segment);
       setLastAngle(angle);
-      setCurrentDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
-      setDetachmentSegments([...initialDetachmentSegments, `segment${segment}`]);
+      setDrawMode(isSegmentSelected ? 'remove' : 'add');
+
+      // Update segments based on draw mode
+      const newSegments = isSegmentSelected
+        ? initialDetachmentSegments.filter(s => s !== segmentId)
+        : [...initialDetachmentSegments, segmentId];
+
+      setCurrentDetachmentSegments(newSegments);
+      setDetachmentSegments(newSegments);
     }
   }, [getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
 
   const handleDrawing = useCallback((e) => {
-    if (!isDrawing || readOnly || drawStartSegment === null || lastAngle === null) return;
+    if (!isDrawing || readOnly || drawStartSegment === null || lastAngle === null || drawMode === null) return;
     e.preventDefault();
 
     const pointer = e.touches?.[0] || e;
@@ -127,15 +138,21 @@ const ClockFace = ({
       const isCounterClockwise = angleDiff < 0;
 
       // Calculate segments between start and current
-      const segmentsToAdd = getSegmentsBetween(lastPosition, currentSegment, isCounterClockwise);
+      const segmentsToProcess = getSegmentsBetween(lastPosition, currentSegment, isCounterClockwise);
 
       // Create a Set of existing segments (without the "segment" prefix)
       const existingSegments = new Set(
         initialDetachmentSegments.map(s => parseInt(s.replace('segment', ''), 10))
       );
 
-      // Add new segments to the set
-      segmentsToAdd.forEach(segment => existingSegments.add(segment));
+      // Add or remove segments based on draw mode
+      segmentsToProcess.forEach(segment => {
+        if (drawMode === 'add') {
+          existingSegments.add(segment);
+        } else {
+          existingSegments.delete(segment);
+        }
+      });
 
       // Convert back to array with "segment" prefix
       const newSegments = Array.from(existingSegments).map(s => `segment${s}`);
@@ -145,7 +162,7 @@ const ClockFace = ({
       setLastPosition(currentSegment);
       setLastAngle(currentAngle);
     }
-  }, [isDrawing, drawStartSegment, lastPosition, lastAngle, getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
+  }, [isDrawing, drawStartSegment, lastPosition, lastAngle, drawMode, getSegmentFromPoint, readOnly, setDetachmentSegments, initialDetachmentSegments]);
 
   const handleDrawingEnd = useCallback((e) => {
     if (!isDrawing || readOnly) return;
@@ -154,6 +171,7 @@ const ClockFace = ({
     setDrawStartSegment(null);
     setLastPosition(null);
     setLastAngle(null);
+    setDrawMode(null);
   }, [isDrawing, readOnly]);
 
   // Event handlers for tears
@@ -305,7 +323,8 @@ const ClockFace = ({
           {/* Detachment segments */}
           <g className="pointer-events-auto" style={{ isolation: 'isolate' }}>
             {[...Array(CLOCK.SEGMENTS)].map((_, i) => {
-              const isHighlighted = currentDetachmentSegments.includes(`segment${i}`);
+              const segmentId = `segment${i}`;
+              const isHighlighted = currentDetachmentSegments.includes(segmentId);
               const degreeStart = segmentToDegree(i);
               const degreeEnd = segmentToDegree(i + 1);
               const posStart = polarToCartesian(degreeStart, innerRadius);
@@ -324,6 +343,9 @@ const ClockFace = ({
                   fill={isHighlighted ? "rgba(59, 130, 246, 0.5)" : "transparent"}
                   className={`cursor-pointer hover:fill-blue-200 transition-colors ${readOnly ? '' : 'pointer-events-auto'}`}
                   style={{ pointerEvents: readOnly ? 'none' : 'auto' }}
+                  title={isHighlighted ? 
+                    "Click and drag to remove detachment" : 
+                    "Click and drag to add detachment"}
                 />
               );
             })}
