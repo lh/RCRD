@@ -5,7 +5,6 @@ import ModelToggle from './ModelToggle';
 const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) => {
     const [modelType, setModelType] = useState(MODEL_TYPE.FULL);
     const [showDetails, setShowDetails] = useState(false);
-    const [showDebug, setShowDebug] = useState(false);
 
     if (!fullModelRisk || !significantModelRisk) return null;
 
@@ -26,11 +25,6 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                     <p className="text-xs text-gray-400">
                         Category: {step.category}
                     </p>
-                    {showDebug && step.debug && (
-                        <p className="text-xs text-blue-500">
-                            Debug: {step.debug}
-                        </p>
-                    )}
                 </div>
             );
         }
@@ -47,11 +41,6 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                 <p className="text-xs text-gray-400">
                     Category: {step.category}
                 </p>
-                {showDebug && step.debug && (
-                    <p className="text-xs text-blue-500">
-                        Debug: {step.debug}
-                    </p>
-                )}
             </div>
         );
     };
@@ -89,32 +78,32 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
 
             {/* Calculation details (collapsible) */}
             {showDetails && (
-                <>
-                    {/* Debug toggle */}
-                    <div className="mb-4">
-                        <button
-                            onClick={() => setShowDebug(!showDebug)}
-                            className="text-sm text-blue-600 hover:text-blue-800"
-                        >
-                            {showDebug ? 'Hide Debug Info' : 'Show Debug Info'}
-                        </button>
-                    </div>
-
-                    {/* Calculation steps */}
-                    <div className="border-t pt-4">
-                        <h4 className="font-medium mb-2">Calculation Details</h4>
-                        <div className="font-mono text-sm">
-                            {risk.steps.map(formatStep)}
-                            
-                            <div className="border-t pt-2 mt-2">
-                                <div className="flex justify-between font-medium">
-                                    <span>Logit:</span>
-                                    <span>{risk.logit.toFixed(3)}</span>
-                                </div>
+                <div className="border-t pt-4">
+                    <h4 className="font-medium mb-2">Calculation Details</h4>
+                    <div className="font-mono text-sm">
+                        {risk.steps.map(formatStep)}
+                        
+                        <div className="border-t pt-2 mt-2">
+                            <div className="flex justify-between font-medium">
+                                <span>Logit:</span>
+                                <span>{risk.logit.toFixed(3)}</span>
+                            </div>
+                            <div className="mt-4 space-y-2 text-sm text-gray-600">
+                                <p>The probability is calculated from the logit using:</p>
+                                <p className="font-medium">p = 1 / (1 + e<sup>-logit</sup>)</p>
+                                <p>Where:</p>
+                                <ul className="list-disc list-inside pl-2 space-y-1">
+                                    <li>p is the probability ({(risk.probability/100).toFixed(3)})</li>
+                                    <li>e is Euler's number (≈ 2.71828)</li>
+                                    <li>logit is the sum of coefficients ({risk.logit.toFixed(3)})</li>
+                                </ul>
+                                <p className="mt-4">
+                                    {`1 / (1 + ${Math.exp(-risk.logit).toFixed(3)}) = ${(risk.probability/100).toFixed(3)}`}
+                                </p>
                             </div>
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );
