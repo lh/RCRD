@@ -21,11 +21,6 @@ const DesktopRetinalCalculator = () => {
         setTamponade: calculator.setTamponade
     };
 
-    // Extract segment numbers from segment IDs
-    const getSegmentNumbers = (segmentIds) => {
-        return segmentIds.map(id => parseInt(id.replace('segment', ''), 10));
-    };
-
     return (
         <div className="space-y-6">
             {!calculator.calculatedRisks && (
@@ -37,17 +32,6 @@ const DesktopRetinalCalculator = () => {
                                     {...formProps}
                                     position="left"
                                 />
-                                <div className="mt-4">
-                                    <h3 className="text-sm font-medium text-gray-700">Current Selection:</h3>
-                                    <p className="text-sm text-gray-600">
-                                        {calculator.selectedHours.length > 0 ? `Breaks at: ${calculator.selectedHours.join(', ')}` : 'No breaks marked'}
-                                    </p>
-                                    <p className={`text-sm ${calculator.detachmentSegments.length === 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                        {calculator.detachmentSegments.length > 0
-                                            ? `Detachment segments: ${calculator.detachmentSegments.length}`
-                                            : 'Detachment area required'}
-                                    </p>
-                                </div>
                             </div>
                         </div>
                         <div className="w-2/4">
