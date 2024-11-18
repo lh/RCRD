@@ -79,27 +79,39 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
             {/* Calculation details (collapsible) */}
             {showDetails && (
                 <div className="border-t pt-4">
-                    <h4 className="font-medium mb-2">Calculation Details</h4>
-                    <div className="font-mono text-sm">
-                        {risk.steps.map(formatStep)}
-                        
-                        <div className="border-t pt-2 mt-2">
-                            <div className="flex justify-between font-medium">
-                                <span>Logit:</span>
-                                <span>{risk.logit.toFixed(3)}</span>
+                    <h4 className="font-medium mb-4">Calculation Details</h4>
+                    <div className="md:grid md:grid-cols-2 md:gap-8">
+                        {/* Left column: Calculation steps */}
+                        <div className="font-mono text-sm">
+                            <h5 className="font-medium mb-3 text-gray-700">Steps</h5>
+                            {risk.steps.map(formatStep)}
+                            <div className="border-t pt-2 mt-2">
+                                <div className="flex justify-between font-medium">
+                                    <span>Logit:</span>
+                                    <span>{risk.logit.toFixed(3)}</span>
+                                </div>
                             </div>
-                            <div className="mt-4 space-y-2 text-sm text-gray-600">
-                                <p>The probability is calculated from the logit using:</p>
-                                <p className="font-medium">p = 1 / (1 + e<sup>-logit</sup>)</p>
-                                <p>Where:</p>
-                                <ul className="list-disc list-inside pl-2 space-y-1">
+                        </div>
+
+                        {/* Right column: Logit transformation */}
+                        <div className="mt-6 md:mt-0">
+                            <h5 className="font-medium mb-3 text-gray-700">Logit Transformation</h5>
+                            <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                                <p className="text-sm text-gray-600">The probability is calculated from the logit using:</p>
+                                <div className="text-center py-2">
+                                    <p className="font-medium text-lg">p = 1 / (1 + e<sup>-logit</sup>)</p>
+                                </div>
+                                <p className="text-sm text-gray-600">Where:</p>
+                                <ul className="list-disc list-inside pl-2 space-y-1 text-sm text-gray-600">
                                     <li>p is the probability ({(risk.probability/100).toFixed(3)})</li>
                                     <li>e is Euler's number (≈ 2.71828)</li>
                                     <li>logit is the sum of coefficients ({risk.logit.toFixed(3)})</li>
                                 </ul>
-                                <p className="mt-4">
-                                    {`1 / (1 + ${Math.exp(-risk.logit).toFixed(3)}) = ${(risk.probability/100).toFixed(3)}`}
-                                </p>
+                                <div className="mt-4 pt-3 border-t border-gray-200">
+                                    <p className="text-sm text-gray-600 font-medium text-center">
+                                        {`1 / (1 + ${Math.exp(-risk.logit).toFixed(3)}) = ${(risk.probability/100).toFixed(3)}`}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
