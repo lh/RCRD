@@ -70,11 +70,12 @@ const ClockFace = ({
           touchStartPosition={touchStartPosition}
           setTouchStartPosition={setTouchStartPosition}
           LONG_PRESS_DURATION={LONG_PRESS_DURATION}
+          isMobile={isMobile}
         />
         {isMobile && !readOnly && (
           <button
             onClick={handleReset}
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#FF69B4] hover:bg-[#FF1493] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF69B4] shadow-lg"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#E6A5C3] hover:bg-[#D494B2] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#E6A5C3] shadow-lg"
             aria-label="Reset detachment drawing"
           />
         )}

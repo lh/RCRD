@@ -29,7 +29,8 @@ export const handleDrawingStart = (
   setDrawMode,
   setCurrentDetachmentSegments,
   setDetachmentSegments,
-  e
+  e,
+  isMobile = false
 ) => {
   if (readOnly) return;
   e.preventDefault();
@@ -45,15 +46,21 @@ export const handleDrawingStart = (
     setDrawStartSegment(segment);
     setLastPosition(segment);
     setLastAngle(angle);
-    setDrawMode(isSegmentSelected ? 'remove' : 'add');
-
-    // Update segments based on draw mode
-    const newSegments = isSegmentSelected
-      ? initialDetachmentSegments.filter(s => s !== segmentId)
-      : [...initialDetachmentSegments, segmentId];
-
-    setCurrentDetachmentSegments(newSegments);
-    setDetachmentSegments(newSegments);
+    
+    // On mobile, always add segments. On desktop, toggle segments.
+    if (isMobile) {
+      setDrawMode('add');
+      const newSegments = [...new Set([...initialDetachmentSegments, segmentId])];
+      setCurrentDetachmentSegments(newSegments);
+      setDetachmentSegments(newSegments);
+    } else {
+      setDrawMode(isSegmentSelected ? 'remove' : 'add');
+      const newSegments = isSegmentSelected
+        ? initialDetachmentSegments.filter(s => s !== segmentId)
+        : [...initialDetachmentSegments, segmentId];
+      setCurrentDetachmentSegments(newSegments);
+      setDetachmentSegments(newSegments);
+    }
   }
 };
 
@@ -70,7 +77,8 @@ export const handleDrawing = (
   setDetachmentSegments,
   setLastPosition,
   setLastAngle,
-  e
+  e,
+  isMobile = false
 ) => {
   if (!isDrawing || readOnly || drawStartSegment === null || lastAngle === null || drawMode === null) return;
   e.preventDefault();
@@ -93,12 +101,16 @@ export const handleDrawing = (
       initialDetachmentSegments.map(s => parseInt(s.replace('segment', ''), 10))
     );
 
-    // Add or remove segments based on draw mode
+    // On mobile, only add segments. On desktop, follow drawMode
     segmentsToProcess.forEach(segment => {
-      if (drawMode === 'add') {
+      if (isMobile) {
         existingSegments.add(segment);
       } else {
-        existingSegments.delete(segment);
+        if (drawMode === 'add') {
+          existingSegments.add(segment);
+        } else {
+          existingSegments.delete(segment);
+        }
       }
     });
 

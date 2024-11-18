@@ -41,7 +41,8 @@ const ClockFaceSVG = ({
   setTouchStartTime,
   touchStartPosition,
   setTouchStartPosition,
-  LONG_PRESS_DURATION
+  LONG_PRESS_DURATION,
+  isMobile = false
 }) => {
   // Constants
   const outerRadius = 110;
@@ -68,7 +69,8 @@ const ClockFaceSVG = ({
         setDrawMode,
         setCurrentDetachmentSegments,
         setDetachmentSegments,
-        e
+        e,
+        isMobile
       )}
       onMouseMove={(e) => handleDrawing(
         isDrawing,
@@ -83,7 +85,8 @@ const ClockFaceSVG = ({
         setDetachmentSegments,
         setLastPosition,
         setLastAngle,
-        e
+        e,
+        isMobile
       )}
       onMouseUp={(e) => handleDrawingEnd(
         isDrawing,
@@ -116,7 +119,8 @@ const ClockFaceSVG = ({
         setDrawMode,
         setCurrentDetachmentSegments,
         setDetachmentSegments,
-        e
+        e,
+        isMobile
       )}
       onTouchMove={(e) => handleDrawing(
         isDrawing,
@@ -131,7 +135,8 @@ const ClockFaceSVG = ({
         setDetachmentSegments,
         setLastPosition,
         setLastAngle,
-        e
+        e,
+        isMobile
       )}
       onTouchEnd={(e) => handleDrawingEnd(
         isDrawing,
@@ -174,9 +179,9 @@ const ClockFaceSVG = ({
               fill={isHighlighted ? "rgba(59, 130, 246, 0.5)" : "transparent"}
               className={`cursor-pointer hover:fill-blue-200 transition-colors ${readOnly ? '' : 'pointer-events-auto'}`}
               style={{ pointerEvents: readOnly ? 'none' : 'auto' }}
-              title={isHighlighted ? 
-                "Click and drag to remove detachment" : 
-                "Click and drag to add detachment"}
+              title={isMobile ? 
+                "Draw to add detachment" : 
+                (isHighlighted ? "Click and drag to remove detachment" : "Click and drag to add detachment")}
             />
           );
         })}
