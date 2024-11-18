@@ -19,27 +19,29 @@ const useDrawingInteractions = (initialDetachmentSegments, setDetachmentSegments
 
     if (segment !== null) {
       const segmentId = `segment${segment}`;
-      const isSegmentSelected = initialDetachmentSegments.includes(segmentId);
       
       setIsDrawing(true);
       setDrawStartSegment(segment);
       setLastPosition(segment);
       setLastAngle(angle);
       
-      // On mobile, we only allow adding segments
-      setDrawMode(isMobile ? 'add' : (isSegmentSelected ? 'remove' : 'add'));
-
-      // Update segments based on draw mode
-      const newSegments = isMobile ? 
-        // On mobile, always add segments
-        [...new Set([...initialDetachmentSegments, segmentId])] :
+      // Mobile always adds segments, desktop toggles
+      if (isMobile) {
+        setDrawMode('add');
+        // On mobile, always add the segment
+        const newSegments = [...new Set([...initialDetachmentSegments, segmentId])];
+        setCurrentDetachmentSegments(newSegments);
+        setDetachmentSegments(newSegments);
+      } else {
         // On desktop, toggle segments
-        (isSegmentSelected ? 
+        const isSegmentSelected = initialDetachmentSegments.includes(segmentId);
+        setDrawMode(isSegmentSelected ? 'remove' : 'add');
+        const newSegments = isSegmentSelected ? 
           initialDetachmentSegments.filter(s => s !== segmentId) :
-          [...initialDetachmentSegments, segmentId]);
-
-      setCurrentDetachmentSegments(newSegments);
-      setDetachmentSegments(newSegments);
+          [...initialDetachmentSegments, segmentId];
+        setCurrentDetachmentSegments(newSegments);
+        setDetachmentSegments(newSegments);
+      }
     }
   }, [getSegmentFromPoint, setDetachmentSegments, initialDetachmentSegments, isMobile]);
 
@@ -65,12 +67,18 @@ const useDrawingInteractions = (initialDetachmentSegments, setDetachmentSegments
         initialDetachmentSegments.map(s => parseInt(s.replace('segment', ''), 10))
       );
 
-      // Add or remove segments based on draw mode
+      // On mobile, only add segments. On desktop, follow drawMode
       segmentsToProcess.forEach(segment => {
-        if (isMobile || drawMode === 'add') {
+        if (isMobile) {
+          // Mobile always adds segments
           existingSegments.add(segment);
-        } else if (!isMobile && drawMode === 'remove') {
-          existingSegments.delete(segment);
+        } else {
+          // Desktop follows drawMode
+          if (drawMode === 'add') {
+            existingSegments.add(segment);
+          } else {
+            existingSegments.delete(segment);
+          }
         }
       });
 

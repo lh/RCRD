@@ -9,7 +9,8 @@ const ClockFace = ({
   onTearToggle,
   onSegmentToggle,
   setDetachmentSegments,
-  readOnly = false
+  readOnly = false,
+  isMobile = false
 }) => {
   // Constants
   const LONG_PRESS_DURATION = 500; // ms
@@ -24,6 +25,11 @@ const ClockFace = ({
   const [currentDetachmentSegments, setCurrentDetachmentSegments] = useState(initialDetachmentSegments);
   const [drawMode, setDrawMode] = useState(null); // 'add' or 'remove'
   const svgRef = useRef(null);
+
+  const handleReset = () => {
+    setCurrentDetachmentSegments([]);
+    setDetachmentSegments([]);
+  };
 
   return (
     <div className="flex justify-center items-center w-full">
@@ -65,6 +71,13 @@ const ClockFace = ({
           setTouchStartPosition={setTouchStartPosition}
           LONG_PRESS_DURATION={LONG_PRESS_DURATION}
         />
+        {isMobile && !readOnly && (
+          <button
+            onClick={handleReset}
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-[#FF69B4] hover:bg-[#FF1493] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FF69B4] shadow-lg"
+            aria-label="Reset detachment drawing"
+          />
+        )}
       </div>
     </div>
   );

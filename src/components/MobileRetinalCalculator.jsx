@@ -45,6 +45,7 @@ const MobileRetinalCalculator = () => {
                         setDetachmentSegments={calculator.setDetachmentSegments}
                         onTouchDeviceChange={setIsTouchDevice}
                         readOnly={false}
+                        isMobile={true}
                     />
                     <div
                         id="touch-debug"
@@ -137,6 +138,7 @@ const MobileRetinalCalculator = () => {
                                 onTearToggle={() => { }}
                                 onSegmentToggle={() => { }}
                                 readOnly={true}
+                                isMobile={true}
                             />
                         </div>
                     </div>
