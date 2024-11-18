@@ -8,7 +8,8 @@ const CryotherapySelection = ({
     value, 
     onChange,
     disabled = false,
-    className = ''
+    className = '',
+    isMobile = false
 }) => {
     const options = [
         { value: 'no', label: 'No' },
@@ -16,16 +17,16 @@ const CryotherapySelection = ({
     ];
 
     return (
-        <div className={`space-y-4 ${className}`}>
+        <div className={`${isMobile ? 'space-y-1' : 'space-y-4'} ${className}`}>
             <div>
                 <label 
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className={`block text-sm font-medium text-gray-700 ${isMobile ? 'mb-1' : 'mb-2'}`}
                     id="cryotherapy-group-label"
                 >
                     Cryotherapy
                 </label>
                 <div 
-                    className="space-y-2"
+                    className={`${isMobile ? 'space-y-1' : 'space-y-2'}`}
                     role="radiogroup"
                     aria-labelledby="cryotherapy-group-label"
                     aria-required="true"
@@ -44,7 +45,7 @@ const CryotherapySelection = ({
                             />
                             <label
                                 htmlFor={`cryo-${option.value}`}
-                                className="ml-3 block text-sm text-gray-700"
+                                className="ml-2 block text-sm text-gray-700"
                             >
                                 {option.label}
                             </label>

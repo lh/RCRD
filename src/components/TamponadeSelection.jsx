@@ -8,7 +8,8 @@ const TamponadeSelection = ({
     value, 
     onChange,
     disabled = false,
-    className = ''
+    className = '',
+    isMobile = false
 }) => {
     const options = [
         { value: 'sf6', label: 'SF6 gas' },
@@ -20,16 +21,16 @@ const TamponadeSelection = ({
     ];
 
     return (
-        <div className={`space-y-4 ${className}`}>
+        <div className={`${isMobile ? 'space-y-1' : 'space-y-4'} ${className}`}>
             <div>
                 <label 
-                    className="block text-sm font-medium text-gray-700 mb-2"
+                    className={`block text-sm font-medium text-gray-700 ${isMobile ? 'mb-0.5' : 'mb-1'}`}
                     id="tamponade-group-label"
                 >
                     Tamponade
                 </label>
                 <div 
-                    className="space-y-2"
+                    className={`${isMobile ? 'space-y-0.5' : 'space-y-1'}`}
                     role="radiogroup"
                     aria-labelledby="tamponade-group-label"
                     aria-required="true"
@@ -48,7 +49,7 @@ const TamponadeSelection = ({
                             />
                             <label
                                 htmlFor={`tamponade-${option.value}`}
-                                className="ml-3 block text-sm text-gray-700"
+                                className="ml-2 block text-sm text-gray-700"
                             >
                                 {option.label}
                             </label>

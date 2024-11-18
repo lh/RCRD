@@ -8,10 +8,11 @@ const GaugeSelection = ({
     value,
     onChange,
     disabled = false,
-    className = ''
+    className = '',
+    isMobile = false
 }) => {
     return (
-        <div className={`space-y-4 ${className}`}>
+        <div className={`${isMobile ? 'space-y-1' : 'space-y-4'} ${className}`}>
             <div>
                 <label 
                     htmlFor="gauge-select"
@@ -23,7 +24,7 @@ const GaugeSelection = ({
                     id="gauge-select"
                     value={value || ''}
                     onChange={e => onChange(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className={`block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 ${isMobile ? 'mt-0.5' : 'mt-1'}`}
                     disabled={disabled}
                     aria-required="true"
                 >

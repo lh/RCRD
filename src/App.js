@@ -2,7 +2,7 @@ import RetinalCalculator from './components/RetinalCalculator.jsx';
 
 function App() {
   return (
-    <div className="App" style={{ padding: '2rem', minHeight: '100vh' }}>
+    <div className="App px-2 md:px-8 min-h-screen">
       <RetinalCalculator />
     </div>
   );

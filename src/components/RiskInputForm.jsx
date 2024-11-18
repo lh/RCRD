@@ -50,7 +50,7 @@ const RiskInputForm = ({
             <input
                 id="age-input"
                 type="number"
-                className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                className={`w-full ${isMobile ? 'p-1' : 'p-2'} border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                     ${!isAgeValid(age) ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
                 value={age}
                 onChange={handleAgeChange}
@@ -75,11 +75,11 @@ const RiskInputForm = ({
     );
 
     const renderPVRGrade = () => (
-        <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+        <div className={isMobile ? 'mt-2' : 'mt-4'}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
                 PVR Grade
             </label>
-            <div className="space-y-2" role="radiogroup" aria-required="true">
+            <div className="space-y-1" role="radiogroup" aria-required="true">
                 {pvrOptions.map(option => (
                     <div key={option.value} className="flex items-center">
                         <input
@@ -105,29 +105,32 @@ const RiskInputForm = ({
     );
 
     const renderTreatmentOptions = () => (
-        <div className="space-y-6">
+        <div className={isMobile ? 'space-y-1' : 'space-y-6'}>
             {/* Gauge Selection */}
             <GaugeSelection
                 value={vitrectomyGauge}
                 onChange={setVitrectomyGauge}
                 disabled={disabled}
+                isMobile={isMobile}
             />
 
             {/* Cryotherapy Selection */}
-            <div className="border-t pt-4">
+            <div className={isMobile ? 'border-t pt-1' : 'border-t pt-4'}>
                 <CryotherapySelection
                     value={cryotherapy}
                     onChange={setCryotherapy}
                     disabled={disabled}
+                    isMobile={isMobile}
                 />
             </div>
 
             {/* Tamponade Selection */}
-            <div className="border-t pt-4">
+            <div className={isMobile ? 'border-t pt-1' : 'border-t pt-4'}>
                 <TamponadeSelection
                     value={tamponade}
                     onChange={setTamponade}
                     disabled={disabled}
+                    isMobile={isMobile}
                 />
             </div>
         </div>
@@ -135,12 +138,12 @@ const RiskInputForm = ({
 
     if (isMobile) {
         return (
-            <form onSubmit={handleSubmit} onReset={onReset} className="space-y-6">
-                <div className="space-y-4">
+            <form onSubmit={handleSubmit} onReset={onReset} className="space-y-1">
+                <div className="space-y-1">
                     {renderAgeInput()}
                     {renderPVRGrade()}
                 </div>
-                <div className="space-y-4">
+                <div className="space-y-1">
                     {renderTreatmentOptions()}
                 </div>
             </form>
