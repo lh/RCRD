@@ -3,18 +3,20 @@ import ClockFace from './clock/ClockFace.jsx';
 import RiskInputForm from './RiskInputForm.jsx';
 import RiskResults from './RiskResults.jsx';
 import { useRetinalCalculator } from './clock/hooks/useRetinalCalculator.js';
-import { formatDetachmentHours } from './clock/utils/formatDetachmentHours.js';
 
 const DesktopRetinalCalculator = () => {
     const calculator = useRetinalCalculator();
 
-    const formProps = {
+    const leftFormProps = {
         age: calculator.age,
         setAge: calculator.setAge,
         pvrGrade: calculator.pvrGrade,
         setPvrGrade: calculator.setPvrGrade,
         vitrectomyGauge: calculator.vitrectomyGauge,
-        setVitrectomyGauge: calculator.setVitrectomyGauge,
+        setVitrectomyGauge: calculator.setVitrectomyGauge
+    };
+
+    const rightFormProps = {
         cryotherapy: calculator.cryotherapy,
         setCryotherapy: calculator.setCryotherapy,
         tamponade: calculator.tamponade,
@@ -29,7 +31,7 @@ const DesktopRetinalCalculator = () => {
                         <div className="w-1/4">
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <RiskInputForm
-                                    {...formProps}
+                                    {...leftFormProps}
                                     position="left"
                                 />
                             </div>
@@ -49,7 +51,7 @@ const DesktopRetinalCalculator = () => {
                         <div className="w-1/4">
                             <div className="bg-gray-50 p-4 rounded-lg">
                                 <RiskInputForm
-                                    {...formProps}
+                                    {...rightFormProps}
                                     position="right"
                                 />
                             </div>

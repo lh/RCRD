@@ -104,67 +104,82 @@ const RiskInputForm = ({
         </div>
     );
 
-    const renderTreatmentOptions = () => (
-        <div className={isMobile ? 'grid grid-cols-2 gap-x-4 gap-y-1' : 'space-y-6'}>
-            {/* Gauge Selection */}
-            <div className={isMobile ? 'col-span-1' : ''}>
-                <GaugeSelection
-                    value={vitrectomyGauge}
-                    onChange={setVitrectomyGauge}
-                    disabled={disabled}
-                    isMobile={isMobile}
-                />
-            </div>
-
-            {/* Tamponade Selection */}
-            <div className={isMobile ? 'col-span-1' : 'border-t pt-4'}>
-                <TamponadeSelection
-                    value={tamponade}
-                    onChange={setTamponade}
-                    disabled={disabled}
-                    isMobile={isMobile}
-                />
-            </div>
-
-            {/* PVR Grade */}
-            <div className={isMobile ? 'col-span-1' : ''}>
-                {renderPVRGrade()}
-            </div>
-
-            {/* Cryotherapy Selection */}
-            <div className={isMobile ? 'col-span-1' : 'border-t pt-4'}>
-                <CryotherapySelection
-                    value={cryotherapy}
-                    onChange={setCryotherapy}
-                    disabled={disabled}
-                    isMobile={isMobile}
-                />
-            </div>
-        </div>
-    );
-
     if (isMobile) {
         return (
             <form onSubmit={handleSubmit} onReset={onReset} className="space-y-1">
                 <div className="space-y-1">
                     {renderAgeInput()}
                 </div>
-                {renderTreatmentOptions()}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    <div className="col-span-1">
+                        <GaugeSelection
+                            value={vitrectomyGauge}
+                            onChange={setVitrectomyGauge}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <TamponadeSelection
+                            value={tamponade}
+                            onChange={setTamponade}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        {renderPVRGrade()}
+                    </div>
+                    <div className="col-span-1">
+                        <CryotherapySelection
+                            value={cryotherapy}
+                            onChange={setCryotherapy}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                </div>
             </form>
         );
     }
 
-    return (
-        <div className="space-y-4">
-            {position === "left" && (
-                <>
-                    {renderAgeInput()}
-                    {renderPVRGrade()}
-                </>
-            )}
-            {position === "right" && renderTreatmentOptions()}
-        </div>
-    );
+    // Desktop layout - split between left and right panels
+    if (position === "left") {
+        return (
+            <div className="space-y-4">
+                {renderAgeInput()}
+                {renderPVRGrade()}
+                <div className="mt-4">
+                    <GaugeSelection
+                        value={vitrectomyGauge}
+                        onChange={setVitrectomyGauge}
+                        disabled={disabled}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (position === "right") {
+        return (
+            <div className="space-y-4">
+                <CryotherapySelection
+                    value={cryotherapy}
+                    onChange={setCryotherapy}
+                    disabled={disabled}
+                />
+                <div className="mt-4">
+                    <TamponadeSelection
+                        value={tamponade}
+                        onChange={setTamponade}
+                        disabled={disabled}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    return null;
 };
 
 export default RiskInputForm;
