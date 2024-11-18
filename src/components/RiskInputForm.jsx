@@ -105,30 +105,37 @@ const RiskInputForm = ({
     );
 
     const renderTreatmentOptions = () => (
-        <div className={isMobile ? 'space-y-1' : 'space-y-6'}>
+        <div className={isMobile ? 'grid grid-cols-2 gap-x-4 gap-y-1' : 'space-y-6'}>
             {/* Gauge Selection */}
-            <GaugeSelection
-                value={vitrectomyGauge}
-                onChange={setVitrectomyGauge}
-                disabled={disabled}
-                isMobile={isMobile}
-            />
-
-            {/* Cryotherapy Selection */}
-            <div className={isMobile ? 'border-t pt-1' : 'border-t pt-4'}>
-                <CryotherapySelection
-                    value={cryotherapy}
-                    onChange={setCryotherapy}
+            <div className={isMobile ? 'col-span-1' : ''}>
+                <GaugeSelection
+                    value={vitrectomyGauge}
+                    onChange={setVitrectomyGauge}
                     disabled={disabled}
                     isMobile={isMobile}
                 />
             </div>
 
             {/* Tamponade Selection */}
-            <div className={isMobile ? 'border-t pt-1' : 'border-t pt-4'}>
+            <div className={isMobile ? 'col-span-1' : 'border-t pt-4'}>
                 <TamponadeSelection
                     value={tamponade}
                     onChange={setTamponade}
+                    disabled={disabled}
+                    isMobile={isMobile}
+                />
+            </div>
+
+            {/* PVR Grade */}
+            <div className={isMobile ? 'col-span-1' : ''}>
+                {renderPVRGrade()}
+            </div>
+
+            {/* Cryotherapy Selection */}
+            <div className={isMobile ? 'col-span-1' : 'border-t pt-4'}>
+                <CryotherapySelection
+                    value={cryotherapy}
+                    onChange={setCryotherapy}
                     disabled={disabled}
                     isMobile={isMobile}
                 />
@@ -141,11 +148,8 @@ const RiskInputForm = ({
             <form onSubmit={handleSubmit} onReset={onReset} className="space-y-1">
                 <div className="space-y-1">
                     {renderAgeInput()}
-                    {renderPVRGrade()}
                 </div>
-                <div className="space-y-1">
-                    {renderTreatmentOptions()}
-                </div>
+                {renderTreatmentOptions()}
             </form>
         );
     }
