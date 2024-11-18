@@ -118,7 +118,6 @@ const MobileRetinalCalculator = () => {
                             <p className="text-sm"><span className="font-medium">Cryotherapy:</span> {calculator.cryotherapy}</p>
                             <p className="text-sm"><span className="font-medium">Tamponade:</span> {calculator.tamponade}</p>
                             <p className="text-sm"><span className="font-medium">Breaks:</span> {calculator.formatHoursList(calculator.selectedHours)}</p>
-                            <p className="text-sm"><span className="font-medium">Detachment:</span> {formatDetachmentHours(getSegmentNumbers(calculator.detachmentSegments))}</p>
                             <div className="pt-4">
                                 <button
                                     onClick={calculator.handleReset}
