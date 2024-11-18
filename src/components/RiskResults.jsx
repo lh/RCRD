@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { MODEL_TYPE } from '../constants/modelTypes.js';
 import ModelToggle from './ModelToggle';
 
-const RiskResults = ({ fullModelRisk, significantModelRisk }) => {
+const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) => {
     const [modelType, setModelType] = useState(MODEL_TYPE.FULL);
     const [showDetails, setShowDetails] = useState(false);
     const [showDebug, setShowDebug] = useState(false);
@@ -64,6 +64,7 @@ const RiskResults = ({ fullModelRisk, significantModelRisk }) => {
             <ModelToggle 
                 modelType={modelType}
                 onChange={setModelType}
+                isMobile={isMobile}
             />
 
             {/* Risk probability */}

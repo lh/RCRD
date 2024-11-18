@@ -15,12 +15,11 @@ export const MODEL_EXPLANATIONS = {
     [MODEL_TYPE.SIGNIFICANT]: `
         This model includes only statistically significant coefficients (p < 0.05),
         following standard statistical practice. Non-significant coefficients are
-        treated as reference values. This produces more conservative and statistically
-        rigorous predictions.
+        treated as reference values. 
     `,
     [MODEL_TYPE.FULL]: `
         This model includes all coefficients from Table 2 of the paper, including
         those that did not reach statistical significance (p < 0.10). This matches
-        the example calculations in the paper but may include chance associations.
+        the example calculations in the paper.
     `
 };

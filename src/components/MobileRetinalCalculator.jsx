@@ -107,6 +107,7 @@ const MobileRetinalCalculator = () => {
                         showMath={calculator.showMath}
                         setShowMath={calculator.setShowMath}
                         onReset={calculator.handleReset}
+                        isMobile={true}
                     />
 
                     <div className="mt-2 border-t pt-2">
