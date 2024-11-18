@@ -3,9 +3,10 @@ import ClockFace from './clock/ClockFace.jsx';
 import RiskInputForm from './RiskInputForm.jsx';
 import RiskResults from './RiskResults.jsx';
 import { useRetinalCalculator } from './clock/hooks/useRetinalCalculator.js';
-import { formatDetachmentHours } from './clock/utils/formatDetachmentHours.js';
 
 const MobileRetinalCalculator = () => {
+    // State to track touch device status for ClockFace component interactions
+    // eslint-disable-next-line no-unused-vars
     const [isTouchDevice, setIsTouchDevice] = useState(false);
     const calculator = useRetinalCalculator();
 
