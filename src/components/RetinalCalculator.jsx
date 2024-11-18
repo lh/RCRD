@@ -1,268 +1,69 @@
-import React, { useState } from 'react';
-import ClockFace from './clock/ClockFace.jsx';
-import RiskInputForm from './RiskInputForm.jsx';
-import RiskResults from './RiskResults.jsx';
-import { calculateRiskWithSteps } from '../utils/riskCalculations.js';
-import { formatDetachmentHours } from './clock/utils/formatDetachmentHours.js';
-
+import React from 'react';
+import MobileRetinalCalculator from './MobileRetinalCalculator';
+import DesktopRetinalCalculator from './DesktopRetinalCalculator';
+import { MODEL_TYPE } from '../constants/modelTypes';
+import hsmaLogo from '../assets/HSMA.PNG';
 
 const RetinalCalculator = () => {
-    // State management with defaults
-    const [age, setAge] = useState('');
-    const [pvrGrade, setPvrGrade] = useState('none');  // default to "No PVR"
-    const [vitrectomyGauge, setVitrectomyGauge] = useState('25g');  // default to "25 gauge"
-    const [selectedHours, setSelectedHours] = useState([]);
-    const [detachmentSegments, setDetachmentSegments] = useState([]);
-    const [hoveredHour, setHoveredHour] = useState(null);
-    const [showMath, setShowMath] = useState(false);
-    const [calculatedRisk, setCalculatedRisk] = useState(null);
-    const [isTouchDevice, setIsTouchDevice] = useState(false);
-
-    // Common props for RiskInputForm
-    const formProps = {
-        age,
-        setAge,
-        pvrGrade,
-        setPvrGrade,
-        vitrectomyGauge,
-        setVitrectomyGauge
-    };
-
-    const handleHoverChange = (hour) => {
-        setHoveredHour(hour);
-    };
-
-    const handleTearToggle = (hour) => {
-        const newSelection = selectedHours.includes(hour)
-            ? selectedHours.filter(h => h !== hour)
-            : [...selectedHours, hour];
-        setSelectedHours(newSelection);
-    };
-
-    const handleSegmentToggle = (segment) => {
-        const newDetachment = detachmentSegments.includes(segment)
-            ? detachmentSegments.filter(s => s !== segment)
-            : [...detachmentSegments, segment];
-        setDetachmentSegments(newDetachment);
-    };
-
-    const handleCalculate = () => {
-        if (!age || detachmentSegments.length === 0) return;
-
-        const risk = calculateRiskWithSteps({
-            age,
-            pvrGrade,
-            vitrectomyGauge,
-            selectedHours,
-            detachmentSegments
-        });
-        setCalculatedRisk(risk);
-    };
-
-    const handleReset = () => {
-        setAge('');
-        setPvrGrade('none'); // Reset to "No PVR"
-        setVitrectomyGauge('25g'); // Reset to "25 gauge"
-        setSelectedHours([]);
-        setDetachmentSegments([]);
-        setCalculatedRisk(null);
-        setShowMath(false);
-    };
-
-    const isCalculateDisabled = !age || detachmentSegments.length === 0;
-
-    const formatHoursList = (hours) => {
-        if (hours.length === 0) return 'None';
-        return hours.sort((a, b) => a - b).join(', ') + " o'clock";
-    };
-
-    // Helper function to convert segment to clock hour
-    // const segmentToHour = (segment) => {
-    //     const hour = Math.floor(segment / 5) % 12;
-    //     return hour === 0 ? 12 : hour;
-    // };
-
-
-
-
-
-    // Helper to format PVR grade display
-    const formatPVRGrade = (grade) => {
-        return grade === 'none' ? 'A' : grade.toUpperCase();
-    };
-
     return (
-        <div className="p-4">
-            <div className="bg-white rounded-lg shadow-lg">
-                <div className="p-6">
+        <div className="md:p-4 p-0">
+            <div className="bg-white md:rounded-lg shadow-lg">
+                <div className="md:p-6 px-1 py-2">
                     <h2 className="text-2xl font-bold mb-2">Retinal Detachment Risk Calculator</h2>
                     <p className="text-sm text-gray-600 mb-6">
-                        Based on the <a href="https://www.beavrs.org/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">UK BEAVRS</a> database <a href="https://www.nature.com/articles/s41433-023-02388-0 " target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">study</a> of retinal detachment outcomes (Yorston et al, 2023)
+                        Based on the{' '}
+                        <a 
+                            href="https://bjo.bmj.com/content/106/1/120" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="external-link"
+                            aria-label="UK BEAVRS database study (opens in new tab)"
+                            title="View the UK BEAVRS database study in a new tab"
+                        >
+                            UK BEAVRS database study
+                        </a>
                     </p>
 
-                    <div className="space-y-6">
-                        {/* Input Form */}
-                        {!calculatedRisk && (
-                            <>
-                                {/* Mobile Layout */}
-                                <div className="md:hidden space-y-4">
-                                    <RiskInputForm
-                                        {...formProps}
-                                        isMobile={true}
-                                    />
-                                    <ClockFace
-                                        selectedHours={selectedHours}
-                                        detachmentSegments={detachmentSegments}
-                                        hoveredHour={hoveredHour}
-                                        onHoverChange={handleHoverChange}
-                                        onTearToggle={handleTearToggle}
-                                        onSegmentToggle={handleSegmentToggle}
-                                        setDetachmentSegments={setDetachmentSegments}
-                                        onTouchDeviceChange={setIsTouchDevice}
-                                        readOnly={false}
-                                    />
-                                    <div
-                                        id="touch-debug"
-                                        className="text-xs font-mono bg-gray-100 p-2 mt-2 whitespace-pre overflow-auto"
-                                        style={{ maxHeight: '100px' }}
-                                    />
-                                    <div
-                                        style={{
-                                            width: '20px',
-                                            height: '20px',
-                                            backgroundColor: isTouchDevice ? 'green' : 'red',
-                                            position: 'fixed',
-                                            bottom: '10px',
-                                            right: '10px'
-                                        }}
-                                    />
-                                    <div className="bg-gray-50 p-4 rounded-lg">
-                                        <h3 className="text-sm font-medium text-gray-700">Current Selection:</h3>
-                                        <p className="text-sm text-gray-600">
-                                            {selectedHours.length > 0 ? `Breaks at: ${selectedHours.join(', ')}` : 'No breaks marked'}
-                                        </p>
-                                        <p className={`text-sm ${detachmentSegments.length === 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                            {detachmentSegments.length > 0
-                                                ? `Detachment segments: ${detachmentSegments.length}`
-                                                : 'Detachment area required'}
-                                        </p>
-                                    </div>
-                                </div>
+                    {/* Mobile version */}
+                    <div className="md:hidden">
+                        <MobileRetinalCalculator modelType={MODEL_TYPE.FULL} />
+                    </div>
 
-                                {/* Desktop/Landscape Layout */}
-                                <div className="hidden md:flex gap-4">
-                                    <div className="w-1/4">
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <RiskInputForm
-                                                {...formProps}
-                                                position="left"
-                                            />
-                                            <div className="mt-4">
-                                                <h3 className="text-sm font-medium text-gray-700">Current Selection:</h3>
-                                                <p className="text-sm text-gray-600">
-                                                    {selectedHours.length > 0 ? `Breaks at: ${selectedHours.join(', ')}` : 'No breaks marked'}
-                                                </p>
-                                                <p className={`text-sm ${detachmentSegments.length === 0 ? 'text-red-600' : 'text-gray-600'}`}>
-                                                    {detachmentSegments.length > 0
-                                                        ? `Detachment segments: ${detachmentSegments.length}`
-                                                        : 'Detachment area required'}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div className="w-2/4">
-                                        <ClockFace
-                                            selectedHours={selectedHours}
-                                            detachmentSegments={detachmentSegments}
-                                            hoveredHour={hoveredHour}
-                                            onHoverChange={handleHoverChange}
-                                            onTearToggle={handleTearToggle}
-                                            onSegmentToggle={handleSegmentToggle}
-                                            setDetachmentSegments={setDetachmentSegments}
-                                            readOnly={false}
-                                        />
-                                    </div>
-                                    <div className="w-1/4">
-                                        <div className="bg-gray-50 p-4 rounded-lg">
-                                            <RiskInputForm
-                                                {...formProps}
-                                                position="right"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                    {/* Desktop version */}
+                    <div className="hidden md:block">
+                        <DesktopRetinalCalculator modelType={MODEL_TYPE.FULL} />
+                    </div>
 
-                                {/* Calculate Button */}
-                                <div className="mt-4">
-                                    <button
-                                        onClick={handleCalculate}
-                                        disabled={isCalculateDisabled}
-                                        className={`w-full py-2 px-4 rounded-md text-white font-medium
-                                            ${isCalculateDisabled
-                                                ? 'bg-gray-400 cursor-not-allowed'
-                                                : 'bg-blue-600 hover:bg-blue-700'}`}
-                                    >
-                                        Calculate Risk
-                                    </button>
-                                    {isCalculateDisabled && (
-                                        <p className="mt-2 text-sm text-red-600 text-center">
-                                            {!age && !detachmentSegments.length && "Age and detachment area required"}
-                                            {!age && detachmentSegments.length > 0 && "Age required"}
-                                            {age && !detachmentSegments.length && "Detachment area required"}
-                                        </p>
-                                    )}
-                                </div>
-                            </>
-                        )}
-
-                        {/* Results with Summary */}
-                        {calculatedRisk && (
-                            <div className="space-y-6">
-                                <RiskResults
-                                    risk={calculatedRisk}
-                                    showMath={showMath}
-                                    setShowMath={setShowMath}
-                                    onReset={handleReset}
-                                />
-
-                                <div className="mt-8 border-t pt-6">
-                                    <h3 className="text-lg font-semibold mb-4">Input Summary</h3>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-2">
-                                            <p className="text-sm"><span className="font-medium">Age:</span> {age} years</p>
-                                            <p className="text-sm"><span className="font-medium">PVR Grade:</span> {formatPVRGrade(pvrGrade)}</p>
-                                            <p className="text-sm"><span className="font-medium">Vitrectomy Gauge:</span> {vitrectomyGauge}</p>
-                                            <p className="text-sm"><span className="font-medium">Breaks:</span> {formatHoursList(selectedHours)}</p>
-                                            <p className="text-sm"><span className="font-medium">Detachment:</span> {formatDetachmentHours(detachmentSegments)}</p>
-                                            <div className="pt-4">
-                                                <button
-                                                    onClick={handleReset}
-                                                    className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 text-white font-medium rounded-md"
-                                                >
-                                                    Reset Calculator
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="w-full max-w-xs mx-auto">
-                                            <ClockFace
-                                                selectedHours={selectedHours}
-                                                detachmentSegments={detachmentSegments}
-                                                hoveredHour={hoveredHour}
-                                                onHoverChange={() => { }}
-                                                onTearToggle={() => { }}
-                                                onSegmentToggle={() => { }}
-                                                readOnly={true}
-                                            />
-                                            <div
-                                                id="touch-debug"
-                                                className="text-xs font-mono bg-gray-100 p-2 mt-2 whitespace-pre overflow-auto"
-                                                style={{ maxHeight: '100px' }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
+                    {/* Attribution and HSMA Logo */}
+                    <div className="mt-8 pt-6 border-t border-gray-200">
+                        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4">
+                            <div className="text-xs md:text-sm text-gray-600 text-center md:text-right leading-tight">
+                                <a 
+                                    href="https://github.com/lh/redetachment-risk"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="hover:text-gray-900 transition-colors"
+                                >
+                                    Luke Herbert
+                                </a>
+                                <br className="md:hidden" />
+                                <span className="mx-1">inspired by</span>
                             </div>
-                        )}
+                            <a 
+                                href="https://arc-swp.nihr.ac.uk/training-type/health-service-modelling-associates-programme-hsma/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block opacity-80 hover:opacity-100 transition-opacity"
+                                aria-label="Visit HSMA Programme (opens in new tab)"
+                                title="Visit the Health Service Modelling Associates Programme"
+                            >
+                                <img 
+                                    src={hsmaLogo}
+                                    alt="HSMA Logo" 
+                                    className="h-10 w-auto hsma-logo"
+                                />
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>

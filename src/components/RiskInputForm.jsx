@@ -1,5 +1,8 @@
 import React from 'react';
-import { pvrOptions, gaugeOptions } from '../constants/riskCalculatorConstants.js';
+import { pvrOptions } from '../constants/riskCalculatorConstants.js';
+import GaugeSelection from './GaugeSelection.jsx';
+import TamponadeSelection from './TamponadeSelection.jsx';
+import CryotherapySelection from './CryotherapySelection.jsx';
 
 const RiskInputForm = ({ 
     position,
@@ -9,79 +12,89 @@ const RiskInputForm = ({
     setPvrGrade,
     vitrectomyGauge,
     setVitrectomyGauge,
-    isMobile = false
+    cryotherapy,
+    setCryotherapy,
+    tamponade,
+    setTamponade,
+    isMobile = false,
+    onReset = null,
+    disabled = false
 }) => {
     const handleSubmit = (e) => {
-        e.preventDefault(); // Prevent form submission
+        e.preventDefault();
+        return false;
+    };
+
+    const isAgeValid = (value) => {
+        if (!value && value !== 0) {
+            return false;
+        }
+        const numValue = parseInt(value, 10);
+        const isValid = !isNaN(numValue) && numValue >= 18 && numValue <= 100;
+        return isValid;
+    };
+
+    const handleAgeChange = (e) => {
+        const newValue = e.target.value;
+        setAge(newValue);
     };
 
     const renderAgeInput = () => (
-        <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
+        <div>
+            <label 
+                htmlFor="age-input"
+                className="block text-sm font-medium text-gray-700"
+            >
                 Age (years)
             </label>
             <input
+                id="age-input"
                 type="number"
-                className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
-                    ${!age ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
+                className={`w-full ${isMobile ? 'p-1' : 'p-2'} border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+                    ${!isAgeValid(age) ? 'bg-red-50 border-red-300' : 'border-gray-300'}`}
                 value={age}
-                onChange={(e) => setAge(e.target.value)}
-                min="0"
-                max="120"
+                onChange={handleAgeChange}
+                min="18"
+                max="100"
                 placeholder="Enter age"
                 required
+                role="spinbutton"
+                aria-label="Age (years)"
+                aria-required="true"
+                aria-valuemin="18"
+                aria-valuemax="100"
+                aria-invalid={!isAgeValid(age)}
+                disabled={disabled}
             />
-            {!age && (
-                <p className="text-sm text-red-600">Age is required</p>
+            {!isAgeValid(age) && (
+                <p className="mt-1 text-sm text-red-600">
+                    Age must be between 18 and 100
+                </p>
             )}
         </div>
     );
 
     const renderPVRGrade = () => (
-        <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">PVR Grade</label>
-            <div className="space-y-2">
-                {pvrOptions.map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
+        <div className={isMobile ? 'mt-2' : 'mt-4'}>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+                PVR Grade
+            </label>
+            <div className="space-y-1" role="radiogroup" aria-required="true">
+                {pvrOptions.map(option => (
+                    <div key={option.value} className="flex items-center">
                         <input
                             type="radio"
-                            id={`pvr-${option.value}${isMobile ? '-mobile' : ''}`}
-                            name={`pvr${isMobile ? '-mobile' : ''}`}
+                            id={`pvr-${option.value}`}
+                            name="pvr-grade"
                             value={option.value}
                             checked={pvrGrade === option.value}
                             onChange={(e) => setPvrGrade(e.target.value)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                            className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            disabled={disabled}
                         />
-                        <label 
-                            htmlFor={`pvr-${option.value}${isMobile ? '-mobile' : ''}`} 
-                            className="text-sm text-gray-700"
-                        >
-                            {option.label}
-                        </label>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
-    const renderVitrectomyGauge = () => (
-        <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Vitrectomy Gauge</label>
-            <div className="space-y-2">
-                {gaugeOptions.map((option) => (
-                    <div key={option.value} className="flex items-center space-x-2">
-                        <input
-                            type="radio"
-                            id={`gauge-${option.value}${isMobile ? '-mobile' : ''}`}
-                            name={`gauge${isMobile ? '-mobile' : ''}`}
-                            value={option.value}
-                            checked={vitrectomyGauge === option.value}
-                            onChange={(e) => setVitrectomyGauge(e.target.value)}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500"
-                        />
-                        <label 
-                            htmlFor={`gauge-${option.value}${isMobile ? '-mobile' : ''}`}
-                            className="text-sm text-gray-700"
+                        <label
+                            htmlFor={`pvr-${option.value}`}
+                            className="ml-2 block text-sm text-gray-700"
                         >
                             {option.label}
                         </label>
@@ -93,29 +106,80 @@ const RiskInputForm = ({
 
     if (isMobile) {
         return (
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
+            <form onSubmit={handleSubmit} onReset={onReset} className="space-y-1">
+                <div className="space-y-1">
                     {renderAgeInput()}
-                    {renderPVRGrade()}
                 </div>
-                <div className="space-y-4">
-                    {renderVitrectomyGauge()}
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                    <div className="col-span-1">
+                        <GaugeSelection
+                            value={vitrectomyGauge}
+                            onChange={setVitrectomyGauge}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        <TamponadeSelection
+                            value={tamponade}
+                            onChange={setTamponade}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
+                    <div className="col-span-1">
+                        {renderPVRGrade()}
+                    </div>
+                    <div className="col-span-1">
+                        <CryotherapySelection
+                            value={cryotherapy}
+                            onChange={setCryotherapy}
+                            disabled={disabled}
+                            isMobile={isMobile}
+                        />
+                    </div>
                 </div>
             </form>
         );
     }
 
-    return (
-        <div className="space-y-4">
-            {position === "left" && (
-                <>
-                    {renderAgeInput()}
-                    {renderPVRGrade()}
-                </>
-            )}
-            {position === "right" && renderVitrectomyGauge()}
-        </div>
-    );
+    // Desktop layout - split between left and right panels
+    if (position === "left") {
+        return (
+            <div className="space-y-4">
+                {renderAgeInput()}
+                {renderPVRGrade()}
+                <div className="mt-4">
+                    <GaugeSelection
+                        value={vitrectomyGauge}
+                        onChange={setVitrectomyGauge}
+                        disabled={disabled}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    if (position === "right") {
+        return (
+            <div className="space-y-4">
+                <CryotherapySelection
+                    value={cryotherapy}
+                    onChange={setCryotherapy}
+                    disabled={disabled}
+                />
+                <div className="mt-4">
+                    <TamponadeSelection
+                        value={tamponade}
+                        onChange={setTamponade}
+                        disabled={disabled}
+                    />
+                </div>
+            </div>
+        );
+    }
+
+    return null;
 };
 
 export default RiskInputForm;

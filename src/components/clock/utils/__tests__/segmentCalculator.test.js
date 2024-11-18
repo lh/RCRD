@@ -1,49 +1,48 @@
-import { calculateSegmentsForHourRange } from '../segmentCalculator.js';
+/**
+ * @jest-environment jsdom
+ */
 
-describe('segmentCalculator', () => {
-    const testCases = [
-        {
-            name: "Hours 1-4",
-            input: { start: 1, end: 4 },
-            expected: Array.from({ length: 20 }, (_, i) => i),  // 0-19
-            expectedCount: 20
-        },
-        {
-            name: "Single hour (hour 3)",
-            input: { start: 3, end: 3 },
-            expected: [10, 11, 12, 13, 14],
-            expectedCount: 5
-        },
-        {
-            name: "Wrap around midnight (11-1)",
-            input: { start: 11, end: 1 },
-            expected: [...Array.from({ length: 10 }, (_, i) => i + 50), 0, 1, 2, 3, 4],
-            expectedCount: 15
-        },
-        {
-            name: "Full clock (12-12)",
-            input: { start: 12, end: 12 },
-            expected: Array.from({ length: 60 }, (_, i) => i),
-            expectedCount: 60
-        }
+import { calculateSegmentsForHourRange } from '../segmentCalculator';
+
+describe('calculateSegmentsForHourRange', () => {
+  test('handles 11-12 range correctly', () => {
+    const segments = calculateSegmentsForHourRange(11, 12);
+    // Should include segments 50-59 (hour 11 and 12)
+    const expected = Array.from({ length: 10 }, (_, i) => i + 50);
+    expect(segments).toEqual(expected);
+  });
+
+  test('handles 11-1 range correctly', () => {
+    const segments = calculateSegmentsForHourRange(11, 1);
+    // Should include segments 50-59 (hour 11), 0-4 (hour 1)
+    const expected = [
+      ...Array.from({ length: 10 }, (_, i) => i + 50), // Hour 11
+      ...Array.from({ length: 5 }, (_, i) => i)        // Hour 1
     ];
+    expect(segments).toEqual(expected);
+  });
 
-    testCases.forEach(testCase => {
-        test(testCase.name, () => {
-            const result = calculateSegmentsForHourRange(testCase.input.start, testCase.input.end);
-            
-            // Test array equality
-            expect(result).toEqual(testCase.expected);
-            
-            // Test length
-            expect(result).toHaveLength(testCase.expectedCount);
-            
-            // Test array contents (useful for debugging if test fails)
-            const missing = testCase.expected.filter(x => !result.includes(x));
-            const extra = result.filter(x => !testCase.expected.includes(x));
-            
-            expect(missing).toHaveLength(0);
-            expect(extra).toHaveLength(0);
-        });
-    });
+  test('handles 12-12 range correctly', () => {
+    const segments = calculateSegmentsForHourRange(12, 12);
+    // Should return all segments (0-59)
+    const expected = Array.from({ length: 60 }, (_, i) => i);
+    expect(segments).toEqual(expected);
+  });
+
+  test('handles 12-1 range correctly', () => {
+    const segments = calculateSegmentsForHourRange(12, 1);
+    // Should include segments 55-59 (hour 12) and 0-4 (hour 1)
+    const expected = [
+      ...Array.from({ length: 5 }, (_, i) => i + 55), // Hour 12
+      ...Array.from({ length: 5 }, (_, i) => i)       // Hour 1
+    ];
+    expect(segments).toEqual(expected);
+  });
+
+  test('handles regular range correctly', () => {
+    const segments = calculateSegmentsForHourRange(3, 5);
+    // Should include segments 10-24 (hours 3-5)
+    const expected = Array.from({ length: 15 }, (_, i) => i + 10);
+    expect(segments).toEqual(expected);
+  });
 });

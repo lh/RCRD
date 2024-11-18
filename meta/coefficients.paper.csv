@@ -1,0 +1,39 @@
+﻿,RRD Failure Model
+Covariate,Coefficient
+Constant Term ,-1.611
+Patient Age ,
+45-64 Years ,0
+65-79 Years ,0.236
+≥80 Years ,0.498
+<45 Years,0.459
+Location of Largest Break,
+9-3 o'clock,0
+4 or 8 o'clock,0.428
+5-7 o'clock,0.607
+No Break Found ,0.676
+Inferior Clock Hours Detached ,
+<3 Hours ,0
+3 to 5 Hours ,0.441
+6 Hours ,0.435
+Total RD ,
+No ,0
+Yes ,0.663
+PVR grade,
+"None, A or B",0
+C ,0.22
+Cryotherapy used during surgery ,
+No ,0
+Yes ,-0.42
+Tamponade used during surgery ,
+Sulphur Hexafluoride Gas,0
+Perfluoroethane Gas ,-0.417
+Perfluoropropane Gas ,-0.104
+Air ,-0.159
+Light Oil ,0.67
+Heavy Oil ,0.03
+Vitrectomy gauge used ,
+20g ,0
+23g ,-0.408
+25g,-0.885
+27g ,-0.703
+Not Recorded ,-0.738

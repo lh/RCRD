@@ -2,10 +2,41 @@
 
 ## Current Structure
 
-### Successfully Organized Tests
+### View-Based Organization
+
+#### RetinalCalculator Tests
+Successfully organized by view and responsibility:
+
+1. Container Tests
+   ```
+   src/components/__tests__/RetinalCalculator.test.jsx
+   ```
+   - View switching tests
+   - Layout coordination
+   - Component composition
+
+2. Mobile View Tests
+   ```
+   src/components/__tests__/MobileRetinalCalculator.test.jsx
+   ```
+   - Touch interactions
+   - Mobile layout
+   - Form validation
+   - Mobile-specific features
+
+3. Desktop View Tests
+   ```
+   src/components/__tests__/DesktopRetinalCalculator.test.jsx
+   ```
+   - Mouse interactions
+   - Desktop layout
+   - Form synchronization
+   - Desktop-specific features
+
+### Shared Component Tests
 
 #### useClockInteractions Tests
-A prime example of well-organized tests:
+Example of well-organized hook tests:
 
 ```
 src/components/clock/hooks/__tests__/useClockInteractions.test.js
@@ -35,117 +66,115 @@ src/components/clock/hooks/__tests__/useClockInteractions.test.js
    });
    ```
 
-3. Mock Organization
-   ```javascript
-   // Module level mocks
-   jest.mock('../../utils/clockCalculations', () => ({
-     segmentToHour: (segment) => {
-       const num = parseInt(segment.replace('segment', ''), 10);
-       return isNaN(num) ? 0 : num;
-     }
-   }));
-   ```
-
-### RetinalCalculator Tests
-Successfully split into logical groups:
-
-1. RetinalCalculator.rendering.test.jsx
-   - Initial state rendering
-   - Layout tests
-   - Component presence tests
-
-2. RetinalCalculator.interactions.test.jsx
-   - User interaction tests
-   - Event handling tests
-   - State change tests
-
-3. RetinalCalculator.form.test.jsx
-   - Form validation tests
-   - Calculation tests
-   - Reset functionality tests
-
-4. RetinalCalculator.helpers.js
-   - Shared test utilities
-   - Common setup functions
-   - Test data factories
-
-## Best Practices
-
-1. File Organization
-   - Group related tests together
-   - Keep test files close to source
-   - Use descriptive file names
-   - Separate helpers and utilities
-
-2. Test Structure
-   ```javascript
-   describe('Component/Hook Name', () => {
-     beforeEach(() => {
-       // Common setup
-     });
-
-     afterEach(() => {
-       // Cleanup
-     });
-
-     test('specific functionality', () => {
-       // Arrange
-       // Act
-       // Assert
-     });
-   });
-   ```
-
-3. Mock Management
-   - Define mocks at appropriate scope
-   - Clean up mocks after tests
-   - Use clear mock implementations
-   - Document mock behavior
-
-4. Test Isolation
-   - Reset state between tests
-   - Clean up side effects
-   - Avoid test interdependence
-   - Use fresh mocks per test
-
 ## Directory Structure
 
 ```
 src/
 ├── components/
-│   ├── __tests__/
-│   │   ├── ComponentName.rendering.test.jsx
-│   │   ├── ComponentName.interactions.test.jsx
-│   │   └── ComponentName.form.test.jsx
+│   ├── RetinalCalculator.jsx
+│   ├── MobileRetinalCalculator.jsx
+│   ├── DesktopRetinalCalculator.jsx
 │   │
-│   └── ComponentName/
-│       ├── __tests__/
-│       │   └── NestedComponent.test.jsx
-│       └── hooks/
-│           ├── __tests__/
-│           │   └── useHook.test.js
-│           └── useHook.js
+│   ├── __tests__/
+│   │   ├── RetinalCalculator.test.jsx
+│   │   ├── MobileRetinalCalculator.test.jsx
+│   │   └── DesktopRetinalCalculator.test.jsx
+│   │
+│   ├── shared/
+│   │   └── ComponentName/
+│   │       ├── __tests__/
+│   │       │   └── ComponentName.test.jsx
+│   │       └── ComponentName.jsx
+│   │
+│   └── hooks/
+│       ├── shared/
+│       │   └── __tests__/
+│       │       └── useSharedHook.test.js
+│       ├── mobile/
+│       │   └── __tests__/
+│       │       └── useMobileHook.test.js
+│       └── desktop/
+│           └── __tests__/
+│               └── useDesktopHook.test.js
 ```
 
 ## Test Categories
 
-1. Unit Tests
-   - Individual function behavior
-   - Isolated component rendering
-   - Hook behavior
+1. View-Specific Tests
+   - Mobile view behavior
+   - Desktop view behavior
+   - View-specific interactions
+   - Layout verification
+
+2. Shared Tests
+   - Common functionality
    - Utility functions
+   - Shared hooks
+   - Core business logic
 
-2. Integration Tests
+3. Integration Tests
+   - View switching
    - Component interactions
-   - Hook integration
-   - Form submissions
-   - API interactions
+   - State management
+   - Data flow
 
-3. Behavioral Tests
-   - User interactions
-   - Event handling
-   - State changes
-   - Error scenarios
+## Best Practices
+
+1. View Separation
+   - Clear view boundaries
+   - Isolated view tests
+   - Shared functionality tests
+   - View-specific mocks
+
+2. Test Structure
+   ```javascript
+   describe('ComponentName', () => {
+     describe('Mobile View', () => {
+       test('handles touch interactions', () => {
+         // Mobile-specific tests
+       });
+     });
+
+     describe('Desktop View', () => {
+       test('handles mouse interactions', () => {
+         // Desktop-specific tests
+       });
+     });
+
+     describe('Shared Behavior', () => {
+       test('common functionality', () => {
+         // Shared behavior tests
+       });
+     });
+   });
+   ```
+
+3. Mock Management
+   ```javascript
+   // View-specific mocks
+   jest.mock('../MobileRetinalCalculator', () => ({
+     MobileRetinalCalculator: () => <div data-testid="mobile-view" />
+   }));
+
+   // Shared mocks
+   jest.mock('../utils/calculations', () => ({
+     calculate: jest.fn()
+   }));
+   ```
+
+4. Helper Functions
+   ```javascript
+   // View-specific helpers
+   const simulateTouchInteraction = async (element) => {
+     fireEvent.touchStart(element);
+     await waitFor(() => {
+       expect(element).toHaveClass('active');
+     });
+   };
+
+   // Shared helpers
+   const getCalculateButton = () => screen.getByTestId('calculate-button');
+   ```
 
 ## Documentation
 
@@ -153,46 +182,48 @@ src/
    ```javascript
    /**
     * @jest-environment jsdom
-    * Tests for ComponentName
-    * Focus: [rendering/interactions/form handling]
+    * Tests for [Mobile/Desktop]RetinalCalculator
+    * Focus: View-specific behavior and interactions
     */
    ```
 
 2. Test Descriptions
-   - Clear purpose
+   - View context
    - Expected behavior
-   - Edge cases
-   - Assumptions
+   - Interaction patterns
+   - Layout requirements
 
 3. Mock Documentation
-   - Purpose of mocks
-   - Expected behavior
-   - Limitations
+   - View-specific mocks
+   - Shared functionality
+   - Mock limitations
    - Usage examples
 
 ## Future Improvements
 
 1. Test Coverage
-   - Identify gaps
-   - Add missing tests
-   - Improve edge cases
-   - Document coverage decisions
+   - View-specific edge cases
+   - Transition scenarios
+   - Responsive behavior
+   - Cross-view interactions
 
 2. Performance
-   - Optimize test runs
-   - Reduce setup overhead
-   - Improve mock efficiency
-   - Better test isolation
+   - View-specific optimizations
+   - Shared test utilities
+   - Mock efficiency
+   - Setup optimization
 
 3. Documentation
-   - Update test guidelines
-   - Document patterns
-   - Share best practices
-   - Maintain examples
+   - View separation patterns
+   - Test organization
+   - Best practices
+   - Migration guides
 
 ## Notes
 
-- Keep tests focused and maintainable
+- Maintain clear view boundaries
+- Share common functionality
+- Document view-specific behavior
+- Regular test review and updates
 - Follow consistent patterns
-- Document decisions and rationale
-- Regular review and updates
+- Keep tests focused and maintainable

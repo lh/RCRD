@@ -3,6 +3,12 @@ import { render, screen, fireEvent, within } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 
+/**
+ * @deprecated These tests have been moved to DesktopRetinalCalculator.test.jsx
+ * This file is kept for historical reference but all tests are skipped.
+ * The desktop view functionality is now tested directly in the DesktopRetinalCalculator component.
+ */
+
 // Mock child components
 jest.mock('../clock/ClockFace', () => {
   return function MockClockFace({ 
@@ -71,7 +77,7 @@ jest.mock('../RiskInputForm', () => {
 jest.mock('../../utils/riskCalculations');
 jest.mock('../clock/utils/formatDetachmentHours');
 
-describe('RetinalCalculator Desktop Layout', () => {
+describe.skip('RetinalCalculator Desktop Layout (Deprecated)', () => {
   const mockRisk = {
     probability: '25.5',
     steps: [],

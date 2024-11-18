@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { segmentToHour } from '../utils/clockCalculations';
+import { ClockHourNotation } from '../utils/clockHourNotation';
 
 export const useClockInteractions = (onChange) => {
   const [selectedHours, setSelectedHours] = useState([]);
@@ -13,6 +14,7 @@ export const useClockInteractions = (onChange) => {
   const drawingRef = useRef(false);
   const touchStartTime = useRef(null);
   const touchStartPosition = useRef(null);
+  const drawStartSegment = useRef(null);
   const longPressThreshold = 300;
   const moveThreshold = 10;
 
@@ -39,29 +41,81 @@ export const useClockInteractions = (onChange) => {
     touchStartPosition.current = null;
   };
 
+  const getSegmentsBetween = (start, end) => {
+    // Calculate both possible paths
+    const cwPath = [];
+    const ccwPath = [];
+
+    // Clockwise path
+    let i = start;
+    while (i !== end) {
+      cwPath.push(i);
+      i = (i + 1) % 60;
+    }
+    cwPath.push(end);
+
+    // Counter-clockwise path
+    i = start;
+    while (i !== end) {
+      ccwPath.push(i);
+      i = (i - 1 + 60) % 60;
+    }
+    ccwPath.push(end);
+
+    // Return the shorter path
+    return cwPath.length <= ccwPath.length ? cwPath : ccwPath;
+  };
+
   const handleSegmentInteraction = (segment, isRightClick = false) => {
-    let newSelection;
+    // Extract segment number from segment ID
+    const currentSegment = parseInt(segment.replace('segment', ''), 10);
     
+    // If this is the start of drawing, store the start segment
+    if (drawingRef.current && drawStartSegment.current === null) {
+      drawStartSegment.current = currentSegment;
+    }
+
+    // Calculate segments to add based on drawing path
+    let segmentsToAdd = [];
+    if (drawingRef.current && drawStartSegment.current !== null) {
+      segmentsToAdd = getSegmentsBetween(drawStartSegment.current, currentSegment);
+    } else {
+      segmentsToAdd = [currentSegment];
+    }
+
+    // Convert segments to IDs
+    const segmentIds = segmentsToAdd.map(s => `segment${s}`);
+    
+    let newSelection;
     const shouldRemove = (isTouchDevice && !isAddMode) || (!isTouchDevice && isRightClick);
     
     if (shouldRemove) {
-      newSelection = detachmentSegments.filter(s => s !== segment);
+      newSelection = detachmentSegments.filter(s => !segmentIds.includes(s));
     } else {
-      newSelection = detachmentSegments.includes(segment) 
-        ? detachmentSegments 
-        : [...detachmentSegments, segment];
+      // Work with segment IDs consistently
+      const existingIds = new Set(detachmentSegments);
+      segmentIds.forEach(id => existingIds.add(id));
+      newSelection = Array.from(existingIds).sort();
     }
     
     setDetachmentSegments(newSelection);
+
+    // Get raw segment numbers for formatting
+    const rawSegments = newSelection.map(s => parseInt(s.replace('segment', ''), 10));
+    const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+    const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
     onChange?.({ 
       tears: selectedHours, 
-      detachment: Array.from(new Set(newSelection.map(segmentToHour))) 
+      detachment: hours,
+      formattedDetachment
     });
   };
 
   const handleStartDrawing = (segment, event) => {
     event.preventDefault();
     drawingRef.current = true;
+    drawStartSegment.current = parseInt(segment.replace('segment', ''), 10);
     setIsDrawing(true);
     handleSegmentInteraction(segment, event.button === 2);
   };
@@ -75,6 +129,7 @@ export const useClockInteractions = (onChange) => {
   const handleMouseDown = (segment, event) => {
     event.preventDefault();
     drawingRef.current = event.button === 2 ? 'right' : 'left';
+    drawStartSegment.current = parseInt(segment.replace('segment', ''), 10);
     setIsDrawing(true);
     handleSegmentInteraction(segment, event.button === 2);
   };
@@ -86,9 +141,16 @@ export const useClockInteractions = (onChange) => {
         ? selectedHours.filter(h => h !== hour)
         : [...selectedHours, hour];
       setSelectedHours(newSelection);
+
+      // Get raw segment numbers for formatting
+      const rawSegments = detachmentSegments.map(s => parseInt(s.replace('segment', ''), 10));
+      const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+      const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
       onChange?.({ 
         tears: newSelection, 
-        detachment: Array.from(new Set(detachmentSegments.map(segmentToHour))) 
+        detachment: hours,
+        formattedDetachment
       });
     }
   };
@@ -111,9 +173,16 @@ export const useClockInteractions = (onChange) => {
         ? [...selectedHours, hour]
         : selectedHours.filter(h => h !== hour);
       setSelectedHours(newSelection);
+
+      // Get raw segment numbers for formatting
+      const rawSegments = detachmentSegments.map(s => parseInt(s.replace('segment', ''), 10));
+      const hours = Array.from(new Set(rawSegments.map(segmentToHour))).sort((a, b) => a - b);
+      const formattedDetachment = ClockHourNotation.formatDetachment(rawSegments);
+
       onChange?.({ 
         tears: newSelection, 
-        detachment: Array.from(new Set(detachmentSegments.map(segmentToHour))) 
+        detachment: hours,
+        formattedDetachment
       });
     }, longPressThreshold);
 
@@ -122,13 +191,18 @@ export const useClockInteractions = (onChange) => {
 
   const handleEndDrawing = () => {
     drawingRef.current = false;
+    drawStartSegment.current = null;
     setIsDrawing(false);
   };
 
   const handleClearAll = () => {
     setSelectedHours([]);
     setDetachmentSegments([]);
-    onChange?.({ tears: [], detachment: [] });
+    onChange?.({ 
+      tears: [], 
+      detachment: [],
+      formattedDetachment: "None"
+    });
   };
 
   useEffect(() => {

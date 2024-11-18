@@ -2,6 +2,7 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import ClockFace from '../ClockFace';
 import { calculateSegmentsForHourRange } from '../utils/segmentCalculator';
+import { CLOCK } from '../utils/clockConstants';
 
 jest.mock('../utils/segmentCalculator', () => ({
   calculateSegmentsForHourRange: jest.fn()
@@ -23,10 +24,10 @@ describe('ClockFace Touch Interactions', () => {
     jest.clearAllMocks();
     calculateSegmentsForHourRange.mockImplementation((start, end) => {
       const segments = [];
-      const startSegment = (start - 1) * 5;
-      const endSegment = (end - 1) * 5;
+      const startSegment = (start - 1) * 2;
+      const endSegment = (end - 1) * 2 + 1;
       for (let i = startSegment; i <= endSegment; i++) {
-        segments.push(i);
+        segments.push(i % CLOCK.SEGMENTS);
       }
       return segments;
     });
@@ -143,7 +144,104 @@ describe('ClockFace Touch Interactions', () => {
         touches: [{ clientX: 110, clientY: 0 }]
       });
       
-      expect(defaultProps.setDetachmentSegments).toHaveBeenCalledTimes(2);
+      // Expect 3 calls: initial start, move, and new start after cancel
+      expect(defaultProps.setDetachmentSegments).toHaveBeenCalledTimes(3);
+    });
+
+    test('handles CCW drawing by following draw direction', () => {
+      render(<ClockFace {...defaultProps} />);
+      
+      const svg = document.querySelector('svg');
+      
+      // Start at 3 o'clock
+      fireEvent.touchStart(svg, {
+        touches: [{ clientX: 220, clientY: 110 }]
+      });
+      
+      // Move CCW to 1 o'clock
+      fireEvent.touchMove(svg, {
+        touches: [{ clientX: 190, clientY: 50 }]
+      });
+      
+      // Should follow CCW path (3→2→1) regardless of length
+      const lastCall = defaultProps.setDetachmentSegments.mock.calls[1][0];
+      const segments = lastCall.map(s => parseInt(s.replace('segment', ''), 10));
+      
+      // Verify segments are in CCW order
+      let prevSegment = segments[0];
+      let isCounterClockwise = true;
+      for (let i = 1; i < segments.length; i++) {
+        const currentSegment = segments[i];
+        if (currentSegment > prevSegment) {
+          isCounterClockwise = false;
+          break;
+        }
+        prevSegment = currentSegment;
+      }
+      expect(isCounterClockwise).toBe(true);
+    });
+
+    test('handles CCW drawing across 12 o\'clock', () => {
+      render(<ClockFace {...defaultProps} />);
+      
+      const svg = document.querySelector('svg');
+      
+      // Start at 2 o'clock
+      fireEvent.touchStart(svg, {
+        touches: [{ clientX: 190, clientY: -50 }]
+      });
+      
+      // Move CCW to 10 o'clock
+      fireEvent.touchMove(svg, {
+        touches: [{ clientX: -190, clientY: -50 }]
+      });
+      
+      // Should follow CCW path (2→1→12→11→10) across midnight
+      const lastCall = defaultProps.setDetachmentSegments.mock.calls[1][0];
+      const segments = lastCall.map(s => parseInt(s.replace('segment', ''), 10));
+      
+      // Verify segments are in CCW order and include the transition across 12
+      let prevSegment = segments[0];
+      let crossedMidnight = false;
+      let isCounterClockwise = true;
+      
+      for (let i = 1; i < segments.length; i++) {
+        const currentSegment = segments[i];
+        // When crossing midnight, we'll see a large jump from low numbers to high numbers
+        if (currentSegment > 20 && prevSegment < 4) {
+          crossedMidnight = true;
+        } else if (!crossedMidnight && currentSegment > prevSegment) {
+          isCounterClockwise = false;
+          break;
+        }
+        prevSegment = currentSegment;
+      }
+      
+      expect(isCounterClockwise).toBe(true);
+      expect(crossedMidnight).toBe(true);
+    });
+
+    test('preserves existing segments when drawing new ones', () => {
+      // Start with some existing segments
+      const existingSegments = ['segment0', 'segment1', 'segment2'];
+      render(<ClockFace {...defaultProps} detachmentSegments={existingSegments} />);
+      
+      const svg = document.querySelector('svg');
+      
+      // Draw new segments at a different location
+      fireEvent.touchStart(svg, {
+        touches: [{ clientX: 220, clientY: 110 }] // 3 o'clock
+      });
+      
+      fireEvent.touchMove(svg, {
+        touches: [{ clientX: 220, clientY: 150 }] // 4 o'clock
+      });
+      
+      // Verify existing segments are preserved
+      const lastCall = defaultProps.setDetachmentSegments.mock.calls[1][0];
+      existingSegments.forEach(segment => {
+        expect(lastCall).toContain(segment);
+      });
     });
   });
 });

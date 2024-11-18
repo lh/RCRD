@@ -1,7 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
-import { getMobileView } from '../test-helpers/RetinalCalculator.helpers';
 
 // Mock child components
 jest.mock('../clock/ClockFace', () => {
@@ -30,21 +29,6 @@ jest.mock('../clock/ClockFace', () => {
         >
           Toggle Segment
         </button>
-        <button 
-          onClick={() => onHoverChange(6)}
-          data-testid="hover-change"
-          disabled={readOnly}
-        >
-          Hover Hour
-        </button>
-        {onTouchDeviceChange && (
-          <button 
-            onClick={() => onTouchDeviceChange(true)}
-            data-testid="touch-device-change"
-          >
-            Set Touch Device
-          </button>
-        )}
       </div>
     );
   };
@@ -78,37 +62,60 @@ jest.mock('../RiskResults', () => {
   return function MockRiskResults({ risk, onReset }) {
     return (
       <div data-testid="risk-results">
-        Risk: {risk.probability}%
-        {onReset && (
-          <button onClick={onReset} data-testid="reset-button">
-            Reset Calculator
-          </button>
-        )}
+        <div>Risk: {risk.probability}%</div>
+        <div className="mt-8 border-t pt-6">
+          <h3 className="text-lg font-semibold mb-4">Input Summary</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <p className="text-sm" data-testid="pvr-grade">
+                <span className="font-medium">PVR Grade:</span> {risk.pvrGrade}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
 });
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
-
 describe('RetinalCalculator Rendering', () => {
+  const getDisabledCalculateButton = () => {
+    const buttons = screen.getAllByTestId('calculate-button');
+    return buttons.find(button => button.disabled);
+  };
+
   test('renders initial state correctly', () => {
     render(<RetinalCalculator />);
     
+    // Check header
     expect(screen.getByText(/retinal detachment risk calculator/i)).toBeInTheDocument();
+    
+    // Check clock face
     expect(screen.getAllByTestId('clock-face')).toHaveLength(2); // Mobile and desktop views
-    expect(screen.getByText(/calculate risk/i)).toBeInTheDocument();
-    expect(screen.getByText(/age and detachment area required/i)).toBeInTheDocument();
+    
+    // Check calculate button and validation message
+    const calculateButton = getDisabledCalculateButton();
+    expect(calculateButton).toBeInTheDocument();
+    expect(calculateButton).toBeDisabled();
+    
+    const buttonSection = calculateButton.parentElement;
+    const validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
   });
 
   test('displays different layouts for mobile and desktop', () => {
-    const { container } = render(<RetinalCalculator />);
+    render(<RetinalCalculator />);
     
     // Mobile layout
-    expect(container.querySelector('.md\\:hidden')).toBeInTheDocument();
+    const mobileSection = screen.getByTestId('risk-form-mobile');
+    expect(mobileSection).toBeInTheDocument();
+    const mobileContainer = mobileSection.closest('.md\\:hidden');
+    expect(mobileContainer).toBeInTheDocument();
     
     // Desktop layout
-    expect(container.querySelector('.hidden.md\\:flex')).toBeInTheDocument();
+    const desktopSection = screen.getByTestId('risk-form-left');
+    expect(desktopSection).toBeInTheDocument();
+    const desktopContainer = desktopSection.closest('.hidden.md\\:block');
+    expect(desktopContainer).toBeInTheDocument();
   });
 });

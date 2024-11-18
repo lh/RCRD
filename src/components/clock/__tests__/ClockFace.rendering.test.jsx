@@ -63,7 +63,7 @@ describe('ClockFace Rendering', () => {
   });
 
   test('renders detachment segments', () => {
-    render(<ClockFace {...defaultProps} detachmentSegments={[0, 1, 2]} />);
+    render(<ClockFace {...defaultProps} detachmentSegments={['segment0', 'segment1', 'segment2']} />);
     
     const highlightedSegments = document.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
     expect(highlightedSegments).toHaveLength(3);

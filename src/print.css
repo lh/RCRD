@@ -1,0 +1,131 @@
+@media print {
+  /* Hide UI elements not needed for printing */
+  button:not(.print-show),
+  .no-print,
+  .md\\:hidden,
+  [data-testid="touch-indicator"],
+  #touch-debug {
+    display: none !important;
+  }
+
+  /* Show desktop view in print */
+  .hidden.md\\:block {
+    display: block !important;
+  }
+
+  /* Reset background colors and borders for print */
+  * {
+    background-color: white !important;
+    color: black !important;
+    border-color: #ccc !important;
+  }
+
+  /* Format the page */
+  body {
+    font-size: 12pt;
+    line-height: 1.5;
+    padding: 20px !important;
+  }
+
+  /* Ensure content fits on page */
+  .App {
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  /* Format risk results and clock face */
+  .risk-results {
+    margin: 20px 0 0 !important;  /* Remove bottom margin */
+    page-break-after: avoid !important;
+    border: 1px solid #ccc;
+    padding: 15px;
+  }
+
+  /* Ensure clock face is right after risk results */
+  .clock-face-print {
+    margin-top: 0 !important;  /* Remove top margin to eliminate gap */
+    padding-top: 10px !important;  /* Add small padding instead */
+    page-break-before: avoid !important;
+    page-break-after: always !important;
+  }
+
+  /* Force calculation steps to start on new page */
+  .calculation-steps {
+    page-break-before: always !important;
+  }
+
+  /* Ensure clock face fits and prints well */
+  svg {
+    max-width: 300px !important;
+    height: auto !important;
+    margin: 0 auto;
+    display: block;
+  }
+
+  /* Format headers */
+  h2, h3 {
+    margin-top: 20px !important;
+    margin-bottom: 10px !important;
+  }
+
+  /* Format grid layout for print */
+  .grid {
+    display: block !important;
+  }
+
+  .grid > * {
+    width: 100% !important;
+    margin-bottom: 20px;
+  }
+
+  /* Ensure text is readable */
+  .text-gray-500,
+  .text-gray-600,
+  .text-gray-700 {
+    color: #333 !important;
+  }
+
+  /* Ensure calculation steps are readable */
+  .calculation-steps .font-mono {
+    font-family: "Courier New", monospace;
+  }
+
+  /* Add print header */
+  .print-header {
+    text-align: center;
+    margin-bottom: 30px;
+    display: block !important;
+  }
+
+  /* Keep first page content together */
+  .first-page {
+    page-break-after: always !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Hide duplicate clock face in Input Summary */
+  .mt-8 .max-w-xs {
+    display: none !important;
+  }
+
+  /* Adjust Input Summary layout for print */
+  .mt-8 .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Remove extra spacing in Input Summary */
+  .mt-8 {
+    margin-top: 0 !important;
+    border-top: none !important;
+    padding-top: 0 !important;
+  }
+
+  /* Ensure HSMA logo prints well */
+  .hsma-logo {
+    max-width: 150px !important;
+    height: auto !important;
+    margin: 20px auto 0 !important;
+    display: block !important;
+    opacity: 1 !important;
+  }
+}

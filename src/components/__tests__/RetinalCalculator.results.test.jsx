@@ -118,9 +118,11 @@ describe('RetinalCalculator Results Display', () => {
 
   const waitForCalculateButton = async () => {
     return await waitFor(() => {
-      const button = screen.getByText(/calculate risk/i);
-      expect(button).not.toBeDisabled();
-      return button;
+      const buttons = screen.getAllByTestId('calculate-button');
+      // Find the enabled button
+      const enabledButton = buttons.find(button => !button.disabled);
+      expect(enabledButton).toBeTruthy();
+      return enabledButton;
     }, { timeout: 2000 });
   };
 

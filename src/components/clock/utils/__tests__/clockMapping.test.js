@@ -1,164 +1,99 @@
-/**
- * Tests for clockMapping utility
- * Focus: Bidirectional mapping between segments and clock hours
- */
-
-import {
-  segmentToClockHourMap,
-  segmentToClockHour,
-  clockHourToSegmentsMap,
-  getSegmentsForClockHour
-} from '../clockMapping';
+import { MAPPING_TYPE, getSegmentForAngle, getHourMapping, getHoursFromSegments, getSegmentsForHours } from '../clockMapping.js';
+import { CLOCK } from '../clockConstants.js';
 
 describe('clockMapping', () => {
-  describe('segmentToClockHourMap', () => {
-    test('has correct length', () => {
-      expect(segmentToClockHourMap.length).toBe(60);
-    });
-
-    test('maps hour 12 segments correctly', () => {
-      const hour12Segments = [0, 1, 2, 3, 56, 57, 58, 59];
-      hour12Segments.forEach(segment => {
-        expect(segmentToClockHourMap[segment]).toBe(12);
-      });
-    });
-
-    test('maps regular hours correctly', () => {
-      const hourMappings = [
-        { segments: [4, 5, 6, 7, 8], hour: 1 },
-        { segments: [9, 10, 11, 12, 13], hour: 2 },
-        { segments: [14, 15, 16, 17, 18], hour: 3 },
-        { segments: [19, 20, 21, 22, 23], hour: 4 },
-        { segments: [24, 25, 26], hour: 5 },
-        { segments: [27, 28, 29, 30, 31, 32], hour: 6 },
-        { segments: [33, 34, 35], hour: 7 },
-        { segments: [36, 37, 38, 39, 40], hour: 8 },
-        { segments: [41, 42, 43, 44, 45], hour: 9 },
-        { segments: [46, 47, 48, 49, 50], hour: 10 },
-        { segments: [51, 52, 53, 54, 55], hour: 11 }
-      ];
-
-      hourMappings.forEach(({ segments, hour }) => {
-        segments.forEach(segment => {
-          expect(segmentToClockHourMap[segment]).toBe(hour);
+    describe('getSegmentForAngle', () => {
+        test('converts angles to segments correctly', () => {
+            // Test every 15 degrees (one segment)
+            expect(getSegmentForAngle(0)).toBe(0);    // 12 o'clock
+            expect(getSegmentForAngle(15)).toBe(1);   // First segment after 12
+            expect(getSegmentForAngle(30)).toBe(2);   // Second segment
+            expect(getSegmentForAngle(345)).toBe(23); // Last segment
         });
-      });
-    });
 
-    test('never returns 0 for valid segments', () => {
-      segmentToClockHourMap.forEach((hour, segment) => {
-        if (segment >= 0 && segment < 60) {
-          expect(hour).not.toBe(0);
-        }
-      });
-    });
-  });
-
-  describe('segmentToClockHour', () => {
-    test('returns correct hour for hour 12 segments', () => {
-      const hour12Segments = [0, 1, 2, 3, 56, 57, 58, 59];
-      hour12Segments.forEach(segment => {
-        expect(segmentToClockHour(segment)).toBe(12);
-      });
-    });
-
-    test('returns correct hour for regular segments', () => {
-      const testCases = [
-        { segment: 5, hour: 1 },
-        { segment: 10, hour: 2 },
-        { segment: 15, hour: 3 },
-        { segment: 30, hour: 6 },
-        { segment: 45, hour: 9 }
-      ];
-
-      testCases.forEach(({ segment, hour }) => {
-        expect(segmentToClockHour(segment)).toBe(hour);
-      });
-    });
-
-    test('handles out-of-bounds segments', () => {
-      expect(segmentToClockHour(-1)).toBeUndefined();
-      expect(segmentToClockHour(60)).toBeUndefined();
-    });
-  });
-
-  describe('clockHourToSegmentsMap', () => {
-    test('contains all hours 1-12', () => {
-      for (let hour = 1; hour <= 12; hour++) {
-        expect(clockHourToSegmentsMap.has(hour)).toBe(true);
-      }
-    });
-
-    test('maps hour 12 correctly', () => {
-      const segments = clockHourToSegmentsMap.get(12);
-      expect(segments).toEqual([0, 1, 2, 3, 56, 57, 58, 59]);
-    });
-
-    test('maps hour 6 correctly', () => {
-      const segments = clockHourToSegmentsMap.get(6);
-      expect(segments).toEqual([27, 28, 29, 30, 31, 32]);
-    });
-
-    test('maps regular hours correctly', () => {
-      const testCases = [
-        { hour: 1, count: 5 },
-        { hour: 2, count: 5 },
-        { hour: 3, count: 5 },
-        { hour: 4, count: 5 },
-        { hour: 5, count: 3 },
-        { hour: 6, count: 6 },
-        { hour: 7, count: 3 },
-        { hour: 8, count: 5 },
-        { hour: 9, count: 5 },
-        { hour: 10, count: 5 },
-        { hour: 11, count: 5 }
-      ];
-
-      testCases.forEach(({ hour, count }) => {
-        const segments = clockHourToSegmentsMap.get(hour);
-        expect(segments.length).toBe(count);
-      });
-    });
-  });
-
-  describe('getSegmentsForClockHour', () => {
-    test('returns correct segments for hour 12', () => {
-      const segments = getSegmentsForClockHour(12);
-      expect(segments).toEqual([0, 1, 2, 3, 56, 57, 58, 59]);
-    });
-
-    test('returns correct segments for hour 6', () => {
-      const segments = getSegmentsForClockHour(6);
-      expect(segments).toEqual([27, 28, 29, 30, 31, 32]);
-    });
-
-    test('returns empty array for invalid hour', () => {
-      expect(getSegmentsForClockHour(0)).toEqual([]);
-      expect(getSegmentsForClockHour(13)).toEqual([]);
-      expect(getSegmentsForClockHour(-1)).toEqual([]);
-    });
-  });
-
-  describe('bidirectional mapping consistency', () => {
-    test('segment→hour→segments maintains segment membership', () => {
-      // For each segment, get its hour, then get all segments for that hour
-      // The original segment should be in that set
-      for (let segment = 0; segment < 60; segment++) {
-        const hour = segmentToClockHour(segment);
-        const segments = getSegmentsForClockHour(hour);
-        expect(segments).toContain(segment);
-      }
-    });
-
-    test('hour→segments→hour maintains hour value', () => {
-      // For each hour, get its segments, then map each segment back to hour
-      // Should always get the original hour
-      for (let hour = 1; hour <= 12; hour++) {
-        const segments = getSegmentsForClockHour(hour);
-        segments.forEach(segment => {
-          expect(segmentToClockHour(segment)).toBe(hour);
+        test('handles angle normalization', () => {
+            expect(getSegmentForAngle(360)).toBe(0);  // Full circle
+            expect(getSegmentForAngle(-15)).toBe(23); // Negative angle
+            expect(getSegmentForAngle(375)).toBe(1);  // More than 360
         });
-      }
     });
-  });
+
+    describe('getHourMapping', () => {
+        test('maps segments to hours correctly', () => {
+            // Test hour 12 segments
+            expect(getHourMapping(23).hours).toEqual(new Set([12]));
+            expect(getHourMapping(0).hours).toEqual(new Set([12]));
+
+            // Test regular hours
+            expect(getHourMapping(1).hours).toEqual(new Set([1]));
+            expect(getHourMapping(2).hours).toEqual(new Set([1]));
+            expect(getHourMapping(3).hours).toEqual(new Set([2]));
+            expect(getHourMapping(4).hours).toEqual(new Set([2]));
+        });
+
+        test('handles DISPLAY mapping type', () => {
+            // Test midnight crossing segments
+            const segment23 = getHourMapping(23, MAPPING_TYPE.DISPLAY);
+            expect(segment23.hours).toEqual(new Set([11, 12]));
+
+            const segment0 = getHourMapping(0, MAPPING_TYPE.DISPLAY);
+            expect(segment0.hours).toEqual(new Set([12, 1]));
+        });
+
+        test('handles MEDICAL mapping type', () => {
+            // Test hour 6 inclusion rule
+            const hour5seg = getHourMapping(10, MAPPING_TYPE.MEDICAL); // Hour 5 segment
+            expect(hour5seg.hours).toContain(6);
+
+            const hour7seg = getHourMapping(14, MAPPING_TYPE.MEDICAL); // Hour 7 segment
+            expect(hour7seg.hours).toContain(6);
+        });
+    });
+
+    describe('getHoursFromSegments', () => {
+        test('converts segment arrays to hours', () => {
+            // Test regular segments
+            expect(getHoursFromSegments([1, 2])).toEqual(new Set([1]));
+            expect(getHoursFromSegments([3, 4])).toEqual(new Set([2]));
+        });
+
+        test('handles string segment IDs', () => {
+            expect(getHoursFromSegments(['segment1', 'segment2'])).toEqual(new Set([1]));
+            expect(getHoursFromSegments(['segment23', 'segment0'])).toEqual(new Set([12]));
+        });
+
+        test('handles midnight crossing', () => {
+            const segments = ['segment21', 'segment22', 'segment23', 'segment0', 'segment1', 'segment2'];
+            const hours = getHoursFromSegments(segments, MAPPING_TYPE.DISPLAY);
+            expect(hours).toEqual(new Set([11, 12, 1]));
+        });
+
+        test('applies medical rules when specified', () => {
+            // Test hour 6 inclusion rule
+            const segments = ['segment9', 'segment10']; // Hour 5 segments
+            const hours = getHoursFromSegments(segments, MAPPING_TYPE.MEDICAL);
+            expect(hours).toContain(6);
+        });
+    });
+
+    describe('getSegmentsForHours', () => {
+        test('gets correct segments for single hour', () => {
+            expect(getSegmentsForHours(1, 1)).toEqual([1, 2]);
+            expect(getSegmentsForHours(6, 6)).toEqual([11, 12]);
+        });
+
+        test('gets correct segments for hour range', () => {
+            expect(getSegmentsForHours(1, 3)).toEqual([1, 2, 3, 4, 5, 6]);
+        });
+
+        test('handles midnight crossing', () => {
+            const segments = getSegmentsForHours(11, 1);
+            expect(segments).toEqual([21, 22, 23, 0, 1, 2]);
+        });
+
+        test('handles full clock', () => {
+            const segments = getSegmentsForHours(12, 12);
+            expect(segments).toEqual(Array.from({ length: 24 }, (_, i) => i));
+        });
+    });
 });
