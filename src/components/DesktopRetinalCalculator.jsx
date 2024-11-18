@@ -117,7 +117,7 @@ const DesktopRetinalCalculator = () => {
                                 <p className="text-sm"><span className="font-medium">PVR Grade:</span> {calculator.formatPVRGrade(calculator.pvrGrade)}</p>
                                 <p className="text-sm"><span className="font-medium">Vitrectomy Gauge:</span> {calculator.vitrectomyGauge}</p>
                                 <p className="text-sm"><span className="font-medium">Cryotherapy:</span> {calculator.cryotherapy}</p>
-                                <p className="text-sm"><span className="font-medium">Tamponade:</span> {calculator.tamponade}</p>
+                                <p className="text-sm"><span className="font-medium">Tamponade:</span> {calculator.formatTamponade(calculator.tamponade)}</p>
                                 <p className="text-sm"><span className="font-medium">Breaks:</span> {calculator.formatHoursList(calculator.selectedHours)}</p>
                                 <div className="pt-4">
                                     <button

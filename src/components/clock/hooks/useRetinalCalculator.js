@@ -86,6 +86,18 @@ export const useRetinalCalculator = () => {
         return grade === 'none' ? 'A' : grade.toUpperCase();
     };
 
+    const formatTamponade = (value) => {
+        const tamponadeMap = {
+            'sf6': 'SF6 gas',
+            'c2f6': 'C2F6 gas',
+            'c3f8': 'C3F8 gas',
+            'air': 'Air',
+            'light_oil': 'Light silicone oil',
+            'heavy_oil': 'Heavy silicone oil'
+        };
+        return tamponadeMap[value] || value;
+    };
+
     return {
         // State
         age,
@@ -118,6 +130,7 @@ export const useRetinalCalculator = () => {
 
         // Formatters
         formatHoursList,
-        formatPVRGrade
+        formatPVRGrade,
+        formatTamponade
     };
 };
