@@ -9,7 +9,7 @@ const RetinalCalculator = () => {
         <div className="md:p-4 p-0">
             <div className="bg-white md:rounded-lg shadow-lg">
                 <div className="md:p-6 px-1 py-2">
-                    <h2 className="text-2xl font-bold mb-2">Retinal Detachment Risk Calculator</h2>
+                    <h2 className="text-2xl font-bold mb-2">Risk Calculator Retinal Detachment (RCRD)</h2>
                     <p className="text-sm text-gray-600 mb-6">
                         Based on the{' '}
                         <a 
