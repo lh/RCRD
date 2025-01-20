@@ -1,62 +1,68 @@
 {
  "homepage": "https://lh.github.io/RCRD/",
-  "name": "retinal-calculator",
-  "version": "0.1.0",
-  "type": "module",
-  "private": true,
-  "dependencies": {
-    "@shadcn/ui": "latest",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^14.0.0",
-    "@testing-library/user-event": "^14.0.0",
-    "lucide-react": "^0.456.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-scripts": "^5.0.1",
-    "web-vitals": "^4.2.4"
-  },
-  "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
-    "eslint-config-react-app": "^7.0.1"
-  },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  },
-  "resolutions": {
-    "nth-check": "^2.0.1",
-    "postcss": "^8.4.31",
-    "svgo": "^3.0.0",
-    "css-select": "^5.1.0",
-    "@svgr/webpack": "^8.0.0",
-    "resolve-url-loader": "^5.0.0"
-  },
-  "overrides": {
-    "nth-check": "^2.0.1",
-    "postcss": "^8.4.31",
-    "svgo": "^3.0.0",
-    "css-select": "^5.1.0",
-    "@svgr/webpack": "^8.0.0",
-    "resolve-url-loader": "^5.0.0"
-  }
+ "name": "retinal-calculator",
+ "version": "0.1.0",
+ "type": "module",
+ "private": true,
+ "dependencies": {
+  "@shadcn/ui": "latest",
+  "@testing-library/jest-dom": "^5.17.0",
+  "@testing-library/react": "^14.0.0",
+  "@testing-library/user-event": "^14.0.0",
+  "lucide-react": "^0.456.0",
+  "react": "^18.3.1",
+  "react-dom": "^18.3.1",
+  "react-scripts": "^5.0.1",
+  "web-vitals": "^4.2.4"
+ },
+ "devDependencies": {
+  "@babel/plugin-proposal-private-property-in-object": "^7.21.0",
+  "eslint-config-react-app": "^7.0.1",
+  "jsdoc": "^4.0.4",
+  "jsdoc-to-markdown": "^8.0.0"
+ },
+ "scripts": {
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject",
+  "clean-docs": "rm -rf docs",
+  "docs:components": "jsdoc2md \"src/components/**/*.jsx\" \"src/components/**/*.js\" > docs/components.md",
+  "docs:utils": "jsdoc2md \"src/utils/**/*.js\" > docs/utils.md",
+  "docs": "npm run clean-docs && mkdir -p docs && npm run docs:components && npm run docs:utils"
+ },
+ "eslintConfig": {
+  "extends": [
+   "react-app",
+   "react-app/jest"
+  ]
+ },
+ "browserslist": {
+  "production": [
+   ">0.2%",
+   "not dead",
+   "not op_mini all"
+  ],
+  "development": [
+   "last 1 chrome version",
+   "last 1 firefox version",
+   "last 1 safari version"
+  ]
+ },
+ "resolutions": {
+  "nth-check": "^2.0.1",
+  "postcss": "^8.4.31",
+  "svgo": "^3.0.0",
+  "css-select": "^5.1.0",
+  "@svgr/webpack": "^8.0.0",
+  "resolve-url-loader": "^5.0.0"
+ },
+ "overrides": {
+  "nth-check": "^2.0.1",
+  "postcss": "^8.4.31",
+  "svgo": "^3.0.0",
+  "css-select": "^5.1.0",
+  "@svgr/webpack": "^8.0.0",
+  "resolve-url-loader": "^5.0.0"
+ }
 }

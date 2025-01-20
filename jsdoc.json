@@ -1,0 +1,27 @@
+{
+    "source": {
+        "include": ["src"],
+        "includePattern": "\\.(jsx|js)$",
+        "excludePattern": "(node_modules/|docs/|__tests__/)"
+    },
+    "plugins": [
+        "node_modules/jsdoc/plugins/markdown"
+    ],
+    "opts": {
+        "destination": "./docs",
+        "recurse": true,
+        "readme": "./README.md"
+    },
+    "tags": {
+        "allowUnknownTags": ["component", "prop"],
+        "dictionaries": ["jsdoc", "closure"]
+    },
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": true,
+        "default": {
+            "outputSourceFiles": true,
+            "includeDate": false
+        }
+    }
+}
