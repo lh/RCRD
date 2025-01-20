@@ -1,0 +1,21 @@
+\frametitle{Mock Management}
+    \begin{lstlisting}[language=JavaScript]
+// Mock dependencies
+jest.mock(`../dependency', () => ({
+  someFunction: jest.fn()
+}));
+
+// Helper setup
+const setupComponent = (props = {}) => {
+  render(<Component {...props} />);
+};
+    \end{lstlisting}
+
+    \begin{block}{Best Practices}
+        \begin{itemize}
+            \item Mock external dependencies
+            \item Create reusable setup functions
+            \item Clean state between tests
+            \item Control timer management
+        \end{itemize}
+    \end{block}

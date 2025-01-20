@@ -4,12 +4,34 @@
 \useoutertheme{miniframes}
 \useinnertheme{circles}
 
-% Additional settings for better presentation
-\setbeamertemplate{navigation symbols}{}  % Remove navigation symbols
-\setbeamertemplate{footline}[frame number]  % Add frame numbers
+% Required packages
+\usepackage{verbatim}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{textcomp}
 
 % Include custom theme and color definitions
 \usepackage{RCRDtheme}
+
+% Configure spacing and presentation settings
+\setlength{\parskip}{0.5em}
+\setbeamertemplate{navigation symbols}{}  % Remove navigation symbols
+\setbeamertemplate{footline}[frame number]  % Add frame numbers
+\setbeamertemplate{frametitle continuation}[from second]
+
+% Configure listings
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=flexible,
+  breaklines=true,
+  frame=none,
+  backgroundcolor=\color{white},
+  showstringspaces=false,
+  literate={├}{{\smash{\raisebox{-1ex}{\textcolor{black}{├}}}}}1
+           {│}{{\textcolor{black}{│}}}1
+           {└}{{\smash{\raisebox{-1ex}{\textcolor{black}{└}}}}}1
+}
 
 % Title page information
 % Presentation structure
@@ -221,11 +243,14 @@
             \end{itemize}
         \end{itemize}
     \end{exampleblock}
+\end{frame}
 
-    \end{frame}
-
-    \begin{frame}  
+\begin{frame}  
     \begin{block}{Testing Principles Phase 1}
+        I ran this when I first implemented my testing framework.
+        
+        There was an existing codebase that I wanted to document with tests before changing anything. 
+        
         \begin{itemize}
             \item Never modify source code to make tests pass
             \item Document needed changes in meta/*.md files
@@ -234,13 +259,14 @@
             \item Maintain test isolation and clear boundaries
         \end{itemize}
     \end{block}
-I woudl run a session on an aspect with the intructions for the LLM as above. When I had read and understood the needed changes, I would switch to Phase 2.
+    \vspace{0.5cm}
+    I would run a session on an aspect with the instructions for the LLM as above. When I had read and understood the needed changes, I would switch to Phase 2. \pause
 \end{frame}
 
-\begin{frame}  
-\begin{block}{Testing Principles Phase 2}
+\begin{frame}
+    \begin{block}{Testing Principles Phase 2}
     \begin{itemize}
-        \item Never modify code to make tests pass
+        \item Never modify tests to make tests pass
         \item Make the changes described in meta/*.md files
         \item Reintroduce previously failing tests when addressed 
         \item Wait for explicit approval before implementation changes
@@ -249,14 +275,29 @@ I woudl run a session on an aspect with the intructions for the LLM as above. Wh
 \end{block}
 \end{frame}
 
+\begin{frame}[fragile]
+    \frametitle{Testing Structure}
+    \begin{block}{Directory Structure}
+        Tests are organized following a clear directory structure that mirrors the source code:
+    \end{block}
+    
+    \begin{lstlisting}[basicstyle=\ttfamily\small]
+src/
+|-- components/
+|   |-- __tests__/          # Component tests
+|   `-- ComponentName/
+|       `-- __tests__/      # Specific component tests
+`-- utils/
+    `-- __tests__/          # Utility function tests
+    \end{lstlisting}
+\end{frame}
 
-
-\begin{frame}
+\begin{frame}[t]
     \frametitle{Testing Strategy}
     \begin{itemize}
-        \item Comprehensive test cases
-        \item Edge case handling
-        \item Debug capabilities
+        \item Comprehensive test cases \pause
+        \item Edge case handling \pause
+        \item Debug capabilities \pause
         \item Automated validation
     \end{itemize}
 \end{frame}
@@ -274,15 +315,15 @@ I woudl run a session on an aspect with the intructions for the LLM as above. Wh
     \end{exampleblock}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[t]
     \frametitle{Future Enhancements}
     \begin{block}{Planned Improvements}
-        \begin{itemize}
-            \item Additional time formats
-            \item Enhanced user interactions
-            \item Visual improvements
-            \item Extended test coverage
-        \end{itemize}
+    \begin{itemize}
+        \item Additional time formats \pause
+        \item Enhanced user interactions \pause
+        \item Visual improvements \pause
+        \item Extended test coverage
+    \end{itemize}
     \end{block}
 \end{frame}
 
