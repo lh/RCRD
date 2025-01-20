@@ -1,0 +1,289 @@
+\documentclass{beamer}
+\usetheme{Malmoe}
+\usecolortheme{beaver}
+\useoutertheme{miniframes}
+\useinnertheme{circles}
+
+% Additional settings for better presentation
+\setbeamertemplate{navigation symbols}{}  % Remove navigation symbols
+\setbeamertemplate{footline}[frame number]  % Add frame numbers
+
+% Include custom theme and color definitions
+\usepackage{RCRDtheme}
+
+% Title page information
+% Presentation structure
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\title{Retinal Detachment Risk Calculator\\Application Development}
+\subtitle{A Test-Driven Development Approach}
+\author{Luke Herbert}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Presentation Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Introduction}
+\begin{frame}
+    \frametitle{Project Overview}
+    \begin{itemize}
+        \item I wanted to make a little application to help me with my retinal detachment risk assessment. It was a side quest\dots \pause
+        
+        \item I had available a paper with various risk factors for retinal detachment. \pause
+        
+        \item In my head was a simple little app I could use on my phone or computer, put in parameters, draw a retinal detachment and get a risk output. \pause
+    \end{itemize}
+\end{frame}
+
+\section{Project Requirements}
+\begin{frame}
+    \frametitle{Initial Constraints}
+    \begin{alertblock}{Core Requirements}
+        \begin{itemize}
+            \item Had to be obvious to use
+            \item No data sent off device
+            \item Appear instantaneous to the user
+            \item Graphic interface
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Constraint implications}
+    \begin{tabular}{|l|l|}
+        \hline
+        Had to be obvious to use & \pause Down to my design \pause \\
+        \hline
+        No data sent off device & \pause Javascript? WASM? \pause \\
+        \hline
+        Appear instantaneous to the user & \pause Calculation on device \pause \\
+        \hline
+        Graphic interface & \pause Typescript and React? \\
+        \hline
+    \end{tabular}
+
+    \vspace{1cm}
+
+    Because I had been doing more object oriented stuff I chose TypeScript which is a superset of Javascript with types. React is a library for building user interfaces in TypeScript and seemed to be the most popular framework for building web applications, so I chose that. I didn't know either TypeScript or React before and I wanted this to be quick so I decided to use LLM to help me.
+\end{frame}
+
+\section{Development Process}
+\begin{frame}
+    \frametitle{LLM-Assisted Development Process}
+    \begin{itemize}
+        \item Work out the logic from the paper
+        \item Design the calculation part
+        \item Design the graphical part
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Logic from the paper}
+    \begin{itemize}
+        \item Supply the paper and ask LLM to extract the parameters
+        \item Confirm the output manually
+        \item Extract the regression equation from the paper
+        \item Use the equation to calculate the risk and check against examples in the paper
+    \end{itemize}
+
+    \vspace{0.5cm}
+    This was pretty straightforward and I got the logic from the paper.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Design the calculation part}
+    \begin{itemize}
+        \item I checked the maths separately
+        \item Asked the LLM to create code to reproduce the calculation
+        \item Checked against hand calculations and examples in the paper
+    \end{itemize}
+
+    \vspace{0.5cm}
+    This was straightforward.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Design the graphical part}
+    \begin{itemize}
+        \item Initially asked the LLM to create code to produce a graphic of a clock face
+        \item Added highlighting and the ability to select segments
+        \item Added the logic around the selection of tears and detachment
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    This was far from straightforward.
+\end{frame}
+
+\begin{frame}
+    \frametitle{(Re-)Design the graphical part}
+    \begin{itemize}
+        \item Added highlighting and the ability to select segments
+        \item Added the logic around the selection of tears and detachment
+    \end{itemize}
+    
+    \vspace{0.5cm}
+    This was far from straightforward!
+\end{frame}
+
+\section{Challenges and Solutions}
+\begin{frame}
+    \frametitle{LLM Integration Challenges}
+    \begin{alertblock}{Key Challenges}
+        \begin{itemize}
+            \item If something wasn't quite right there was a tendency to go round in circles
+            \item Hard to know when to stop
+            \item Need for structured approach to avoid endless iterations
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Eventual LLM working pattern}
+    \begin{block}{Documentation Strategy}
+        \begin{itemize}
+            \item Have a "meta" folder to contain:
+            \begin{itemize}
+                \item Design documents
+                \item Examples
+                \item Documents generated by the LLM
+                \item A "next steps" document
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+    
+    \begin{block}{Testing Approach}
+        \begin{itemize}
+            \item Set up a testing framework:
+            \begin{itemize}
+                \item Make minimal tests to start
+                \item Have the tests run after every change
+                \item Use the tests to drive the development
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Using tests to drive development}
+    As an example, the way things displayed had to be different for mobile and desktop. Working in parallel was too complicated so I got it working in one format and then wrote tests to check that the other format worked. These obviously failed, but I could feed back the results of the failing tests to the LLM until the tests passed.
+\end{frame}
+
+\section{Testing Framework}
+\begin{frame}
+    \frametitle{Testing Strategy Overview}
+    \begin{enumerate}
+        \item Test Organization
+        \begin{itemize}
+            \item Tests organized by view (mobile/desktop) and responsibility
+            \item Clear separation between component, utility, and hook tests
+            \item Tests grouped using describe blocks with clear descriptions
+            \item Proper test isolation and setup/teardown
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Test-Driven Development cycle}
+    \begin{alertblock}{Key TDD Steps}
+        \begin{enumerate}
+            \item Write/update test for a single change
+            \item Verify test fails (red)
+            \item Make minimal code changes
+            \item Verify test passes (green)
+            \item Refactor if needed
+            \item Get approval before next change
+        \end{enumerate}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Component Testing Structure Example}
+    \begin{exampleblock}{Test Organization}
+        \begin{itemize}
+            \item RetinalCalculator tests split into:
+            \begin{itemize}
+                \item Container tests (view switching, layout)
+                \item Mobile view tests (touch interactions)
+                \item Desktop view tests (mouse interactions)
+                \item Shared functionality tests
+            \end{itemize}
+        \end{itemize}
+    \end{exampleblock}
+
+    \end{frame}
+
+    \begin{frame}  
+    \begin{block}{Testing Principles Phase 1}
+        \begin{itemize}
+            \item Never modify source code to make tests pass
+            \item Document needed changes in meta/*.md files
+            \item Skip failing tests with detailed comments
+            \item Wait for explicit approval before implementation changes
+            \item Maintain test isolation and clear boundaries
+        \end{itemize}
+    \end{block}
+I woudl run a session on an aspect with the intructions for the LLM as above. When I had read and understood the needed changes, I would switch to Phase 2.
+\end{frame}
+
+\begin{frame}  
+\begin{block}{Testing Principles Phase 2}
+    \begin{itemize}
+        \item Never modify code to make tests pass
+        \item Make the changes described in meta/*.md files
+        \item Reintroduce previously failing tests when addressed 
+        \item Wait for explicit approval before implementation changes
+        \item Maintain code isolation and clear boundaries
+    \end{itemize}
+\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+    \frametitle{Testing Strategy}
+    \begin{itemize}
+        \item Comprehensive test cases
+        \item Edge case handling
+        \item Debug capabilities
+        \item Automated validation
+    \end{itemize}
+\end{frame}
+
+\section{Results and Future Work}
+\begin{frame}
+    \frametitle{Key Development Achievements}
+    \begin{exampleblock}{Technical Implementation}
+        \begin{itemize}
+            \item React-based implementation
+            \item Modular component structure
+            \item Utility functions for time conversion
+            \item Robust testing framework
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Future Enhancements}
+    \begin{block}{Planned Improvements}
+        \begin{itemize}
+            \item Additional time formats
+            \item Enhanced user interactions
+            \item Visual improvements
+            \item Extended test coverage
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\end{document}
