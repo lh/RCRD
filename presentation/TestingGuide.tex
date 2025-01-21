@@ -1,0 +1,303 @@
+\documentclass{beamer}
+\usetheme{Malmoe}
+\usecolortheme{beaver}
+\useoutertheme{miniframes}
+\useinnertheme{circles}
+
+% Required packages
+\usepackage{verbatim}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{textcomp}
+
+% Include custom theme and color definitions
+\usepackage{RCRDtheme}
+
+% Configure spacing and presentation settings
+\setlength{\parskip}{0.5em}
+\setbeamertemplate{navigation symbols}{}  % Remove navigation symbols
+\setbeamertemplate{footline}[frame number]  % Add frame numbers
+\setbeamertemplate{frametitle continuation}[from second]
+
+% Configure listings
+\lstdefinelanguage{JavaScript}{
+  keywords={const, let, var, function, return, if, else, for, while, do, switch, case, break, continue, new, try, catch, throw, typeof, instanceof},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={class, export, boolean, throw, implements, import, this, console},
+  ndkeywordstyle=\color{darkgray}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  literate={'}{\textquotesingle}1
+           {`}{\textasciigrave}1
+}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  columns=flexible,
+  breaklines=true,
+  frame=none,
+  backgroundcolor=\color{white},
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny,
+  numbersep=5pt,
+  tabsize=2,
+  extendedchars=true,
+  language=JavaScript
+}
+
+% Title page information
+% Presentation structure
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\title{Testing Guide\\Setting Up and Writing Tests}
+\subtitle{A Practical Approach to Testing React Applications}
+\author{Testing Framework Documentation}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Presentation Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Testing Stack}
+\begin{frame}
+    \frametitle{Core Technologies}
+    \begin{block}{Primary Testing Tools}
+        \begin{itemize}
+            \item Jest
+            \begin{itemize}
+                \item Primary test runner and assertion library
+                \item Handles test orchestration and reporting
+                \item Provides mocking capabilities
+                \item Supports timer mocking for async operations
+            \end{itemize}
+            \pause
+            \item React Testing Library
+            \begin{itemize}
+                \item Component testing utility
+                \item Encourages testing user behavior
+                \item Provides DOM querying utilities
+                \item Promotes accessibility-first testing
+            \end{itemize}
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{Setting Up Testing Environment}
+\begin{frame}[fragile]
+    \frametitle{Initial Setup}
+    \begin{block}{Configuration Files}
+        \begin{itemize}
+            \item jest.config.js - Core Jest configuration
+            \item setupTests.js - Test environment setup
+        \end{itemize}
+    \end{block}
+    
+    \begin{lstlisting}[language=JavaScript]
+// setupTests.js
+import `@testing-library/jest-dom';
+import { jest } from `@jest/globals';
+
+// Mock timers for all tests
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.runOnlyPendingTimers();
+  jest.useRealTimers();
+});
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Directory Structure}
+    \begin{block}{Test Organization}
+        Tests are organized following a clear directory structure that mirrors the source code:
+    \end{block}
+    
+    \begin{lstlisting}[basicstyle=\ttfamily\small]
+src/
+|-- components/
+|   |-- __tests__/          # Component tests
+|   `-- ComponentName/
+|       `-- __tests__/      # Specific component tests
+`-- utils/
+    `-- __tests__/          # Utility function tests
+    \end{lstlisting}
+\end{frame}
+
+\section{Writing Tests}
+\begin{frame}[fragile]
+    \frametitle{Test Structure}
+    \begin{block}{Component Test Example}
+        \begin{lstlisting}[language=JavaScript]
+describe(`ComponentName', () => {
+  describe(`Behavior Category', () => {
+    test(`should exhibit specific behavior', () => {
+      // Test implementation
+    });
+  });
+});
+        \end{lstlisting}
+    \end{block}
+    
+    \begin{alertblock}{Key Elements}
+        \begin{itemize}
+            \item Clear test grouping using describe blocks
+            \item Focused, single-responsibility tests
+            \item Proper setup and teardown
+            \item Consistent naming conventions
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Mock Management}
+    \begin{lstlisting}[language=JavaScript]
+// Mock dependencies
+jest.mock(`../dependency', () => ({
+  someFunction: jest.fn()
+}));
+
+// Helper setup
+const setupComponent = (props = {}) => {
+  render(<Component {...props} />);
+};
+    \end{lstlisting}
+    
+    \begin{block}{Best Practices}
+        \begin{itemize}
+            \item Mock external dependencies
+            \item Create reusable setup functions
+            \item Clean state between tests
+            \item Control timer management
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{Test Categories}
+\begin{frame}
+    \frametitle{Types of Tests}
+    \begin{enumerate}
+        \item View-Based Tests
+        \begin{itemize}
+            \item Container tests (component composition)
+            \item Mobile view specific tests
+            \item Desktop view specific tests
+            \item View-specific interactions and layouts
+        \end{itemize}
+        \pause
+        \item Shared Component Tests
+        \begin{itemize}
+            \item Reusable component behavior
+            \item Common functionality
+            \item Shared hooks and utilities
+        \end{itemize}
+        \pause
+        \item Integration Tests
+        \begin{itemize}
+            \item Component interactions
+            \item State management
+            \item Data flow
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\section{Best Practices}
+\begin{frame}
+    \frametitle{Testing Guidelines}
+    \begin{block}{Core Principles}
+        \begin{itemize}
+            \item Test behavior over implementation
+            \item One assertion per test
+            \item Clear test descriptions
+            \item Proper test isolation
+        \end{itemize}
+    \end{block}
+    
+    \begin{alertblock}{Common Pitfalls to Avoid}
+        \begin{itemize}
+            \item Testing implementation details
+            \item Brittle selectors
+            \item Complex test setups
+            \item Shared state between tests
+        \end{itemize}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Test-Driven Development}
+    \begin{enumerate}
+        \item Write test first
+        \begin{itemize}
+            \item Define expected behavior
+            \item Create failing test
+        \end{itemize}
+        \pause
+        \item Implement minimal code
+        \begin{itemize}
+            \item Write just enough code to pass
+            \item Focus on functionality
+        \end{itemize}
+        \pause
+        \item Refactor
+        \begin{itemize}
+            \item Clean up implementation
+            \item Maintain test coverage
+        \end{itemize}
+    \end{enumerate}
+\end{frame}
+
+\section{Maintenance}
+\begin{frame}
+    \frametitle{Keeping Tests Healthy}
+    \begin{block}{Regular Reviews}
+        \begin{itemize}
+            \item Test coverage analysis
+            \item Performance monitoring
+            \item Pattern consistency
+            \item Documentation updates
+        \end{itemize}
+    \end{block}
+    
+    \begin{block}{Updates}
+        \begin{itemize}
+            \item Framework version updates
+            \item Dependency management
+            \item Best practices alignment
+            \item Test suite optimization
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\section{Future Improvements}
+\begin{frame}
+    \frametitle{Continuous Enhancement}
+    \begin{exampleblock}{Areas for Growth}
+        \begin{itemize}
+            \item Coverage expansion \pause
+            \item Performance optimization \pause
+            \item Documentation improvements \pause
+            \item Testing patterns library
+        \end{itemize}
+    \end{exampleblock}
+\end{frame}
+
+\end{document}

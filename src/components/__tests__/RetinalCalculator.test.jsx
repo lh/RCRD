@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
 import { MODEL_TYPE } from '../../constants/modelTypes';
+import { TEST_DEFAULTS, TEST_SCENARIOS } from '../../test-utils/constants';
 
 // Mock the calculator components
 jest.mock('../MobileRetinalCalculator', () => {
@@ -29,8 +30,8 @@ describe('RetinalCalculator', () => {
 
     test('renders mobile view for small screens', () => {
         render(<RetinalCalculator />);
-        const mobileView = screen.getByTestId('mobile-calculator');
-        expect(mobileView).toHaveClass('md:hidden');
+        const mobileView = screen.getByTestId('mobile-calculator').closest('.md\\:hidden');
+        expect(mobileView).toBeInTheDocument();
     });
 
     test('renders desktop view for large screens', () => {
@@ -43,10 +44,20 @@ describe('RetinalCalculator', () => {
         render(<RetinalCalculator />);
         
         // Title should be present
-        expect(screen.getByText('Retinal Detachment Risk Calculator')).toBeInTheDocument();
+        expect(screen.getByText('Risk Calculator Retinal Detachment (RCRD)')).toBeInTheDocument();
         
-        // Links should be present
-        expect(screen.getByText('UK BEAVRS')).toHaveAttribute('href', 'https://www.beavrs.org/');
-        expect(screen.getByText('study')).toHaveAttribute('href', 'https://www.nature.com/articles/s41433-023-02388-0');
+        // BEAVRS link should be present with correct URL and attributes
+        const beavrsLink = screen.getByText('UK BEAVRS database study');
+        expect(beavrsLink).toHaveAttribute('href', 'https://bjo.bmj.com/content/106/1/120');
+        expect(beavrsLink).toHaveAttribute('target', '_blank');
+        expect(beavrsLink).toHaveAttribute('rel', 'noopener noreferrer');
+        
+        // Attribution should be present
+        expect(screen.getByText('Luke Herbert')).toBeInTheDocument();
+        expect(screen.getByText('inspired by')).toBeInTheDocument();
+        expect(screen.getByAltText('HSMA Logo')).toBeInTheDocument();
     });
+
+    // Note: Form interaction tests moved to mobile/desktop calculator test files
+    // since the form elements are rendered inside those components
 });

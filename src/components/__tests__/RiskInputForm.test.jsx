@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act, waitFor } from '@testing-library/react';
 import RiskInputForm from '../RiskInputForm';
 import { pvrOptions } from '../../constants/riskCalculatorConstants';
 
@@ -88,110 +88,169 @@ describe('RiskInputForm', () => {
         jest.clearAllMocks();
     });
 
-    test('renders all selection components with correct props', () => {
-        render(<RiskInputForm {...mockProps} position="right" />);
+    describe('Mobile View', () => {
+        test('renders all components in mobile layout', () => {
+            render(<RiskInputForm {...mockProps} isMobile={true} />);
 
-        // Verify gauge selection
-        const gaugeSelect = screen.getByTestId('gauge-select');
-        expect(gaugeSelect).toHaveValue('25g');
-        fireEvent.change(gaugeSelect, { target: { value: '23g' } });
-        expect(mockProps.setVitrectomyGauge).toHaveBeenCalledWith('23g');
-
-        // Verify tamponade selection
-        const tamponadeSelect = screen.getByTestId('tamponade-select');
-        expect(tamponadeSelect).toHaveValue('sf6');
-        fireEvent.change(tamponadeSelect, { target: { value: 'c2f6' } });
-        expect(mockProps.setTamponade).toHaveBeenCalledWith('c2f6');
-
-        // Verify cryotherapy selection
-        const cryoSelect = screen.getByTestId('cryotherapy-select');
-        expect(cryoSelect).toHaveValue('no');
-        fireEvent.change(cryoSelect, { target: { value: 'yes' } });
-        expect(mockProps.setCryotherapy).toHaveBeenCalledWith('yes');
-    });
-
-    test('disables all inputs when disabled prop is true', () => {
-        render(<RiskInputForm {...mockProps} disabled={true} />);
-
-        // Age input should be disabled
-        expect(screen.getByRole('spinbutton')).toBeDisabled();
-
-        // PVR grade radios should be disabled
-        const pvrRadios = screen.getAllByRole('radio');
-        pvrRadios.forEach(radio => {
-            expect(radio).toBeDisabled();
+            // Verify all components are rendered
+            expect(screen.getByRole('spinbutton')).toBeInTheDocument(); // Age input
+            expect(screen.getByTestId('gauge-select')).toBeInTheDocument();
+            expect(screen.getByTestId('tamponade-select')).toBeInTheDocument();
+            expect(screen.getByTestId('cryotherapy-select')).toBeInTheDocument();
+            expect(screen.getAllByRole('radio')).toHaveLength(4); // PVR options
         });
 
-        // Treatment options should be disabled
-        expect(screen.getByTestId('gauge-select')).toBeDisabled();
-        expect(screen.getByTestId('tamponade-select')).toBeDisabled();
-        expect(screen.getByTestId('cryotherapy-select')).toBeDisabled();
+        test('handles form submission in mobile view', () => {
+            render(<RiskInputForm {...mockProps} isMobile={true} />);
+            
+            const form = screen.getByTestId('gauge-select').closest('form');
+            fireEvent.submit(form);
+            
+            // Verify default submission is prevented
+            expect(mockProps.onReset).not.toHaveBeenCalled();
+        });
+
+        test('disables all inputs in mobile view when disabled prop is true', () => {
+            render(<RiskInputForm {...mockProps} isMobile={true} disabled={true} />);
+
+            // Verify all inputs are disabled
+            expect(screen.getByRole('spinbutton')).toBeDisabled();
+            expect(screen.getByTestId('gauge-select')).toBeDisabled();
+            expect(screen.getByTestId('tamponade-select')).toBeDisabled();
+            expect(screen.getByTestId('cryotherapy-select')).toBeDisabled();
+            screen.getAllByRole('radio').forEach(radio => {
+                expect(radio).toBeDisabled();
+            });
+        });
+
+        test('resets form correctly in mobile view', () => {
+            render(<RiskInputForm {...mockProps} isMobile={true} />);
+
+            // Change values
+            fireEvent.change(screen.getByTestId('gauge-select'), { target: { value: '23g' } });
+            fireEvent.change(screen.getByTestId('tamponade-select'), { target: { value: 'c2f6' } });
+            fireEvent.change(screen.getByTestId('cryotherapy-select'), { target: { value: 'yes' } });
+
+            // Reset form
+            const form = screen.getByTestId('gauge-select').closest('form');
+            fireEvent.reset(form);
+
+            // Verify reset callback was called
+            expect(mockProps.onReset).toHaveBeenCalledTimes(1);
+        });
     });
 
-    test('preserves all values when switching positions', () => {
-        const { rerender } = render(
-            <RiskInputForm 
-                {...mockProps} 
-                position="right"
-                age="65"
-                pvrGrade="C"
-                vitrectomyGauge="23g"
-                cryotherapy="yes"
-                tamponade="c2f6"
-            />
-        );
+    describe('Desktop View - Left Panel', () => {
+        test('renders left panel components correctly', () => {
+            render(<RiskInputForm {...mockProps} position="left" />);
 
-        // Switch positions
-        rerender(
-            <RiskInputForm 
-                {...mockProps} 
-                position="left"
-                age="65"
-                pvrGrade="C"
-                vitrectomyGauge="23g"
-                cryotherapy="yes"
-                tamponade="c2f6"
-            />
-        );
+            // Verify left panel components
+            expect(screen.getByRole('spinbutton')).toBeInTheDocument(); // Age input
+            expect(screen.getAllByRole('radio')).toHaveLength(4); // PVR options
+            expect(screen.getByTestId('gauge-select')).toBeInTheDocument();
 
-        // Switch back
-        rerender(
-            <RiskInputForm 
-                {...mockProps} 
-                position="right"
-                age="65"
-                pvrGrade="C"
-                vitrectomyGauge="23g"
-                cryotherapy="yes"
-                tamponade="c2f6"
-            />
-        );
+            // Verify right panel components are not rendered
+            expect(screen.queryByTestId('tamponade-select')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('cryotherapy-select')).not.toBeInTheDocument();
+        });
 
-        // Verify all values are preserved
-        expect(screen.getByTestId('gauge-select')).toHaveValue('23g');
-        expect(screen.getByTestId('tamponade-select')).toHaveValue('c2f6');
-        expect(screen.getByTestId('cryotherapy-select')).toHaveValue('yes');
+        test('handles left panel interactions', () => {
+            render(<RiskInputForm {...mockProps} position="left" />);
+
+            // Test age input
+            const ageInput = screen.getByRole('spinbutton');
+            fireEvent.change(ageInput, { target: { value: '50' } });
+            expect(mockProps.setAge).toHaveBeenCalledWith('50');
+
+            // Test gauge selection
+            const gaugeSelect = screen.getByTestId('gauge-select');
+            fireEvent.change(gaugeSelect, { target: { value: '23g' } });
+            expect(mockProps.setVitrectomyGauge).toHaveBeenCalledWith('23g');
+
+            // Test PVR selection
+            const pvrRadios = screen.getAllByRole('radio');
+            fireEvent.click(pvrRadios[1]); // Select second option
+            expect(mockProps.setPvrGrade).toHaveBeenCalled();
+        });
     });
 
-    test('resets form correctly', () => {
-        render(
-            <RiskInputForm 
-                {...mockProps} 
-                position="right"
-                isMobile={true}
-            />
-        );
+    describe('Desktop View - Right Panel', () => {
+        test('renders right panel components correctly', () => {
+            render(<RiskInputForm {...mockProps} position="right" />);
 
-        // Change all values
-        fireEvent.change(screen.getByTestId('gauge-select'), { target: { value: '23g' } });
-        fireEvent.change(screen.getByTestId('tamponade-select'), { target: { value: 'c2f6' } });
-        fireEvent.change(screen.getByTestId('cryotherapy-select'), { target: { value: 'yes' } });
+            // Verify right panel components
+            expect(screen.getByTestId('tamponade-select')).toBeInTheDocument();
+            expect(screen.getByTestId('cryotherapy-select')).toBeInTheDocument();
 
-        // Reset form
-        const form = screen.getByRole('form');
-        fireEvent.reset(form);
+            // Verify left panel components are not rendered
+            expect(screen.queryByRole('spinbutton')).not.toBeInTheDocument();
+            expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+            expect(screen.queryByTestId('gauge-select')).not.toBeInTheDocument();
+        });
 
-        // Verify onReset was called
-        expect(mockProps.onReset).toHaveBeenCalledTimes(1);
+        test('handles right panel interactions', () => {
+            render(<RiskInputForm {...mockProps} position="right" />);
+
+            // Test tamponade selection
+            const tamponadeSelect = screen.getByTestId('tamponade-select');
+            fireEvent.change(tamponadeSelect, { target: { value: 'c2f6' } });
+            expect(mockProps.setTamponade).toHaveBeenCalledWith('c2f6');
+
+            // Test cryotherapy selection
+            const cryoSelect = screen.getByTestId('cryotherapy-select');
+            fireEvent.change(cryoSelect, { target: { value: 'yes' } });
+            expect(mockProps.setCryotherapy).toHaveBeenCalledWith('yes');
+        });
+    });
+
+    describe('Shared Behavior', () => {
+        test('validates age input', async () => {
+            const { rerender } = render(<RiskInputForm {...mockProps} isMobile={true} />);
+            const ageInput = screen.getByRole('spinbutton');
+            
+            // Test initial state
+            expect(ageInput).toHaveAttribute('aria-invalid', 'false');
+            
+            // Test invalid age
+            await act(async () => {
+                fireEvent.change(ageInput, { target: { value: '15' } });
+                rerender(<RiskInputForm {...mockProps} age="15" isMobile={true} />);
+            });
+            
+            await waitFor(() => {
+                expect(mockProps.setAge).toHaveBeenCalledWith('15');
+                expect(ageInput).toHaveAttribute('aria-invalid', 'true');
+                expect(screen.getByText(/age must be between 18 and 100/i)).toBeInTheDocument();
+            });
+            
+            // Test valid age
+            await act(async () => {
+                fireEvent.change(ageInput, { target: { value: '50' } });
+                rerender(<RiskInputForm {...mockProps} age="50" isMobile={true} />);
+            });
+            
+            await waitFor(() => {
+                expect(mockProps.setAge).toHaveBeenCalledWith('50');
+                expect(ageInput).toHaveAttribute('aria-invalid', 'false');
+                expect(screen.queryByText(/age must be between 18 and 100/i)).not.toBeInTheDocument();
+            });
+        });
+
+        test('preserves values when switching between mobile and desktop views', () => {
+            const { rerender } = render(<RiskInputForm {...mockProps} isMobile={true} />);
+            
+            const updatedProps = {
+                ...mockProps,
+                vitrectomyGauge: '23g',
+                tamponade: 'c2f6'
+            };
+            
+            // Switch to desktop view with updated props
+            rerender(<RiskInputForm {...updatedProps} position="left" />);
+            expect(screen.getByTestId('gauge-select')).toHaveValue('23g');
+            
+            rerender(<RiskInputForm {...updatedProps} position="right" />);
+            expect(screen.getByTestId('tamponade-select')).toHaveValue('c2f6');
+        });
     });
 });

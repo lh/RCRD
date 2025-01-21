@@ -22,12 +22,19 @@ jest.mock('../clock/ClockFace', () => {
         >
           Toggle Segment
         </button>
-        <button
-          onClick={() => onTouchDeviceChange(true)}
-          data-testid="touch-device-toggle"
-        >
-          Toggle Touch Device
-        </button>
+        {/* Touch device toggle and indicator */}
+        <div>
+          <button
+            onClick={() => onTouchDeviceChange(true)}
+            data-testid="touch-device-toggle"
+          >
+            Toggle Touch Device
+          </button>
+          <div 
+            data-testid="touch-indicator"
+            style={{ backgroundColor: 'green' }}
+          />
+        </div>
       </div>
     );
   };
@@ -77,9 +84,9 @@ jest.mock('../clock/utils/formatDetachmentHours');
 
 describe('MobileRetinalCalculator', () => {
   const mockRisk = {
-    probability: '25.5',
+    probability: 25.5,
     steps: [],
-    logit: '-1.082'
+    logit: -1.082
   };
 
   beforeEach(() => {
@@ -141,9 +148,9 @@ describe('MobileRetinalCalculator', () => {
     expect(inputSummaryHeading).toBeInTheDocument();
     
     // Verify risk display
-    const riskHeading = screen.getByText(/estimated risk of failure/i);
+    const riskHeading = screen.getByText(/probability of requiring additional surgery/i);
     expect(riskHeading).toBeInTheDocument();
-    expect(riskHeading.textContent).toMatch(/25\.5%/);
+    expect(screen.getByText('25.5%')).toBeInTheDocument();
     
     // Verify clock face is present
     const clockFace = screen.getByTestId('clock-face');
@@ -161,29 +168,53 @@ describe('MobileRetinalCalculator', () => {
     
     fireEvent.click(resetButton);
     
-    // Wait for the age input to be cleared
+    // Wait for the age input to reset to default
     await waitFor(() => {
       const updatedAgeInput = screen.getByTestId('age-input-mobile');
-      expect(updatedAgeInput.value).toBe('');
+      expect(updatedAgeInput.value).toBe('50');
     });
   });
 
-  test('shows validation messages', () => {
+  test('shows correct validation messages', () => {
     render(<MobileRetinalCalculator />);
     
-    const calculateButton = screen.getByTestId('calculate-button');
-    fireEvent.click(calculateButton);
+    // Initially shows detachment required (age defaults to 50)
+    let buttonSection = screen.getByTestId('calculate-button').parentElement;
+    let validationMessage = within(buttonSection).getByText(/detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
     
-    // Check for initial validation message in the button section
-    const buttonSection = screen.getByTestId('calculate-button').parentElement;
-    const initialValidationMessage = within(buttonSection).getByText(/age and detachment area required/i);
-    expect(initialValidationMessage).toBeInTheDocument();
-    
-    // Update age and check for updated validation message
+    // Clear age to see both required message
     const ageInput = screen.getByTestId('age-input-mobile');
+    fireEvent.change(ageInput, { target: { value: '' } });
+    
+    // Now shows both required
+    buttonSection = screen.getByTestId('calculate-button').parentElement;
+    validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Add detachment but keep age empty
+    const segmentButton = screen.getByTestId('segment-toggle');
+    fireEvent.click(segmentButton);
+    
+    // Now shows only age required
+    buttonSection = screen.getByTestId('calculate-button').parentElement;
+    validationMessage = within(buttonSection).getByText(/age required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Remove detachment and add age
+    fireEvent.click(segmentButton); // Remove detachment
     fireEvent.change(ageInput, { target: { value: '65' } });
     
-    const updatedValidationMessage = within(buttonSection).getByText(/detachment area required/i);
-    expect(updatedValidationMessage).toBeInTheDocument();
+    // Now shows only detachment required
+    buttonSection = screen.getByTestId('calculate-button').parentElement;
+    validationMessage = within(buttonSection).getByText(/detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Add detachment back
+    fireEvent.click(segmentButton);
+    
+    // Calculate button should now be enabled
+    const calculateButton = screen.getByTestId('calculate-button');
+    expect(calculateButton).not.toBeDisabled();
   });
 });

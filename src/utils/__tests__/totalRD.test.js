@@ -18,38 +18,39 @@ describe('Total RD Detection', () => {
 
     // Test inferior detachment detection
     test('correctly identifies inferior hours', () => {
-        // Create segments for hours 3-9 (2 segments per hour)
-        // Hour 3: segments 4-5
-        // Hour 4: segments 6-7
-        // Hour 5: segments 8-9
-        // Hour 6: segments 10-11
-        // Hour 7: segments 12-13
-        // Hour 8: segments 14-15
-        // Hour 9: segments 16-17
+        // Create segments for hours 3-9 (5 segments per hour)
         const inferiorSegments = [
-            'segment4', 'segment5',   // Hour 3
-            'segment6', 'segment7',   // Hour 4
-            'segment8', 'segment9',   // Hour 5
-            'segment10', 'segment11', // Hour 6
-            'segment12', 'segment13', // Hour 7
-            'segment14', 'segment15', // Hour 8
-            'segment16', 'segment17'  // Hour 9
+            10, 11, 12, 13, 14,  // Hour 3
+            15, 16, 17, 18, 19,  // Hour 4
+            20, 21, 22, 23, 24,  // Hour 5
+            25, 26, 27, 28, 29,  // Hour 6
+            30, 31, 32, 33, 34,  // Hour 7
+            35, 36, 37, 38, 39,  // Hour 8
+            40, 41, 42, 43, 44   // Hour 9
         ];
         expect(getInferiorDetachment(inferiorSegments)).toBe('6_hours');
 
         // Test partial inferior detachment (hours 3-5)
         const partialInferiorSegments = [
-            'segment4', 'segment5',   // Hour 3
-            'segment6', 'segment7',   // Hour 4
-            'segment8', 'segment9'    // Hour 5
+            10, 11, 12, 13, 14,  // Hour 3
+            15, 16, 17, 18, 19,  // Hour 4
+            20, 21, 22, 23, 24   // Hour 5
         ];
         expect(getInferiorDetachment(partialInferiorSegments)).toBe('3_to_5');
     });
 
     // Test complete risk calculation
     test('calculates correct risk for total RD case', () => {
-        // Create segments 0-23 for total RD
-        const totalRDSegments = Array.from({ length: 24 }, (_, i) => `segment${i}`);
+        // Create segments for total RD including all inferior hours
+        const totalRDSegments = [
+            10, 11, 12, 13, 14,  // Hour 3
+            15, 16, 17, 18, 19,  // Hour 4
+            20, 21, 22, 23, 24,  // Hour 5
+            25, 26, 27, 28, 29,  // Hour 6
+            30, 31, 32, 33, 34,  // Hour 7
+            35, 36, 37, 38, 39,  // Hour 8
+            40, 41, 42, 43, 44   // Hour 9
+        ];
 
         const result = calculateRiskWithSteps({
             age: '82',

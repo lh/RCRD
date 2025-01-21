@@ -1,0 +1,14 @@
+\frametitle{Testing Structure}
+    \begin{block}{Directory Structure}
+        Tests are organized following a clear directory structure that mirrors the source code:
+    \end{block}
+
+    \begin{lstlisting}[basicstyle=\ttfamily\small]
+src/
+|-- components/
+|   |-- __tests__/          # Component tests
+|   `-- ComponentName/
+|       `-- __tests__/      # Specific component tests
+`-- utils/
+    `-- __tests__/          # Utility function tests
+    \end{lstlisting}
