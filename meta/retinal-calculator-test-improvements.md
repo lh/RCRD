@@ -1,208 +1,99 @@
 # RetinalCalculator Test Improvements
 
-## View Separation Improvements
+## Test Issues and Fixes
 
-### 1. Component Structure
-- Separated RetinalCalculator into view-specific components:
-  * RetinalCalculator (container)
-  * MobileRetinalCalculator
-  * DesktopRetinalCalculator
-- Each component has dedicated test files
-- Clear separation of concerns between views
+### Mobile View Test
 
-### 2. Test Organization
-- Created view-specific test files:
-  * RetinalCalculator.test.jsx (container tests)
-  * MobileRetinalCalculator.test.jsx
-  * DesktopRetinalCalculator.test.jsx
-- Improved test isolation and clarity
-- Better test maintenance
+Original:
+```javascript
+test('renders mobile view for small screens', () => {
+    render(<RetinalCalculator />);
+    const mobileView = screen.getByTestId('mobile-calculator');
+    expect(mobileView).toHaveClass('md:hidden');
+});
+```
 
-### 3. Mock Improvements
-- Created view-specific mocks
-- Proper component boundaries
-- Clear mock responsibilities
-- Consistent mock patterns
+Issue:
+- Test looks for 'md:hidden' class on the mobile calculator component
+- But the class is actually on the parent div wrapper
 
-## Results Display Tests
+Fix:
+```javascript
+test('renders mobile view for small screens', () => {
+    render(<RetinalCalculator />);
+    const mobileView = screen.getByTestId('mobile-calculator').closest('.md\\:hidden');
+    expect(mobileView).toBeInTheDocument();
+});
+```
 
-### Fixed Issues
-1. Mock Implementation
-   - Removed extra properties from calculateRiskWithSteps mock that were causing React rendering issues
-   - Mock now only returns properties expected by RiskResults component:
-     * probability
-     * steps
-     * logit
-     * age
-     * pvrGrade
-     * vitrectomyGauge
+### Header Content Test
 
-2. Test Structure
-   - Added proper cleanup after each test
-   - Improved timeout handling for async operations
-   - Added explicit waiting for UI elements
+Original:
+```javascript
+test('renders header content', () => {
+    render(<RetinalCalculator />);
+    expect(screen.getByText('Retinal Detachment Risk Calculator')).toBeInTheDocument();
+    expect(screen.getByText('UK BEAVRS')).toHaveAttribute('href', 'https://www.beavrs.org/');
+    expect(screen.getByText('study')).toHaveAttribute('href', 'https://www.nature.com/articles/s41433-023-02388-0');
+});
+```
 
-### Test Coverage
-The tests now properly verify:
-1. Math details visibility toggling
-2. Complete input summary display
-3. Value persistence through reset and recalculate cycle
+Issues:
+1. Title text doesn't match actual implementation
+2. BEAVRS link URL is incorrect
+3. Study link test is looking for non-existent element
 
-## View-Specific Testing
+Fix:
+```javascript
+test('renders header content', () => {
+    render(<RetinalCalculator />);
+    expect(screen.getByText('Risk Calculator Retinal Detachment (RCRD)')).toBeInTheDocument();
+    expect(screen.getByText('UK BEAVRS database study')).toHaveAttribute('href', 'https://bjo.bmj.com/content/106/1/120');
+});
+```
 
-### 1. Mobile View Tests
-- Touch interaction handling
-- Mobile layout verification
-- Form validation in mobile context
-- Mobile-specific user flows
+## Implementation Details
 
-### 2. Desktop View Tests
-- Mouse interaction handling
-- Desktop layout verification
-- Form synchronization
-- Desktop-specific features
+1. Mobile/Desktop Views:
+   - Mobile view is wrapped in `<div className="md:hidden">`
+   - Desktop view is wrapped in `<div className="hidden md:block">`
+   - These classes handle responsive visibility
 
-### 3. Shared Functionality Tests
-- Risk calculation logic
-- Form validation rules
-- Data persistence
-- Common utilities
+2. Header Structure:
+   - Title: "Risk Calculator Retinal Detachment (RCRD)"
+   - Subtitle: "Based on the UK BEAVRS database study"
+   - BEAVRS link: Points to BMJ article
+   - Attribution section with HSMA logo
 
-## Test Helper Improvements
+## Testing Strategy
 
-### 1. Shared Helpers
-- Created getEnabledCalculateButton
-- Created getDisabledCalculateButton
-- Improved element queries
-- Better error messages
+1. Component Structure Tests:
+   - Verify presence of both mobile and desktop views
+   - Check responsive classes are correctly applied
+   - Validate component hierarchy
 
-### 2. View-Specific Helpers
-- Mobile touch simulation
-- Desktop mouse interaction
-- Layout verification
-- Form interaction helpers
+2. Content Tests:
+   - Match exact text content
+   - Verify link destinations
+   - Check accessibility attributes
 
-### 3. Mock Improvements
-- Consistent mock patterns
-- Clear mock responsibilities
-- Better error simulation
-- Proper cleanup
-
-## Best Practices Applied
-
-### 1. Component Testing
-- Tests focus on component behavior
-- Verifies both initial render and post-interaction states
-- Checks proper cleanup after reset
-- Clear test boundaries
-
-### 2. Mock Isolation
-- Mocks only return data needed by the component
-- Mock implementations are reset between tests
-- Different mock responses for different test scenarios
-- View-specific mock patterns
-
-### 3. Async Testing
-- Proper use of waitFor for async operations
-- Reasonable timeout values (2000ms)
-- Clear error messages for timeouts
-- Consistent async patterns
-
-### 4. Test Organization
-- Clear file structure
-- Consistent naming patterns
-- Proper test isolation
-- Maintainable test suites
+3. Responsive Behavior:
+   - Test visibility classes
+   - Verify correct component rendering based on screen size
 
 ## Future Improvements
 
-### 1. Visual Testing
-- Add visual regression tests
-- Implement screenshot comparisons
-- Test responsive behavior
-- Verify layout changes
+1. Additional Test Cases:
+   - Test accessibility attributes
+   - Verify image loading
+   - Check responsive layout changes
 
-### 2. Integration Testing
-- Add end-to-end tests
-- Test view transitions
-- Verify data flow
-- Test edge cases
+2. Test Organization:
+   - Group tests by feature
+   - Add more descriptive test names
+   - Include setup/teardown if needed
 
-### 3. Performance Testing
-- Add rendering benchmarks
-- Test view switching
-- Measure interaction speed
-- Profile test execution
-
-## Implementation Notes
-
-### 1. Test Structure
-```javascript
-// RetinalCalculator.test.jsx
-describe('RetinalCalculator', () => {
-  test('renders mobile version for small screens', () => {
-    // Test mobile view rendering
-  });
-
-  test('renders desktop version for large screens', () => {
-    // Test desktop view rendering
-  });
-});
-
-// MobileRetinalCalculator.test.jsx
-describe('MobileRetinalCalculator', () => {
-  test('handles touch interactions', () => {
-    // Test mobile interactions
-  });
-});
-
-// DesktopRetinalCalculator.test.jsx
-describe('DesktopRetinalCalculator', () => {
-  test('synchronizes form data', () => {
-    // Test desktop synchronization
-  });
-});
-```
-
-### 2. Mock Examples
-```javascript
-// View-specific mock
-jest.mock('../MobileRetinalCalculator', () => {
-  return function MockMobileRetinalCalculator() {
-    return <div data-testid="mobile-calculator">Mobile Version</div>;
-  };
-});
-
-// Shared functionality mock
-jest.mock('../utils/riskCalculations', () => ({
-  calculateRiskWithSteps: jest.fn().mockReturnValue({
-    probability: 75,
-    steps: [],
-    logit: 1.5
-  })
-}));
-```
-
-### 3. Helper Functions
-```javascript
-// Shared helpers
-const getEnabledCalculateButton = () => {
-  const buttons = screen.getAllByTestId('calculate-button');
-  return buttons.find(button => !button.disabled);
-};
-
-// View-specific helpers
-const simulateTouchInteraction = async (element) => {
-  fireEvent.touchStart(element);
-  await waitFor(() => {
-    expect(element).toHaveClass('active');
-  });
-};
-```
-
-## Conclusion
-The test improvements provide:
-- Clear separation between mobile and desktop views
-- Better test organization and maintenance
-- Improved mock patterns and helper functions
-- Solid foundation for future improvements
+3. Documentation:
+   - Add JSDoc comments
+   - Document test patterns
+   - Include examples of common test scenarios

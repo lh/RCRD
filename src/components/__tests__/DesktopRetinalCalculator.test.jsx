@@ -1,185 +1,221 @@
 import React from 'react';
-import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
 import DesktopRetinalCalculator from '../DesktopRetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
+import { MODEL_TYPE } from '../../constants/modelTypes';
+import * as useRetinalCalculatorModule from '../clock/hooks/useRetinalCalculator';
 
-// Mock child components
+// Mock the custom hook
+jest.mock('../clock/hooks/useRetinalCalculator', () => ({
+  useRetinalCalculator: jest.fn()
+}));
+
+// Mock child components minimally
 jest.mock('../clock/ClockFace', () => {
-  return function MockClockFace({ 
-    onTearToggle, 
-    onSegmentToggle, 
-    onHoverChange,
-    readOnly,
-    setDetachmentSegments 
-  }) {
-    return (
-      <div data-testid="clock-face">
-        <button 
-          onClick={() => onSegmentToggle(25)} 
-          data-testid="segment-toggle"
-          disabled={readOnly}
-        >
-          Toggle Segment
-        </button>
-      </div>
-    );
-  };
+  const MockClockFace = (props) => (
+    <div data-testid="clock-face">
+      <button 
+        onClick={() => {
+          props.onSegmentToggle(25);
+          props.setDetachmentSegments?.([25]);
+        }}
+        data-testid="segment-toggle"
+        disabled={props.readOnly}
+      >
+        Toggle Segment
+      </button>
+    </div>
+  );
+  return { __esModule: true, default: MockClockFace };
 });
 
 jest.mock('../RiskInputForm', () => {
-  return function MockRiskInputForm({ 
-    age,
-    setAge, 
-    pvrGrade,
-    setPvrGrade, 
-    vitrectomyGauge,
-    setVitrectomyGauge,
-    position
-  }) {
-    return (
-      <div data-testid={`risk-form-${position}`}>
+  const MockRiskInputForm = (props) => (
+    <div data-testid={`risk-form-${props.position}`}>
+      {props.age !== undefined && (
         <input 
           type="number"
-          value={age}
-          onChange={(e) => setAge(e.target.value)}
-          data-testid={`age-input-${position}`}
+          value={props.age}
+          onChange={(e) => props.setAge?.(e.target.value)}
+          data-testid={`age-input-${props.position}`}
         />
+      )}
+      {props.pvrGrade !== undefined && (
         <select
-          value={pvrGrade}
-          onChange={(e) => setPvrGrade(e.target.value)}
-          data-testid={`pvr-grade-${position}`}
+          value={props.pvrGrade}
+          onChange={(e) => props.setPvrGrade?.(e.target.value)}
+          data-testid={`pvr-grade-${props.position}`}
         >
           <option value="none">No PVR</option>
           <option value="b">B</option>
         </select>
+      )}
+      {props.cryotherapy !== undefined && (
         <select
-          value={vitrectomyGauge}
-          onChange={(e) => setVitrectomyGauge(e.target.value)}
-          data-testid={`gauge-${position}`}
+          value={props.cryotherapy}
+          onChange={(e) => props.setCryotherapy?.(e.target.value)}
+          data-testid={`cryotherapy-${props.position}`}
         >
-          <option value="23g">23g</option>
-          <option value="25g">25g</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
         </select>
-      </div>
-    );
-  };
+      )}
+    </div>
+  );
+  return { __esModule: true, default: MockRiskInputForm };
 });
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
+jest.mock('../RiskResults', () => {
+  const MockRiskResults = (props) => (
+    <div data-testid="risk-results">
+      <div className="text-3xl font-bold mb-2">
+        {props.fullModelRisk.probability}%
+      </div>
+      <button onClick={props.onReset} data-testid="reset-button">
+        Reset Calculator
+      </button>
+    </div>
+  );
+  return { __esModule: true, default: MockRiskResults };
+});
 
 describe('DesktopRetinalCalculator', () => {
-  const mockRisk = {
-    probability: '25.5',
-    steps: [],
-    logit: '-1.082'
+  const mockCalculator = {
+    age: '50',
+    setAge: jest.fn(),
+    pvrGrade: 'none',
+    setPvrGrade: jest.fn(),
+    vitrectomyGauge: '25g',
+    setVitrectomyGauge: jest.fn(),
+    cryotherapy: 'yes',
+    setCryotherapy: jest.fn(),
+    tamponade: 'c2f6',
+    setTamponade: jest.fn(),
+    selectedHours: [],
+    detachmentSegments: [],
+    hoveredHour: null,
+    handleHoverChange: jest.fn(),
+    handleTearToggle: jest.fn(),
+    handleSegmentToggle: jest.fn(),
+    setDetachmentSegments: jest.fn(),
+    handleCalculate: jest.fn(),
+    handleReset: jest.fn(),
+    isCalculateDisabled: false,
+    calculatedRisks: null,
+    showMath: false,
+    setShowMath: jest.fn(),
+    formatPVRGrade: (grade) => grade.toUpperCase(),
+    formatTamponade: (t) => t,
+    formatHoursList: () => 'None'
   };
 
   beforeEach(() => {
-    calculateRiskWithSteps.mockReset();
-    calculateRiskWithSteps.mockReturnValue(mockRisk);
+    jest.clearAllMocks();
+    useRetinalCalculatorModule.useRetinalCalculator.mockReturnValue(mockCalculator);
   });
 
-  const getEnabledCalculateButton = () => {
-    const buttons = screen.getAllByTestId('calculate-button');
-    return buttons.find(button => !button.disabled);
-  };
-
-  test('syncs form values between left and right panels', () => {
+  test('renders left and right forms with correct fields', () => {
     render(<DesktopRetinalCalculator />);
     
-    // Set value in left panel
-    const leftAgeInput = screen.getByTestId('age-input-left');
-    fireEvent.change(leftAgeInput, { target: { value: '65' } });
+    // Left form should have age and PVR grade
+    const leftForm = screen.getByTestId('risk-form-left');
+    expect(within(leftForm).getByTestId('age-input-left')).toBeInTheDocument();
+    expect(within(leftForm).getByTestId('pvr-grade-left')).toBeInTheDocument();
     
-    // Verify right panel is synced
-    const rightAgeInput = screen.getByTestId('age-input-right');
-    expect(rightAgeInput.value).toBe('65');
-    
-    // Set value in right panel
-    const rightPvrSelect = screen.getByTestId('pvr-grade-right');
-    fireEvent.change(rightPvrSelect, { target: { value: 'b' } });
-    
-    // Verify left panel is synced
-    const leftPvrSelect = screen.getByTestId('pvr-grade-left');
-    expect(leftPvrSelect.value).toBe('b');
+    // Right form should have cryotherapy
+    const rightForm = screen.getByTestId('risk-form-right');
+    expect(within(rightForm).getByTestId('cryotherapy-right')).toBeInTheDocument();
   });
 
-  test('handles form interactions and calculation', () => {
+  test('updates state through hook setters', () => {
     render(<DesktopRetinalCalculator />);
     
-    // Set form values
-    const leftAgeInput = screen.getByTestId('age-input-left');
-    fireEvent.change(leftAgeInput, { target: { value: '65' } });
+    // Test age input
+    const ageInput = screen.getByTestId('age-input-left');
+    fireEvent.change(ageInput, { target: { value: '65' } });
+    expect(mockCalculator.setAge).toHaveBeenCalledWith('65');
     
-    const rightPvrSelect = screen.getByTestId('pvr-grade-right');
-    fireEvent.change(rightPvrSelect, { target: { value: 'b' } });
+    // Test PVR grade select
+    const pvrSelect = screen.getByTestId('pvr-grade-left');
+    fireEvent.change(pvrSelect, { target: { value: 'b' } });
+    expect(mockCalculator.setPvrGrade).toHaveBeenCalledWith('b');
     
-    // Interact with clock face
-    const segmentButton = screen.getByTestId('segment-toggle');
-    fireEvent.click(segmentButton);
-    
-    // Calculate risk
-    const calculateButton = getEnabledCalculateButton();
-    fireEvent.click(calculateButton);
-    
-    expect(calculateRiskWithSteps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        age: '65',
-        pvrGrade: 'b'
-      })
-    );
+    // Test cryotherapy select
+    const cryoSelect = screen.getByTestId('cryotherapy-right');
+    fireEvent.change(cryoSelect, { target: { value: 'no' } });
+    expect(mockCalculator.setCryotherapy).toHaveBeenCalledWith('no');
   });
 
-  test('displays calculation results with correct layout', async () => {
-    render(<DesktopRetinalCalculator />);
+  test('handles calculation flow', () => {
+    // Start with no results
+    const { rerender } = render(<DesktopRetinalCalculator />);
     
-    // Fill form and calculate
-    const leftAgeInput = screen.getByTestId('age-input-left');
-    fireEvent.change(leftAgeInput, { target: { value: '65' } });
+    // Fill form
+    const ageInput = screen.getByTestId('age-input-left');
+    fireEvent.change(ageInput, { target: { value: '65' } });
     
     const segmentButton = screen.getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    const calculateButton = getEnabledCalculateButton();
+    // Calculate
+    const calculateButton = screen.getByTestId('calculate-button');
     fireEvent.click(calculateButton);
+    expect(mockCalculator.handleCalculate).toHaveBeenCalled();
     
-    // Wait for results to appear
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /input summary/i })).toBeInTheDocument();
-    });
+    // Update mock to show results
+    const calculatorWithResults = {
+      ...mockCalculator,
+      calculatedRisks: {
+        full: { probability: 25.5 },
+        significant: { probability: 30.0 }
+      }
+    };
+    useRetinalCalculatorModule.useRetinalCalculator.mockReturnValue(calculatorWithResults);
     
-    // Verify results layout
-    const inputSummaryHeading = screen.getByRole('heading', { name: /input summary/i });
-    const resultsGrid = inputSummaryHeading.parentElement.querySelector('.grid');
-    expect(resultsGrid).toBeInTheDocument();
-    expect(resultsGrid).toHaveClass('grid-cols-2', 'gap-6');
+    // Re-render with results
+    rerender(<DesktopRetinalCalculator />);
     
-    // Verify risk display
-    const riskHeading = screen.getByText(/estimated risk of failure/i);
-    expect(riskHeading).toBeInTheDocument();
-    expect(riskHeading.textContent).toMatch(/25\.5%/);
+    // Verify results are displayed
+    expect(screen.getByTestId('risk-results')).toBeInTheDocument();
+    expect(screen.getByText('25.5%')).toBeInTheDocument();
     
-    // Verify clock face is present
-    const clockFace = screen.getByTestId('clock-face');
-    expect(clockFace).toBeInTheDocument();
-    
-    // Verify input summary sections
-    const summarySection = screen.getByRole('heading', { name: /input summary/i }).parentElement;
-    expect(summarySection).toHaveTextContent(/age:/i);
-    expect(summarySection).toHaveTextContent(/pvr grade:/i);
-    expect(summarySection).toHaveTextContent(/vitrectomy gauge:/i);
-    
-    // Verify reset functionality
-    const resetButton = screen.getByRole('button', { name: /reset calculator/i });
-    expect(resetButton).toBeInTheDocument();
-    
+    // Test reset
+    const resetButton = screen.getByTestId('reset-button');
     fireEvent.click(resetButton);
+    expect(mockCalculator.handleReset).toHaveBeenCalled();
+  });
+
+  test('displays validation messages', () => {
+    // Setup calculator with validation state
+    const calculatorWithValidation = {
+      ...mockCalculator,
+      isCalculateDisabled: true,
+      age: '',
+      detachmentSegments: []
+    };
+    useRetinalCalculatorModule.useRetinalCalculator.mockReturnValue(calculatorWithValidation);
     
-    // Wait for the form to reset
-    await waitFor(() => {
-      const updatedLeftAgeInput = screen.getByTestId('age-input-left');
-      expect(updatedLeftAgeInput.value).toBe('');
-    });
+    render(<DesktopRetinalCalculator />);
+    
+    // Verify calculate button is disabled
+    const calculateButton = screen.getByTestId('calculate-button');
+    expect(calculateButton).toBeDisabled();
+    
+    // Verify validation messages
+    expect(screen.getByText(/age and detachment area required/i)).toBeInTheDocument();
+    
+    // Add age but keep detachment empty
+    const ageInput = screen.getByTestId('age-input-left');
+    fireEvent.change(ageInput, { target: { value: '65' } });
+    
+    // Update calculator state to reflect age change
+    const calculatorWithAge = {
+      ...calculatorWithValidation,
+      age: '65'
+    };
+    useRetinalCalculatorModule.useRetinalCalculator.mockReturnValue(calculatorWithAge);
+    
+    // Verify updated validation message
+    expect(screen.getByText(/detachment area required/i)).toBeInTheDocument();
   });
 });

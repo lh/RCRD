@@ -3,6 +3,7 @@ import { render, screen, within, fireEvent, waitFor, cleanup } from '@testing-li
 import RetinalCalculator from '../RetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { getMobileView, getResultsSection, fillForm } from '../test-helpers/RetinalCalculator.helpers';
+import { TEST_DEFAULTS } from '../../test-utils/constants';
 
 // Increase test timeout
 jest.setTimeout(10000);
@@ -36,6 +37,10 @@ jest.mock('../RiskInputForm', () => ({
     setPvrGrade, 
     vitrectomyGauge,
     setVitrectomyGauge,
+    cryotherapy,
+    setCryotherapy,
+    tamponade,
+    setTamponade,
     position
   }) {
     return (
@@ -62,6 +67,22 @@ jest.mock('../RiskInputForm', () => ({
           <option value="23g">23g</option>
           <option value="25g">25g</option>
         </select>
+        <select
+          value={cryotherapy}
+          onChange={(e) => setCryotherapy(e.target.value)}
+          data-testid={`cryo-${position || 'mobile'}`}
+        >
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+        <select
+          value={tamponade}
+          onChange={(e) => setTamponade(e.target.value)}
+          data-testid={`tamponade-${position || 'mobile'}`}
+        >
+          <option value="sf6">SF6</option>
+          <option value="c2f6">C2F6</option>
+        </select>
       </div>
     );
   }
@@ -69,10 +90,22 @@ jest.mock('../RiskInputForm', () => ({
 
 jest.mock('../RiskResults', () => ({
   __esModule: true,
-  default: function MockRiskResults({ risk, onReset, showMath, setShowMath }) {
+  default: function MockRiskResults({ 
+    fullModelRisk, 
+    significantModelRisk, 
+    onReset, 
+    showMath, 
+    setShowMath 
+  }) {
+    const risk = showMath ? significantModelRisk : fullModelRisk;
     return (
       <div data-testid="risk-results">
-        Risk: {risk.probability}%
+        <div className="text-3xl font-bold mb-2">
+          {risk.probability}%
+        </div>
+        <p className="text-sm text-gray-600">
+          Probability of requiring additional surgery within 6 weeks
+        </p>
         <button 
           onClick={() => setShowMath(!showMath)}
           data-testid="show-math-toggle"
@@ -83,9 +116,9 @@ jest.mock('../RiskResults', () => ({
         <div data-testid="input-summary" className="mt-8 border-t pt-6">
           <h3 data-testid="summary-heading">Input Summary</h3>
           <div data-testid="summary-content">
-            <p data-testid="summary-age">Age: {risk.age} years</p>
-            <p data-testid="summary-pvr">PVR Grade: {risk.pvrGrade}</p>
-            <p data-testid="summary-gauge">Vitrectomy Gauge: {risk.vitrectomyGauge}</p>
+            <p data-testid="summary-age">{risk?.age} years</p>
+            <p data-testid="summary-pvr">{risk?.pvrGrade?.toUpperCase()}</p>
+            <p data-testid="summary-gauge">{risk?.vitrectomyGauge}</p>
           </div>
         </div>
         {onReset && (
@@ -102,16 +135,22 @@ jest.mock('../../utils/riskCalculations');
 jest.mock('../clock/utils/formatDetachmentHours');
 
 describe('RetinalCalculator Results Display', () => {
+  const mockRisk = {
+    probability: 25.5,
+    steps: [],
+    logit: -1.082,
+    age: TEST_DEFAULTS.age.value,
+    pvrGrade: TEST_DEFAULTS.pvrGrade.value,
+    vitrectomyGauge: TEST_DEFAULTS.vitrectomyGauge.value,
+    cryotherapy: TEST_DEFAULTS.cryotherapy.value,
+    tamponade: TEST_DEFAULTS.tamponade.value,
+    selectedHours: TEST_DEFAULTS.selectedHours.value,
+    detachmentSegments: TEST_DEFAULTS.detachmentSegments.value
+  };
+
   beforeEach(() => {
     calculateRiskWithSteps.mockReset();
-    calculateRiskWithSteps.mockImplementation(() => ({
-      probability: '25.5',
-      steps: [],
-      logit: '-1.082',
-      age: '65',
-      pvrGrade: 'B',
-      vitrectomyGauge: '23g'
-    }));
+    calculateRiskWithSteps.mockReturnValue(mockRisk);
   });
 
   afterEach(cleanup);
@@ -161,7 +200,13 @@ describe('RetinalCalculator Results Display', () => {
       fireEvent,
       within, 
       mobileView, 
-      data: { age: '65', pvrGrade: 'b', vitrectomyGauge: '23g' }
+      data: { 
+        age: TEST_DEFAULTS.age.value, 
+        pvrGrade: TEST_DEFAULTS.pvrGrade.value, 
+        vitrectomyGauge: TEST_DEFAULTS.vitrectomyGauge.value,
+        cryotherapy: TEST_DEFAULTS.cryotherapy.value,
+        tamponade: TEST_DEFAULTS.tamponade.value
+      }
     });
     const calculateButton = await waitForCalculateButton();
     fireEvent.click(calculateButton);
@@ -169,9 +214,9 @@ describe('RetinalCalculator Results Display', () => {
     
     // Verify summary content
     const summary = screen.getByTestId('input-summary');
-    expect(within(summary).getByTestId('summary-age')).toHaveTextContent('65 years');
-    expect(within(summary).getByTestId('summary-pvr')).toHaveTextContent('B');
-    expect(within(summary).getByTestId('summary-gauge')).toHaveTextContent('23g');
+    expect(within(summary).getByTestId('summary-age')).toHaveTextContent(`${TEST_DEFAULTS.age.value} years`);
+    expect(within(summary).getByTestId('summary-pvr')).toHaveTextContent(TEST_DEFAULTS.pvrGrade.value.toUpperCase());
+    expect(within(summary).getByTestId('summary-gauge')).toHaveTextContent(TEST_DEFAULTS.vitrectomyGauge.value);
   });
 
   test('maintains input values in summary after reset and recalculate', async () => {
@@ -195,10 +240,7 @@ describe('RetinalCalculator Results Display', () => {
     
     // Update mock for second calculation
     calculateRiskWithSteps.mockImplementation(() => ({
-      probability: '25.5',
-      steps: [],
-      logit: '-1.082',
-      age: '65',
+      ...mockRisk,
       pvrGrade: 'NONE',
       vitrectomyGauge: '25g'
     }));
@@ -209,7 +251,13 @@ describe('RetinalCalculator Results Display', () => {
       fireEvent, 
       within, 
       mobileView: clockFace,
-      data: { age: '65', pvrGrade: 'none', vitrectomyGauge: '25g' }
+      data: { 
+        age: TEST_DEFAULTS.age.value, 
+        pvrGrade: TEST_DEFAULTS.pvrGrade.value, 
+        vitrectomyGauge: TEST_DEFAULTS.vitrectomyGauge.value,
+        cryotherapy: TEST_DEFAULTS.cryotherapy.value,
+        tamponade: TEST_DEFAULTS.tamponade.value
+      }
     });
     
     // Get new calculate button and click
@@ -219,7 +267,7 @@ describe('RetinalCalculator Results Display', () => {
     // Wait for and verify summary content
     await waitForResults();
     const summary = screen.getByTestId('input-summary');
-    expect(within(summary).getByTestId('summary-age')).toHaveTextContent('65 years');
+    expect(within(summary).getByTestId('summary-age')).toHaveTextContent(`${TEST_DEFAULTS.age.value} years`);
     expect(within(summary).getByTestId('summary-pvr')).toHaveTextContent('NONE');
     expect(within(summary).getByTestId('summary-gauge')).toHaveTextContent('25g');
   });

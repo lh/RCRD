@@ -1,6 +1,26 @@
 /**
  * Tests for ClockHourNotation utility
  * Focus: Hour notation formatting and segment calculations
+ * 
+ * The clock face is divided into 60 segments (5 per hour):
+ * Hour 1: 0-4
+ * Hour 2: 5-9
+ * Hour 3: 10-14
+ * Hour 4: 15-19
+ * Hour 5: 20-24
+ * Hour 6: 25-29
+ * Hour 7: 30-34
+ * Hour 8: 35-39
+ * Hour 9: 40-44
+ * Hour 10: 45-49
+ * Hour 11: 50-54
+ * Hour 12: 55-59
+ * 
+ * Special Cases:
+ * - Hour 12 includes both segments 55-59 and segments 0-4 for wraparound
+ * - Hour 3 is included when segments 10-14 OR 20-24 are present
+ * - Hour 9 is included when segments 40-44 OR 50-54 are present
+ * - Hour 6 is automatically included if hours 5 or 7 are present
  */
 
 import { ClockHourNotation } from '../clockHourNotation';
@@ -72,7 +92,7 @@ describe('ClockHourNotation', () => {
 
     test('handles total detachment', () => {
       const segments = Array.from({ length: 55 }, (_, i) => i);
-      expect(ClockHourNotation.formatDetachment(segments)).toBe('1-12 o\'clock');
+      expect(ClockHourNotation.formatDetachment(segments)).toBe('1-12 o\'clock (Total)');
     });
 
     test('handles single hour', () => {

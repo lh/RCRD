@@ -74,9 +74,9 @@ jest.mock('../clock/utils/formatDetachmentHours');
 
 describe('RetinalCalculator Form Validation', () => {
   const mockRisk = {
-    probability: '25.5',
+    probability: 25.5,
     steps: [],
-    logit: '-1.082'
+    logit: -1.082
   };
 
   beforeEach(() => {
@@ -94,17 +94,48 @@ describe('RetinalCalculator Form Validation', () => {
     return buttons.find(button => button.disabled);
   };
 
-  test('shows correct validation message for detachment without age', () => {
+  test('shows correct validation messages', () => {
     const { container } = render(<RetinalCalculator />);
     const { mobileContainer, mobileView } = getMobileView(container);
     
+    // Initially shows detachment required (age defaults to 50)
+    let buttonSection = getDisabledCalculateButton().parentElement;
+    let validationMessage = within(buttonSection).getByText(/detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Clear age to see both required message
+    const ageInput = screen.getByTestId('age-input-mobile');
+    fireEvent.change(ageInput, { target: { value: '' } });
+    
+    // Now shows both required
+    buttonSection = getDisabledCalculateButton().parentElement;
+    validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Add detachment but keep age empty
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
     
-    // Look for validation message in the button area
-    const buttonSection = getDisabledCalculateButton().parentElement;
-    const validationMessage = within(buttonSection).getByText(/age required/i);
+    // Now shows only age required
+    buttonSection = getDisabledCalculateButton().parentElement;
+    validationMessage = within(buttonSection).getByText(/age required/i);
     expect(validationMessage).toBeInTheDocument();
+    
+    // Remove detachment and add age
+    fireEvent.click(segmentButton); // Remove detachment
+    fireEvent.change(ageInput, { target: { value: '65' } });
+    
+    // Now shows only detachment required
+    buttonSection = getDisabledCalculateButton().parentElement;
+    validationMessage = within(buttonSection).getByText(/detachment area required/i);
+    expect(validationMessage).toBeInTheDocument();
+    
+    // Add detachment back
+    fireEvent.click(segmentButton);
+    
+    // Calculate button should now be enabled
+    const calculateButton = getEnabledCalculateButton();
+    expect(calculateButton).not.toBeDisabled();
   });
 
   test('handles PVR grade changes', () => {
@@ -151,18 +182,6 @@ describe('RetinalCalculator Form Validation', () => {
     );
   });
 
-  test('shows correct validation message for age without detachment', () => {
-    const { container } = render(<RetinalCalculator />);
-    const { mobileContainer } = getMobileView(container);
-    
-    const ageInput = screen.getByTestId('age-input-mobile');
-    fireEvent.change(ageInput, { target: { value: '65' } });
-    
-    // Look for validation message in the button area
-    const buttonSection = getDisabledCalculateButton().parentElement;
-    const validationMessage = within(buttonSection).getByText(/detachment area required/i);
-    expect(validationMessage).toBeInTheDocument();
-  });
 
   test('enables calculation when all required fields are filled', () => {
     const { container } = render(<RetinalCalculator />);

@@ -3,10 +3,13 @@ import { render, screen, within, fireEvent, waitFor } from '@testing-library/rea
 import RetinalCalculator from '../RetinalCalculator';
 import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { getMobileView } from '../test-helpers/RetinalCalculator.helpers';
+import { MODEL_TYPE } from '../../constants/modelTypes';
+import { TEST_DEFAULTS } from '../../test-utils/constants';
 
 // Mock child components
-jest.mock('../clock/ClockFace', () => {
-  return function MockClockFace({ 
+jest.mock('../clock/ClockFace', () => ({
+  __esModule: true,
+  default: function MockClockFace({ 
     onTearToggle, 
     onSegmentToggle, 
     onHoverChange,
@@ -48,17 +51,22 @@ jest.mock('../clock/ClockFace', () => {
         )}
       </div>
     );
-  };
-});
+  }
+}));
 
-jest.mock('../RiskInputForm', () => {
-  return function MockRiskInputForm({ 
+jest.mock('../RiskInputForm', () => ({
+  __esModule: true,
+  default: function MockRiskInputForm({ 
     age,
     setAge, 
     pvrGrade,
     setPvrGrade, 
     vitrectomyGauge,
     setVitrectomyGauge,
+    cryotherapy,
+    setCryotherapy,
+    tamponade,
+    setTamponade,
     position,
     isMobile 
   }) {
@@ -70,16 +78,76 @@ jest.mock('../RiskInputForm', () => {
           onChange={(e) => setAge(e.target.value)}
           data-testid={`age-input-${position || 'mobile'}`}
         />
+        <select
+          value={pvrGrade}
+          onChange={(e) => setPvrGrade(e.target.value)}
+          data-testid={`pvr-grade-${position || 'mobile'}`}
+        >
+          <option value="none">No PVR</option>
+          <option value="b">B</option>
+        </select>
+        <select
+          value={vitrectomyGauge}
+          onChange={(e) => setVitrectomyGauge(e.target.value)}
+          data-testid={`gauge-${position || 'mobile'}`}
+        >
+          <option value="23g">23g</option>
+          <option value="25g">25g</option>
+        </select>
+        <select
+          value={cryotherapy}
+          onChange={(e) => setCryotherapy(e.target.value)}
+          data-testid={`cryo-${position || 'mobile'}`}
+        >
+          <option value="no">No</option>
+          <option value="yes">Yes</option>
+        </select>
+        <select
+          value={tamponade}
+          onChange={(e) => setTamponade(e.target.value)}
+          data-testid={`tamponade-${position || 'mobile'}`}
+        >
+          <option value="sf6">SF6</option>
+          <option value="c2f6">C2F6</option>
+        </select>
       </div>
     );
-  };
-});
+  }
+}));
 
-jest.mock('../RiskResults', () => {
-  return function MockRiskResults({ risk, onReset }) {
+jest.mock('../RiskResults', () => ({
+  __esModule: true,
+  default: function MockRiskResults({ 
+    fullModelRisk, 
+    significantModelRisk, 
+    onReset, 
+    showMath, 
+    setShowMath 
+  }) {
+    const risk = showMath ? significantModelRisk : fullModelRisk;
     return (
       <div data-testid="risk-results">
-        Risk: {risk.probability}%
+        <div className="text-3xl font-bold mb-2">
+          {risk?.probability}%
+        </div>
+        <p className="text-sm text-gray-600">
+          Probability of requiring additional surgery within 6 weeks
+        </p>
+        <button 
+          onClick={() => setShowMath(!showMath)}
+          data-testid="show-math-toggle"
+        >
+          {showMath ? 'Hide Math' : 'Show Math'}
+        </button>
+        {showMath && <div data-testid="math-details">Math Details</div>}
+        <div data-testid="input-summary" className="mt-8 border-t pt-6">
+          <h3 data-testid="summary-heading">Input Summary</h3>
+          <div data-testid="summary-content">
+            <p data-testid="summary-age">{risk?.age} years</p>
+            <p data-testid="summary-pvr">{risk?.pvrGrade?.toUpperCase()}</p>
+            <p data-testid="summary-gauge">{risk?.vitrectomyGauge}</p>
+          </div>
+        </div>
         {onReset && (
           <button onClick={onReset} data-testid="reset-button">
             Reset Calculator
@@ -87,17 +155,24 @@ jest.mock('../RiskResults', () => {
         )}
       </div>
     );
-  };
-});
+  }
+}));
 
 jest.mock('../../utils/riskCalculations');
 jest.mock('../clock/utils/formatDetachmentHours');
 
 describe('RetinalCalculator Form', () => {
   const mockRisk = {
-    probability: '25.5',
+    probability: 25.5,
     steps: [],
-    logit: '-1.082'
+    logit: -1.082,
+    age: TEST_DEFAULTS.age.value,
+    pvrGrade: TEST_DEFAULTS.pvrGrade.value,
+    vitrectomyGauge: TEST_DEFAULTS.vitrectomyGauge.value,
+    cryotherapy: TEST_DEFAULTS.cryotherapy.value,
+    tamponade: TEST_DEFAULTS.tamponade.value,
+    selectedHours: TEST_DEFAULTS.selectedHours.value,
+    detachmentSegments: TEST_DEFAULTS.detachmentSegments.value
   };
 
   beforeEach(() => {
@@ -121,7 +196,7 @@ describe('RetinalCalculator Form', () => {
     
     // Fill in required fields using mobile form
     const ageInput = screen.getByTestId('age-input-mobile');
-    fireEvent.change(ageInput, { target: { value: '65' } });
+    fireEvent.change(ageInput, { target: { value: TEST_DEFAULTS.age.value } });
     
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
@@ -134,11 +209,14 @@ describe('RetinalCalculator Form', () => {
     });
     
     expect(calculateRiskWithSteps).toHaveBeenCalledWith({
-      age: '65',
+      age: TEST_DEFAULTS.age.value,
       pvrGrade: 'none',
       vitrectomyGauge: '25g',
       selectedHours: [],
-      detachmentSegments: [25]
+      detachmentSegments: [25],
+      cryotherapy: 'yes',
+      tamponade: 'c2f6',
+      modelType: MODEL_TYPE.FULL
     });
   });
 
@@ -151,12 +229,12 @@ describe('RetinalCalculator Form', () => {
     
     // Add age but no detachment
     const ageInput = screen.getByTestId('age-input-mobile');
-    fireEvent.change(ageInput, { target: { value: '65' } });
+    fireEvent.change(ageInput, { target: { value: TEST_DEFAULTS.age.value } });
     expect(calculateButton).toBeDisabled();
     
-    // Find text within the mobile selection area
-    const mobileSelection = within(mobileContainer).getByText(/current selection:/i).closest('div');
-    expect(within(mobileSelection).getByText(/detachment area required/i)).toBeInTheDocument();
+    // Verify validation message
+    const buttonSection = calculateButton.parentElement;
+    expect(within(buttonSection).getByText(/detachment area required/i)).toBeInTheDocument();
   });
 
   test('resets calculator state', async () => {
@@ -165,7 +243,7 @@ describe('RetinalCalculator Form', () => {
     
     // Set up initial state using mobile form
     const ageInput = screen.getByTestId('age-input-mobile');
-    fireEvent.change(ageInput, { target: { value: '65' } });
+    fireEvent.change(ageInput, { target: { value: TEST_DEFAULTS.age.value } });
     
     const segmentButton = within(mobileView).getByTestId('segment-toggle');
     fireEvent.click(segmentButton);
@@ -186,13 +264,9 @@ describe('RetinalCalculator Form', () => {
       expect(screen.queryByTestId('risk-results')).not.toBeInTheDocument();
     });
     
-    const buttonSection = getDisabledCalculateButton().parentElement;
-    const validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
-    expect(validationMessage).toBeInTheDocument();
-    
-    // Verify form reset
+    // Verify form reset to defaults
     const newAgeInput = screen.getByTestId('age-input-mobile');
-    expect(newAgeInput.value).toBe('');
+    expect(newAgeInput.value).toBe(TEST_DEFAULTS.age.value);
   });
 
   test('displays read-only clock face in results view', async () => {

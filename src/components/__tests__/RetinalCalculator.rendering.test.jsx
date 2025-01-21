@@ -42,6 +42,10 @@ jest.mock('../RiskInputForm', () => {
     setPvrGrade, 
     vitrectomyGauge,
     setVitrectomyGauge,
+    cryotherapy,
+    setCryotherapy,
+    tamponade,
+    setTamponade,
     position,
     isMobile 
   }) {
@@ -53,30 +57,81 @@ jest.mock('../RiskInputForm', () => {
           onChange={(e) => setAge(e.target.value)}
           data-testid={`age-input-${position || 'mobile'}`}
         />
+        <select
+          value={pvrGrade}
+          onChange={(e) => setPvrGrade(e.target.value)}
+          data-testid={`pvr-grade-input-${position || 'mobile'}`}
+        >
+          <option value="none">None</option>
+        </select>
+        <select
+          value={vitrectomyGauge}
+          onChange={(e) => setVitrectomyGauge(e.target.value)}
+          data-testid={`gauge-input-${position || 'mobile'}`}
+        >
+          <option value="25g">25g</option>
+        </select>
+        <select
+          value={cryotherapy}
+          onChange={(e) => setCryotherapy(e.target.value)}
+          data-testid={`cryo-input-${position || 'mobile'}`}
+        >
+          <option value="no">No</option>
+        </select>
+        <select
+          value={tamponade}
+          onChange={(e) => setTamponade(e.target.value)}
+          data-testid={`tamponade-input-${position || 'mobile'}`}
+        >
+          <option value="sf6">SF6</option>
+        </select>
       </div>
     );
   };
 });
 
-jest.mock('../RiskResults', () => {
-  return function MockRiskResults({ risk, onReset }) {
+jest.mock('../RiskResults', () => ({
+  __esModule: true,
+  default: function MockRiskResults({ 
+    fullModelRisk, 
+    significantModelRisk, 
+    onReset, 
+    showMath, 
+    setShowMath 
+  }) {
+    const risk = showMath ? significantModelRisk : fullModelRisk;
     return (
       <div data-testid="risk-results">
-        <div>Risk: {risk.probability}%</div>
-        <div className="mt-8 border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4">Input Summary</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <p className="text-sm" data-testid="pvr-grade">
-                <span className="font-medium">PVR Grade:</span> {risk.pvrGrade}
-              </p>
-            </div>
+        <div className="text-3xl font-bold mb-2">
+          {risk?.probability}%
+        </div>
+        <p className="text-sm text-gray-600">
+          Probability of requiring additional surgery within 6 weeks
+        </p>
+        <button 
+          onClick={() => setShowMath(!showMath)}
+          data-testid="show-math-toggle"
+        >
+          {showMath ? 'Hide Math' : 'Show Math'}
+        </button>
+        {showMath && <div data-testid="math-details">Math Details</div>}
+        <div data-testid="input-summary" className="mt-8 border-t pt-6">
+          <h3 data-testid="summary-heading">Input Summary</h3>
+          <div data-testid="summary-content">
+            <p data-testid="summary-age">{risk?.age} years</p>
+            <p data-testid="summary-pvr">{risk?.pvrGrade?.toUpperCase()}</p>
+            <p data-testid="summary-gauge">{risk?.vitrectomyGauge}</p>
           </div>
         </div>
+        {onReset && (
+          <button onClick={onReset} data-testid="reset-button">
+            Reset Calculator
+          </button>
+        )}
       </div>
     );
-  };
-});
+  }
+}));
 
 describe('RetinalCalculator Rendering', () => {
   const getDisabledCalculateButton = () => {
@@ -88,7 +143,7 @@ describe('RetinalCalculator Rendering', () => {
     render(<RetinalCalculator />);
     
     // Check header
-    expect(screen.getByText(/retinal detachment risk calculator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Risk Calculator Retinal Detachment \(RCRD\)/i)).toBeInTheDocument();
     
     // Check clock face
     expect(screen.getAllByTestId('clock-face')).toHaveLength(2); // Mobile and desktop views
@@ -99,7 +154,7 @@ describe('RetinalCalculator Rendering', () => {
     expect(calculateButton).toBeDisabled();
     
     const buttonSection = calculateButton.parentElement;
-    const validationMessage = within(buttonSection).getByText(/age and detachment area required/i);
+    const validationMessage = within(buttonSection).getByText(/Detachment area required/i);
     expect(validationMessage).toBeInTheDocument();
   });
 

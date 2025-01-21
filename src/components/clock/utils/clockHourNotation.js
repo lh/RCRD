@@ -1,7 +1,4 @@
 class ClockHourNotation {
-    static SEGMENTS_PER_HOUR = 2;
-    static TOTAL_SEGMENTS = 24;
-
     /**
      * Check if any segments touch a given hour
      * @param {number[]} segments - Array of segment numbers
@@ -9,24 +6,24 @@ class ClockHourNotation {
      * @returns {boolean}
      */
     static segmentsTouchHour(segments, hour) {
-        // Define segment ranges for each hour (2 segments per hour)
+        // Define segment ranges for each hour (5 segments per hour)
         const hourRanges = {
-            1: [0, 1],      // Hour 1: 0-1
-            2: [2, 3],      // Hour 2: 2-3
-            3: [4, 5],      // Hour 3: 4-5
-            4: [6, 7],      // Hour 4: 6-7
-            5: [8, 9],      // Hour 5: 8-9
-            6: [10, 11],    // Hour 6: 10-11
-            7: [12, 13],    // Hour 7: 12-13
-            8: [14, 15],    // Hour 8: 14-15
-            9: [16, 17],    // Hour 9: 16-17
-            10: [18, 19],   // Hour 10: 18-19
-            11: [20, 21],   // Hour 11: 20-21
-            12: [22, 23]    // Hour 12: 22-23
+            1: [0, 4],      // Hour 1: 0-4
+            2: [5, 9],      // Hour 2: 5-9
+            3: [10, 14],    // Hour 3: 10-14
+            4: [15, 19],    // Hour 4: 15-19
+            5: [20, 24],    // Hour 5: 20-24
+            6: [25, 29],    // Hour 6: 25-29
+            7: [30, 34],    // Hour 7: 30-34
+            8: [35, 39],    // Hour 8: 35-39
+            9: [40, 44],    // Hour 9: 40-44
+            10: [45, 49],   // Hour 10: 45-49
+            11: [50, 54],   // Hour 11: 50-54
+            12: [55, 59]    // Hour 12: 55-59
         };
 
         if (hour === 12) {
-            return segments.some(s => s >= 22 || s <= 1);
+            return segments.some(s => s >= 55 || s <= 4);
         }
 
         const [start, end] = hourRanges[hour];
@@ -109,8 +106,8 @@ class ClockHourNotation {
             return "None";
         }
 
-        // Consider it total detachment if 23 or more segments are marked
-        if (segments.length >= 23) {
+        // Consider it total detachment if 55 or more segments are marked
+        if (segments.length >= 55) {
             return "1-12 o'clock (Total)";
         }
 
@@ -123,10 +120,10 @@ class ClockHourNotation {
         }
 
         // Special handling for hours 3, 6, and 9
-        if (segments.some(s => (s >= 4 && s <= 5) || (s >= 8 && s <= 9))) {
+        if (segments.some(s => (s >= 10 && s <= 14) || (s >= 20 && s <= 24))) {
             hours.add(3);
         }
-        if (segments.some(s => (s >= 16 && s <= 17) || (s >= 20 && s <= 21))) {
+        if (segments.some(s => (s >= 40 && s <= 44) || (s >= 50 && s <= 54))) {
             hours.add(9);
         }
         if (hours.has(5) || hours.has(7)) {
