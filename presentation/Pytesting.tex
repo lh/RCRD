@@ -1,0 +1,315 @@
+\documentclass{beamer}
+\usetheme{Malmoe}
+\usecolortheme{beaver}
+\useoutertheme{miniframes}
+\useinnertheme{circles}
+
+% Required packages
+\usepackage{verbatim}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{textcomp}
+
+% Include custom theme and color definitions
+\usepackage{RCRDtheme}
+
+% Configure spacing and presentation settings
+\setlength{\parskip}{0.5em}
+\setbeamertemplate{navigation symbols}{}  % Remove navigation symbols
+\setbeamertemplate{footline}[frame number]  % Add frame numbers
+\setbeamertemplate{frametitle continuation}[from second]
+
+% Define custom language for configuration files
+\lstdefinestyle{configstyle}{
+    basicstyle=\ttfamily\small,
+    columns=fullflexible,
+    keepspaces=true,
+    commentstyle=\color{green!60!black},
+    keywordstyle=\color{red},
+    stringstyle=\color{blue},
+    frame=single
+}
+
+% Configure listings for Python code
+\lstset{
+    language=Python,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black},
+    numbers=left,
+    numberstyle=\tiny,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    breakatwhitespace=true,
+    showstringspaces=false,
+    columns=fullflexible,
+    keepspaces=true
+}
+
+% Configure listings for bash
+\lstdefinelanguage{bash}{
+    keywords={},
+    comment=[l]{\#},
+    commentstyle=\color{green!60!black},
+    basicstyle=\ttfamily\small,
+    columns=fullflexible,
+    keepspaces=true
+}
+
+% Configure listings for yaml
+\lstdefinelanguage{yaml}{
+    keywords={true,false,null,y,n},
+    keywordstyle=\color{blue}\bfseries,
+    basicstyle=\ttfamily\small,
+    commentstyle=\color{green!60!black},
+    morecomment=[l]{\#},
+    stringstyle=\color{red},
+    morestring=[b]',
+    morestring=[b]",
+    columns=fullflexible,
+    keepspaces=true
+}
+
+% Title page information
+% Presentation structure
+\AtBeginSection[]
+{
+  \begin{frame}
+    \frametitle{Contents}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\title{Pytesting}
+\subtitle{Running tests with pytest}
+\author{Luke Herbert}
+\date{\today}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+    \frametitle{Presentation Overview}
+    \tableofcontents
+\end{frame}
+
+\section{Setting Up pytest}
+\begin{frame}[fragile]
+    \frametitle{Initial Setup}
+    \begin{block}{Install Required Packages}
+        \begin{lstlisting}[language=bash]
+pip install pytest==8.0.0
+pip install pytest-cov==4.1.0
+pip install hypothesis==6.98.0
+pip install pytest-snapshot==0.9.0
+        \end{lstlisting}
+    \end{block}
+    
+    \begin{alertblock}{Project Configuration}
+        Create \texttt{pytest.ini} at project root:
+        \begin{lstlisting}[style=configstyle]
+[pytest]
+testpaths = tests
+python_files = test_*.py
+addopts = -v --cov=streamlit_app
+        \end{lstlisting}
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Test Configuration}
+    \begin{block}{conftest.py Setup}
+        \begin{lstlisting}[language=Python]
+import pytest
+from streamlit_app import SmokeModel_MECC_Model
+
+@pytest.fixture
+def base_model():
+    params = {
+        'N_people': 50,
+        'N_service': 1,
+        'visit_prob': 0.1,
+        'seed': 42
+    }
+    return SmokeModel_MECC_Model(**params)
+        \end{lstlisting}
+    \end{block}
+\end{frame}
+
+\section{Running Tests}
+\begin{frame}[fragile]
+    \frametitle{Basic Test Commands}
+    \begin{exampleblock}{Common Usage}
+        \begin{lstlisting}[language=bash]
+# Run all tests with coverage
+pytest --cov=streamlit_app
+
+# Run specific test file
+pytest tests/unit/test_parameters.py -v
+
+# Run tests matching pattern
+pytest -k "test_parameter" -v
+
+# Generate HTML coverage report
+pytest --cov=streamlit_app --cov-report=html
+        \end{lstlisting}
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Test Organization}
+    \begin{lstlisting}[basicstyle=\ttfamily\small]
+tests/
+|-- conftest.py          # Shared fixtures
+|-- unit/
+|   |-- test_parameters.py
+|   |-- test_smoke_model_initialization.py
+|   |-- test_smoke_model_quit_mechanics.py
+|   `-- test_smoke_model_relapse.py
+`-- integration/
+    |-- test_model_integration.py
+    `-- test_service_scaling.py
+    \end{lstlisting}
+\end{frame}
+
+\section{Writing Tests}
+\begin{frame}[fragile]
+    \frametitle{Test Structure Example}
+    \begin{lstlisting}[language=Python]
+def test_smoke_model_initialization(base_model):
+    """Test model initialization with default params"""
+    # Check initial state
+    assert base_model.N_people == 50
+    assert base_model.visit_prob == 0.1
+    
+    # Verify agent creation
+    agents = [a for a in base_model.schedule.agents]
+    assert len(agents) == 51  # 50 people + 1 service
+    
+    # Check random seed
+    assert base_model.random.getstate() is not None
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Testing Model Behavior}
+    \begin{lstlisting}[language=Python]
+def test_service_interaction(base_model):
+    """Test interaction between people and services"""
+    # Force visit probability to ensure contact
+    base_model.visit_prob = 1.0
+    
+    # Run one step
+    base_model.step()
+    
+    # Check data collection
+    data = base_model.datacollector.get_model_vars_dataframe()
+    assert "Total Contacts" in data.columns
+    assert data["Total Contacts"].iloc[-1] > 0
+    \end{lstlisting}
+\end{frame}
+
+\section{Continuous Integration}
+\begin{frame}[fragile]
+    \frametitle{Continuous Testing}
+    \begin{block}{Using pytest-watch}
+        \begin{lstlisting}[language=bash]
+# Install pytest-watch
+pip install pytest-watch
+
+# Run with continuous monitoring
+ptw --onpass "echo 'Success!'" --onfail "echo 'Failed!'"
+
+# Watch specific tests
+ptw tests/unit/ -- -v
+        \end{lstlisting}
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Pre-commit Hooks}
+    \begin{alertblock}{Pre-commit Configuration}
+        Create \texttt{.pre-commit-config.yaml}:
+        \begin{lstlisting}[language=yaml]
+repos:
+- repo: local
+  hooks:
+  - id: pytest
+    name: pytest
+    entry: pytest
+    language: system
+    types: [python]
+    pass_filenames: false
+        \end{lstlisting}
+    \end{alertblock}
+\end{frame}
+
+\section{Debugging Tests}
+\begin{frame}[fragile]
+    \frametitle{Debugging with PDB}
+    \begin{block}{Using Python Debugger}
+        \begin{lstlisting}[language=Python]
+def test_complex_behavior(base_model):
+    # Add breakpoint for debugging
+    import pdb; pdb.set_trace()
+    
+    # Or use pytest.set_trace()
+    import pytest; pytest.set_trace()
+        \end{lstlisting}
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Debug Command Options}
+    \begin{alertblock}{Running Tests with Debug Mode}
+        \begin{lstlisting}[language=bash]
+# Print output during test run
+pytest -s
+
+# Show local variables on failure
+pytest -l
+
+# Enter PDB on first failure
+pytest --pdb
+        \end{lstlisting}
+    \end{alertblock}
+\end{frame}
+
+\section{Coverage Analysis}
+\begin{frame}[fragile]
+    \frametitle{Coverage Reports}
+    \begin{block}{Generating Coverage Data}
+        \begin{lstlisting}[language=bash]
+# Basic coverage
+pytest --cov=streamlit_app
+
+# Detailed terminal report
+pytest --cov=streamlit_app --cov-report=term-missing
+
+# HTML report
+pytest --cov=streamlit_app --cov-report=html
+
+# XML for CI systems
+pytest --cov=streamlit_app --cov-report=xml
+        \end{lstlisting}
+    \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Coverage Settings}
+    \begin{alertblock}{Coverage Configuration}
+        In \texttt{.coveragerc}:
+        \begin{lstlisting}[style=configstyle]
+[run]
+source = streamlit_app
+omit = tests/*
+       setup.py
+        \end{lstlisting}
+    \end{alertblock}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,10 @@
+\frametitle{Coverage Settings}
+    \begin{alertblock}{Coverage Configuration}
+        In \texttt{.coveragerc}:
+        \begin{lstlisting}[style=configstyle]
+[run]
+source = streamlit_app
+omit = tests/*
+       setup.py
+        \end{lstlisting}
+    \end{alertblock}

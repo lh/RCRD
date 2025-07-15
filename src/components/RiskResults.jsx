@@ -62,7 +62,7 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                     {risk.probability.toFixed(1)}%
                 </div>
                 <p className="text-sm text-gray-600">
-                    Probability of requiring additional surgery within 6 weeks
+                    Probability of requiring additional surgery within 6 months
                 </p>
             </div>
 

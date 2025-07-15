@@ -131,7 +131,7 @@ jest.mock('../RiskResults', () => ({
           {risk?.probability}%
         </div>
         <p className="text-sm text-gray-600">
-          Probability of requiring additional surgery within 6 weeks
+          Probability of requiring additional surgery within 6 months
         </p>
         <button 
           onClick={() => setShowMath(!showMath)}
