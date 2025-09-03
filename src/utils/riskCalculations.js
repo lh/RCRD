@@ -108,9 +108,6 @@ export function calculateRiskWithSteps({
         const coeff = PAPER_COEFFICIENTS[category][value] || 0;
         const isSignificantCoeff = isSignificant(category, value);
 
-        // Debug logging
-        console.log(`${label}: category=${category}, value=${value}, coefficient=${coeff}, significant=${isSignificantCoeff}`);
-
         if (modelType === MODEL_TYPE.SIGNIFICANT && !isSignificantCoeff) {
             steps.push({ 
                 step: label, 
