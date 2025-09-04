@@ -12,9 +12,15 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
     const risk = modelType === MODEL_TYPE.FULL ? fullModelRisk : significantModelRisk;
 
     const formatStep = (step) => {
+        const stepId = step.step.toLowerCase().replace(/\s+/g, '-');
+        
         if (step.excluded) {
             return (
-                <div key={step.step} className="mb-2">
+                <div key={step.step} 
+                     className="mb-2"
+                     data-testid={`step-${stepId}`}
+                     data-excluded="true"
+                     data-p-value=">=0.05">
                     <div className="flex justify-between text-gray-500">
                         <span>{step.step}:</span>
                         <span>0.000</span>
@@ -30,7 +36,11 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
         }
 
         return (
-            <div key={step.step} className="mb-2">
+            <div key={step.step} 
+                 className="mb-2"
+                 data-testid={`step-${stepId}`}
+                 data-coefficient={step.value}
+                 data-category={step.category}>
                 <div className="flex justify-between">
                     <span>{step.step}:</span>
                     <span>{step.value.toFixed(3)}</span>
@@ -45,8 +55,15 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
         );
     };
 
+    // Determine risk category for medical validation
+    const riskCategory = risk.probability < 10 ? 'low-risk' : 
+                        risk.probability < 25 ? 'moderate-risk' : 'high-risk';
+    
+    // Ensure probability is within valid range (0-100)
+    const validProbability = Math.max(0, Math.min(100, risk.probability || 0));
+    
     return (
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-lg shadow" data-testid="risk-results">
             <h3 className="text-xl font-bold mb-4">Risk Calculation Results</h3>
             
             {/* Model toggle with explanations */}
@@ -56,10 +73,15 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                 isMobile={isMobile}
             />
 
-            {/* Risk probability */}
-            <div className="mb-6">
-                <div className="text-3xl font-bold mb-2">
-                    {risk.probability.toFixed(1)}%
+            {/* Risk probability with medical validation attributes */}
+            <div className="mb-6" 
+                 data-testid="risk-probability"
+                 data-model-type={modelType}
+                 data-risk-category={riskCategory}
+                 aria-label={`Risk percentage: ${validProbability.toFixed(1)}%`}>
+                <div className="text-3xl font-bold mb-2"
+                     data-testid="risk-probability-value">
+                    {validProbability.toFixed(1)}%
                 </div>
                 <p className="text-sm text-gray-600">
                     Probability of requiring additional surgery within 6 months

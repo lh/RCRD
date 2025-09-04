@@ -34,13 +34,22 @@ describe('Toggle', () => {
     });
 
     test('calls onChange with correct value when toggled', () => {
-        render(<Toggle {...defaultProps} />);
+        const { rerender } = render(<Toggle {...defaultProps} />);
+        
+        // Initially checked is false, so "No" is selected
+        expect(screen.getByLabelText('No')).toBeChecked();
         
         // Click "Yes" option
         fireEvent.click(screen.getByLabelText('Yes'));
         expect(defaultProps.onChange).toHaveBeenCalledWith(true);
-
-        // Click "No" option
+        
+        // Reset mock
+        defaultProps.onChange.mockClear();
+        
+        // Rerender with checked=true
+        rerender(<Toggle {...defaultProps} checked={true} />);
+        
+        // Now "Yes" is checked, click "No"
         fireEvent.click(screen.getByLabelText('No'));
         expect(defaultProps.onChange).toHaveBeenCalledWith(false);
     });
@@ -99,5 +108,42 @@ describe('Toggle', () => {
         
         expect(yesInput.name).toBe(noInput.name);
         expect(yesInput.name).toBe('test-mobile');
+    });
+
+    test('handles keyboard navigation', () => {
+        render(<Toggle {...defaultProps} />);
+        
+        const radioGroup = screen.getByRole('radiogroup');
+        
+        // ArrowRight should select "Yes"
+        fireEvent.keyDown(radioGroup, { key: 'ArrowRight' });
+        expect(defaultProps.onChange).toHaveBeenCalledWith(true);
+        
+        defaultProps.onChange.mockClear();
+        
+        // ArrowLeft should select "No"
+        fireEvent.keyDown(radioGroup, { key: 'ArrowLeft' });
+        expect(defaultProps.onChange).toHaveBeenCalledWith(false);
+    });
+
+    test('displays error message when error prop is true', () => {
+        const errorMessage = 'Please select an option';
+        render(
+            <Toggle 
+                {...defaultProps} 
+                error={true}
+                errorMessage={errorMessage}
+            />
+        );
+        
+        expect(screen.getByRole('alert')).toHaveTextContent(errorMessage);
+        expect(screen.getByRole('radiogroup')).toHaveAttribute('aria-invalid', 'true');
+    });
+
+    test('applies error styling when error prop is true', () => {
+        render(<Toggle {...defaultProps} error={true} />);
+        
+        const radioGroup = screen.getByRole('radiogroup');
+        expect(radioGroup).toHaveClass('bg-red-50');
     });
 });

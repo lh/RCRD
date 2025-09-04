@@ -4,10 +4,12 @@ import { MODEL_TYPE, MODEL_DESCRIPTIONS, MODEL_EXPLANATIONS } from '../constants
 
 const ModelToggle = ({ modelType, onChange, isMobile = false }) => {
     return (
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg" data-testid="model-toggle" data-mobile={isMobile}>
             <div className="flex items-center justify-between mb-2">
                 {!isMobile && <h3 className="text-lg font-medium">Risk Model Selection</h3>}
                 <Toggle
+                    id="model-type"
+                    name="modelType"
                     checked={modelType === MODEL_TYPE.FULL}
                     onChange={(checked) => onChange(checked ? MODEL_TYPE.FULL : MODEL_TYPE.SIGNIFICANT)}
                     labels={{
