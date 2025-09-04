@@ -6,44 +6,73 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
     const [modelType, setModelType] = useState(MODEL_TYPE.FULL);
     const [showDetails, setShowDetails] = useState(false);
 
-    if (!fullModelRisk || !significantModelRisk) return null;
+    // Handle missing or malformed risk data gracefully
+    const createDefaultRisk = () => ({
+        probability: 0,
+        steps: [],
+        logit: 0
+    });
+
+    // Validate and sanitize risk data
+    const sanitizeRisk = (risk) => {
+        if (!risk) return createDefaultRisk();
+        
+        return {
+            probability: (typeof risk.probability === 'number' && !isNaN(risk.probability)) 
+                ? risk.probability 
+                : 0,
+            steps: Array.isArray(risk.steps) ? risk.steps : [],
+            logit: (typeof risk.logit === 'number' && !isNaN(risk.logit)) 
+                ? risk.logit 
+                : 0
+        };
+    };
+
+    const sanitizedFullRisk = sanitizeRisk(fullModelRisk);
+    const sanitizedSignificantRisk = sanitizeRisk(significantModelRisk);
 
     // Get the appropriate risk data based on selected model
-    const risk = modelType === MODEL_TYPE.FULL ? fullModelRisk : significantModelRisk;
+    const risk = modelType === MODEL_TYPE.FULL ? sanitizedFullRisk : sanitizedSignificantRisk;
 
     const formatStep = (step) => {
-        const stepId = step.step.toLowerCase().replace(/\s+/g, '-');
+        // Handle malformed step objects
+        if (!step || typeof step !== 'object') return null;
+        
+        const stepName = step.step || 'Unknown Step';
+        const stepId = stepName.toLowerCase().replace(/\s+/g, '-');
+        
+        const stepValue = typeof step.value === 'number' && !isNaN(step.value) ? step.value : 0;
         
         if (step.excluded) {
             return (
-                <div key={step.step} 
+                <div key={stepName} 
                      className="mb-2"
                      data-testid={`step-${stepId}`}
                      data-excluded="true"
                      data-p-value=">=0.05">
                     <div className="flex justify-between text-gray-500">
-                        <span>{step.step}:</span>
+                        <span>{stepName}:</span>
                         <span>0.000</span>
                     </div>
                     <p className="text-sm text-gray-500">
-                        (Original value: {step.value.toFixed(3)}, excluded due to p ≥ 0.05)
+                        (Original value: {stepValue.toFixed(3)}, excluded due to p ≥ 0.05)
                     </p>
                     <p className="text-xs text-gray-400">
-                        Category: {step.category}
+                        Category: {step.category || 'Unknown'}
                     </p>
                 </div>
             );
         }
 
         return (
-            <div key={step.step} 
+            <div key={stepName} 
                  className="mb-2"
                  data-testid={`step-${stepId}`}
-                 data-coefficient={step.value}
+                 data-coefficient={stepValue}
                  data-category={step.category}>
                 <div className="flex justify-between">
-                    <span>{step.step}:</span>
-                    <span>{step.value.toFixed(3)}</span>
+                    <span>{stepName}:</span>
+                    <span>{stepValue.toFixed(3)}</span>
                 </div>
                 {step.detail && (
                     <p className="text-sm text-gray-600">{step.detail}</p>
@@ -106,7 +135,7 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                         {/* Left column: Calculation steps */}
                         <div className="font-mono text-sm">
                             <h5 className="font-medium mb-3 text-gray-700">Steps</h5>
-                            {risk.steps.map(formatStep)}
+                            {risk.steps.map(formatStep).filter(Boolean)}
                             <div className="border-t pt-2 mt-2">
                                 <div className="flex justify-between font-medium">
                                     <span>Logit:</span>

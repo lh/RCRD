@@ -75,7 +75,7 @@ describe('Error Boundary and Error Handling Tests', () => {
         )).not.toThrow();
 
         // Component should render with default state
-        expect(screen.getByText(/Risk|Results/i)).toBeInTheDocument();
+        expect(screen.getByText('Risk Calculation Results')).toBeInTheDocument();
       });
 
       it('should handle negative probability values', () => {
