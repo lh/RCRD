@@ -22,15 +22,15 @@ This document tracks technical debt in the RCRD (Risk Calculator Retinal Detachm
 |----|----------|-------------|----------|--------|--------|--------|----------|
 | TD-001 | Logging | ~~Production console.log in calculations~~ | ~~CRITICAL~~ | ~~XS~~ | ~~High~~ | ✅ FIXED | ~~src/utils/riskCalculations.js:112~~ |
 | TD-002 | Logging | 111 remaining console.log statements | MEDIUM | S | Medium | Open | Multiple files |
-| TD-003 | Error Handling | Missing ErrorBoundary component | HIGH | M | High | Open | src/components/ |
+| TD-003 | Error Handling | ~~Missing ErrorBoundary component~~ | ~~HIGH~~ | ~~M~~ | ~~High~~ | ✅ FIXED | ~~src/components/~~ |
 | TD-004 | Code Duplication | Mobile/Desktop calculator duplication (~70%) | MEDIUM | L | Medium | Open | src/components/{Mobile,Desktop}RetinalCalculator.jsx |
 | TD-005 | Code Quality | Unused isTouchDevice state variable | LOW | XS | Low | Open | src/components/MobileRetinalCalculator.jsx:10 |
 | TD-006 | Dead Code | Commented console.log statements | LOW | XS | Low | Open | Multiple test files |
 | TD-007 | Type Safety | No TypeScript - using plain JavaScript | MEDIUM | XL | High | Open | Entire codebase |
 | TD-008 | Dependencies | Unpinned @shadcn/ui version ("latest") | MEDIUM | XS | Medium | Open | package.json |
 | TD-009 | Dependencies | Security overrides suggesting outdated deps | HIGH | M | High | Open | package.json |
-| TD-010 | Validation | No input validation in calculateRiskWithSteps | HIGH | S | High | Open | src/utils/riskCalculations.js |
-| TD-011 | Error Handling | No try-catch in risk calculations | HIGH | S | High | Open | src/utils/riskCalculations.js |
+| TD-010 | Validation | ~~No input validation in calculateRiskWithSteps~~ | ~~HIGH~~ | ~~S~~ | ~~High~~ | ✅ FIXED | ~~src/utils/riskCalculations.js~~ |
+| TD-011 | Error Handling | ~~No try-catch in risk calculations~~ | ~~HIGH~~ | ~~S~~ | ~~High~~ | ✅ FIXED | ~~src/utils/riskCalculations.js~~ |
 | TD-012 | Testing | Console.logs in test files | LOW | S | Low | Open | src/components/__tests__/*.test.jsx |
 | TD-013 | Code Quality | ESLint suppression comments | LOW | XS | Low | Open | src/components/MobileRetinalCalculator.jsx:9 |
 | TD-014 | Architecture | No state management (Redux/Context) | LOW | L | Medium | Open | N/A - uses prop drilling |
@@ -55,13 +55,10 @@ This document tracks technical debt in the RCRD (Risk Calculator Retinal Detachm
 2. Use proper test reporters instead
 3. Add build step to strip console statements in production
 
-### TD-003: Missing ErrorBoundary
-**Issue**: No error boundary to catch and handle React component errors.
-**Impact**: A single calculation error could crash the entire application.
-**Solution**: 
-1. Create ErrorBoundary component
-2. Wrap Calculator components
-3. Add fallback UI with error message and retry option
+### TD-003: Missing ErrorBoundary [✅ FIXED]
+**Fixed on**: 2025-09-03
+**Description**: No error boundary existed to catch React component errors.
+**Resolution**: Created ErrorBoundary component with fallback UI, wrapped main app components.
 
 ### TD-004: Code Duplication
 **Issue**: MobileRetinalCalculator and DesktopRetinalCalculator share ~70% identical code.
@@ -108,31 +105,14 @@ const [isTouchDevice, setIsTouchDevice] = useState(false);
 3. Update outdated packages
 4. Remove unnecessary overrides
 
-### TD-010-011: Missing Validation & Error Handling
-**Current state**: No validation or error handling in calculateRiskWithSteps
-**Risks**: 
-- Invalid inputs cause crashes
-- No graceful error recovery
-- Poor user experience on errors
-
-**Solution**:
-```javascript
-export function calculateRiskWithSteps(params) {
-    try {
-        // Validate inputs
-        if (!params.age || params.age < 0 || params.age > 120) {
-            throw new Error('Invalid age');
-        }
-        // ... existing logic
-    } catch (error) {
-        return {
-            error: true,
-            message: error.message,
-            probability: null
-        };
-    }
-}
-```
+### TD-010-011: Missing Validation & Error Handling [✅ FIXED]
+**Fixed on**: 2025-09-03
+**Description**: No validation or error handling in calculateRiskWithSteps
+**Resolution**: 
+- Added comprehensive input validation function
+- Added try-catch error handling
+- Returns error object with detailed messages
+- Validates age, PVR grade, gauge, hours, segments, cryotherapy, tamponade
 
 ## Resolution Priority
 
@@ -163,16 +143,19 @@ export function calculateRiskWithSteps(params) {
 
 ### Completed
 - [x] TD-001: Critical console.log removed (2025-09-03)
+- [x] TD-003: ErrorBoundary component added (2025-09-03)
+- [x] TD-010: Input validation added (2025-09-03)
+- [x] TD-011: Error handling with try-catch added (2025-09-03)
 
 ### In Progress
 - [ ] None currently
 
 ### Metrics
 - **Total Issues**: 15
-- **Resolved**: 1 (6.7%)
-- **Critical/High**: 5 remaining
+- **Resolved**: 4 (26.7%)
+- **Critical/High**: 1 remaining (TD-009: Security deps)
 - **Medium**: 5 remaining  
-- **Low**: 4 remaining
+- **Low**: 5 remaining
 
 ## Verification Steps
 

@@ -85,9 +85,73 @@ export function getPVRGrade(pvrGrade) {
 }
 
 /**
+ * Validate calculation input parameters
+ * @param {Object} params - Parameters to validate
+ * @returns {Object} Validation result with isValid and errors array
+ */
+export function validateCalculationInputs(params) {
+    const errors = [];
+    const { age, pvrGrade, vitrectomyGauge, selectedHours, detachmentSegments, cryotherapy, tamponade } = params;
+
+    // Validate age
+    if (age === undefined || age === null || age === '') {
+        errors.push('Age is required');
+    } else {
+        const ageNum = parseInt(age);
+        if (isNaN(ageNum) || ageNum < 0 || ageNum > 120) {
+            errors.push('Age must be a number between 0 and 120');
+        }
+    }
+
+    // Validate PVR grade
+    const validPvrGrades = ['none', 'C', 'D'];
+    if (pvrGrade && !validPvrGrades.includes(pvrGrade)) {
+        errors.push(`PVR grade must be one of: ${validPvrGrades.join(', ')}`);
+    }
+
+    // Validate vitrectomy gauge
+    const validGauges = ['20g', '23g', '25g', '27g'];
+    if (vitrectomyGauge && !validGauges.includes(vitrectomyGauge)) {
+        errors.push(`Vitrectomy gauge must be one of: ${validGauges.join(', ')}`);
+    }
+
+    // Validate selectedHours
+    if (selectedHours && !Array.isArray(selectedHours)) {
+        errors.push('Selected hours must be an array');
+    } else if (selectedHours) {
+        const invalidHours = selectedHours.filter(h => h < 1 || h > 12 || !Number.isInteger(h));
+        if (invalidHours.length > 0) {
+            errors.push('All selected hours must be integers between 1 and 12');
+        }
+    }
+
+    // Validate detachmentSegments
+    if (detachmentSegments && !Array.isArray(detachmentSegments)) {
+        errors.push('Detachment segments must be an array');
+    }
+
+    // Validate cryotherapy
+    const validCryotherapy = ['yes', 'no'];
+    if (cryotherapy && !validCryotherapy.includes(cryotherapy)) {
+        errors.push(`Cryotherapy must be one of: ${validCryotherapy.join(', ')}`);
+    }
+
+    // Validate tamponade
+    const validTamponade = ['none', 'air', 'sf6', 'c2f6', 'c3f8', 'light_oil', 'heavy_oil'];
+    if (tamponade && !validTamponade.includes(tamponade)) {
+        errors.push(`Tamponade must be one of: ${validTamponade.join(', ')}`);
+    }
+
+    return {
+        isValid: errors.length === 0,
+        errors
+    };
+}
+
+/**
  * Calculate risk with detailed steps
  * @param {Object} params - Risk calculation parameters
- * @returns {Object} Risk calculation results with steps
+ * @returns {Object} Risk calculation results with steps or error
  */
 export function calculateRiskWithSteps({
     age,
@@ -99,7 +163,25 @@ export function calculateRiskWithSteps({
     tamponade = 'sf6',
     modelType = MODEL_TYPE.FULL
 }) {
-    const steps = [];
+    try {
+        // Validate inputs
+        const validation = validateCalculationInputs({
+            age, pvrGrade, vitrectomyGauge, selectedHours,
+            detachmentSegments, cryotherapy, tamponade
+        });
+
+        if (!validation.isValid) {
+            return {
+                error: true,
+                message: 'Invalid input parameters',
+                errors: validation.errors,
+                probability: null,
+                steps: [],
+                logit: null
+            };
+        }
+
+        const steps = [];
     let logit = PAPER_COEFFICIENTS.constant;
     steps.push({ step: 'Constant', value: PAPER_COEFFICIENTS.constant });
 
@@ -160,6 +242,11 @@ export function calculateRiskWithSteps({
     // Calculate probability
     const probability = 100 / (1 + Math.exp(-logit));
 
+    // Validate the result
+    if (isNaN(probability) || !isFinite(probability)) {
+        throw new Error('Calculation resulted in invalid probability value');
+    }
+
     return {
         probability,
         steps,
@@ -168,6 +255,21 @@ export function calculateRiskWithSteps({
         pvrGrade: pvrCategory,
         vitrectomyGauge,
         cryotherapy,
-        tamponade
+        tamponade,
+        error: false
     };
+    } catch (error) {
+        // Log error in development
+        if (process.env.NODE_ENV === 'development') {
+            console.error('Risk calculation error:', error);
+        }
+
+        return {
+            error: true,
+            message: error.message || 'An unexpected error occurred during calculation',
+            probability: null,
+            steps: [],
+            logit: null
+        };
+    }
 }

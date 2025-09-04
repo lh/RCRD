@@ -168,18 +168,36 @@ describe('calculateRiskWithSteps', () => {
     });
 
     test('handles default/edge cases', () => {
+        // Test with valid minimum inputs
         const result = calculateRiskWithSteps({
-            age: '',
+            age: '50',  // Provide valid age
             pvrGrade: '',
             vitrectomyGauge: '',
             selectedHours: [],
             detachmentSegments: []
         });
 
+        expect(result.error).toBe(false);
         expect(result.probability).toBeGreaterThan(0);
         expect(result.probability).toBeLessThan(100);
         expect(result.steps.length).toBeGreaterThan(0);
         expect(result.logit).toBeDefined();
+    });
+
+    test('validates invalid input and returns error', () => {
+        // Test with invalid age
+        const result = calculateRiskWithSteps({
+            age: '',  // Invalid: empty age
+            pvrGrade: '',
+            vitrectomyGauge: '',
+            selectedHours: [],
+            detachmentSegments: []
+        });
+
+        expect(result.error).toBe(true);
+        expect(result.message).toBe('Invalid input parameters');
+        expect(result.errors).toContain('Age is required');
+        expect(result.probability).toBeNull();
     });
 
     test('handles total detachment', () => {
