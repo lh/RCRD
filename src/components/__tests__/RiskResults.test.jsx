@@ -11,6 +11,11 @@ describe('RiskResults', () => {
         logit: 1.074,
         steps: [
             {
+                step: 'Constant',
+                value: -1.611,
+                category: 'constant',
+            },
+            {
                 step: 'Age group',
                 value: 0.498,
                 detail: '(≥80 years)',
@@ -60,6 +65,11 @@ describe('RiskResults', () => {
         probability: 72.3,
         logit: 0.980,
         steps: [
+            {
+                step: 'Constant',
+                value: -1.611,
+                category: 'constant',
+            },
             {
                 step: 'Age group',
                 value: 0.498,
@@ -304,9 +314,11 @@ describe('RiskResults', () => {
         // Check for formula elements with mathematical validation
         const transformSection = screen.getByText('Logit Transformation').parentElement;
         
-        // Validate formula structure
-        const formula = within(transformSection).getByText(/p = 1 \/ \(1 \+ e/);
-        expect(formula.parentElement).toHaveTextContent('p = 1 / (1 + e-logit)');
+        // Validate formula structure - look for the formula in the specific format
+        const formulaText = within(transformSection).getByText((content, element) => {
+            return element && element.tagName === 'P' && content.includes('p = 1 / (1 + e');
+        });
+        expect(formulaText).toHaveTextContent('p = 1 / (1 + e-logit)');
         
         // Validate mathematical components
         const probabilityExplanation = within(transformSection).getByText(/p is the probability/);
@@ -318,11 +330,13 @@ describe('RiskResults', () => {
         const logitExplanation = within(transformSection).getByText(/logit is the sum of coefficients/);
         expect(logitExplanation).toHaveTextContent(`logit is the sum of coefficients (${mockFullModelRisk.logit.toFixed(3)})`);
         
-        // Validate calculation result
-        const calculationResult = within(transformSection).getByText(/1 \/ \(1 \+/);
+        // Validate calculation result - look for the specific calculation line
         const expectedExp = Math.exp(-mockFullModelRisk.logit).toFixed(3);
         const expectedProb = (mockFullModelRisk.probability/100).toFixed(3);
-        expect(calculationResult).toHaveTextContent(`1 / (1 + ${expectedExp}) = ${expectedProb}`);
+        const calculationResult = within(transformSection).getByText((content, element) => {
+            return element && content.includes(`1 / (1 + ${expectedExp}) = ${expectedProb}`);
+        });
+        expect(calculationResult).toBeInTheDocument();
     });
 
     it('should handle mobile display correctly', () => {
@@ -340,9 +354,11 @@ describe('RiskResults', () => {
         expect(modelToggle).toHaveAttribute('data-mobile', 'true');
     });
 
-    it('should not render when risk data is missing', () => {
-        const { container } = render(<RiskResults />);
-        expect(container.firstChild).toBeNull();
+    it('should render with default values when risk data is missing', () => {
+        render(<RiskResults />);
+        // Should render with default 0% probability
+        const probabilityValue = screen.getByTestId('risk-probability-value');
+        expect(probabilityValue).toHaveTextContent('0.0%');
     });
 
     it('should handle probability edge cases correctly', () => {

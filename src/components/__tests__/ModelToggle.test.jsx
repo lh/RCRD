@@ -53,7 +53,7 @@ describe('ModelToggle', () => {
     });
 
     test('calls onChange when toggling between models', () => {
-        render(
+        const { rerender } = render(
             <ModelToggle 
                 modelType={MODEL_TYPE.SIGNIFICANT} 
                 onChange={mockOnChange} 
@@ -67,9 +67,9 @@ describe('ModelToggle', () => {
         fireEvent.click(screen.getByLabelText('Full Model'));
         expect(mockOnChange).toHaveBeenCalledWith(MODEL_TYPE.FULL);
 
-        // Clear mock and render with full model
+        // Clear mock and rerender with full model
         mockOnChange.mockClear();
-        const { rerender } = render(
+        rerender(
             <ModelToggle 
                 modelType={MODEL_TYPE.FULL} 
                 onChange={mockOnChange} 
