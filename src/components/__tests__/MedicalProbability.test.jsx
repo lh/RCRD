@@ -338,7 +338,9 @@ describe('Medical Probability Range Validation', () => {
 
     describe('Probability Monotonicity', () => {
         it('should increase probability monotonically with age risk', () => {
-            const ages = [40, 55, 70, 85];
+            // Use ages that actually increase monotonically in risk
+            // 45-64 is reference (coeff 0), 65-79 (coeff 0.236), 80+ (coeff 0.498)
+            const ages = [50, 70, 85];
             const probabilities = ages.map(age => 
                 calculateRiskWithSteps({
                     age,

@@ -239,8 +239,9 @@ export function calculateRiskWithSteps({
     // Tamponade
     logit += addCoefficient('tamponade', tamponade, 'Tamponade');
 
-    // Calculate probability
-    const probability = 100 / (1 + Math.exp(-logit));
+    // Calculate probability and round to 2 decimal places for consistency
+    const rawProbability = 100 / (1 + Math.exp(-logit));
+    const probability = Math.round(rawProbability * 100) / 100;
 
     // Validate the result
     if (isNaN(probability) || !isFinite(probability)) {
