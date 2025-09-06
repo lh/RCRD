@@ -13,7 +13,9 @@ const CalculationSteps = ({ steps, logit, probability }) => {
     // Calculate step IDs for testing
     const getStepId = (step) => {
         if (!step || !step.step) return 'unknown';
-        return String(step.step).toLowerCase().replace(/\s+/g, '-');
+        return String(step.step).toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')  // Replace all non-alphanumeric with dashes
+            .replace(/-+$/, '');  // Remove trailing dashes
     };
     
     return (
