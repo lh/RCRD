@@ -13,10 +13,12 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
         logit: 0
     });
 
-    // Validate and sanitize risk data
+    // Validate and sanitize risk data - only for truly invalid data
     const sanitizeRisk = (risk) => {
-        if (!risk) return createDefaultRisk();
+        // Only return default if risk is null or undefined
+        if (risk === null || risk === undefined) return createDefaultRisk();
         
+        // If it's a valid object, clean up any NaN values but preserve valid zeros
         return {
             probability: (typeof risk.probability === 'number' && !isNaN(risk.probability)) 
                 ? risk.probability 
@@ -28,11 +30,12 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
         };
     };
 
-    const sanitizedFullRisk = sanitizeRisk(fullModelRisk);
-    const sanitizedSignificantRisk = sanitizeRisk(significantModelRisk);
+    // Only sanitize if we actually need to (for malformed data)
+    const fullRisk = fullModelRisk ? sanitizeRisk(fullModelRisk) : createDefaultRisk();
+    const significantRisk = significantModelRisk ? sanitizeRisk(significantModelRisk) : createDefaultRisk();
 
     // Get the appropriate risk data based on selected model
-    const risk = modelType === MODEL_TYPE.FULL ? sanitizedFullRisk : sanitizedSignificantRisk;
+    const risk = modelType === MODEL_TYPE.FULL ? fullRisk : significantRisk;
 
     const formatStep = (step) => {
         // Handle malformed step objects

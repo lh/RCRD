@@ -104,7 +104,7 @@ export function validateCalculationInputs(params) {
     }
 
     // Validate PVR grade
-    const validPvrGrades = ['none', 'C', 'D'];
+    const validPvrGrades = ['none', 'A', 'B', 'C', 'D'];
     if (pvrGrade && !validPvrGrades.includes(pvrGrade)) {
         errors.push(`PVR grade must be one of: ${validPvrGrades.join(', ')}`);
     }
@@ -132,7 +132,7 @@ export function validateCalculationInputs(params) {
 
     // Validate cryotherapy
     const validCryotherapy = ['yes', 'no'];
-    if (cryotherapy && !validCryotherapy.includes(cryotherapy)) {
+    if (cryotherapy !== undefined && !validCryotherapy.includes(cryotherapy)) {
         errors.push(`Cryotherapy must be one of: ${validCryotherapy.join(', ')}`);
     }
 
