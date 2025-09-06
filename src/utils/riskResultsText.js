@@ -50,8 +50,12 @@ export function getStepExplanation(step, value) {
  * @returns {string} The formula text
  */
 export function getProbabilityFormulaText(logit) {
-    const sign = logit >= 0 ? "+" : "";
-    return "1 / (1 + e" + sign + logit + ") × 100%";
+    // Convert string to number to handle negative zero correctly
+    const numLogit = Number(logit);
+    // Use the numeric value for display to avoid "-0" display issues
+    const displayValue = numLogit === 0 ? "0" : logit;
+    const sign = numLogit >= 0 ? "+" : "";
+    return "1 / (1 + e" + sign + displayValue + ") × 100%";
 }
 
 /**
@@ -60,7 +64,12 @@ export function getProbabilityFormulaText(logit) {
  * @returns {string} The result text
  */
 export function getProbabilityResultText(probability) {
-    return Math.round(probability) + "%";
+    // Convert to string to preserve decimal places if provided
+    const probStr = String(probability);
+    // Remove existing % sign if present
+    const cleanProb = probStr.replace('%', '');
+    // Return with % sign added
+    return cleanProb + "%";
 }
 
 /**

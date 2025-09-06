@@ -56,7 +56,8 @@ export const createMinimalMock = () => {
         </button>
       )}
     </div>
-  ));
+  );
+  });
 };
 
 // Detailed mock for integration tests

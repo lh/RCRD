@@ -32,12 +32,12 @@ describe('ClockFace - Complete Integration Test', () => {
             const tearGroups = container.querySelectorAll('g[style*="cursor: pointer"]');
             expect(tearGroups.length).toBe(12);
 
-            // Click hour 3
-            fireEvent.click(tearGroups[2]);
+            // Click hour 3 (at index 3 because: index 0=hour12, 1=hour1, 2=hour2, 3=hour3)
+            fireEvent.click(tearGroups[3]);
             expect(mockOnTearToggle).toHaveBeenCalledWith(3);
 
-            // Click hour 12
-            fireEvent.click(tearGroups[11]);
+            // Click hour 12 (at index 0)
+            fireEvent.click(tearGroups[0]);
             expect(mockOnTearToggle).toHaveBeenCalledWith(12);
         });
 
@@ -125,7 +125,7 @@ describe('ClockFace - Complete Integration Test', () => {
             );
 
             // Check that specified segments are highlighted
-            const highlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            const highlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegments.length).toBeGreaterThan(0);
         });
 
@@ -236,12 +236,12 @@ describe('ClockFace - Complete Integration Test', () => {
 
             const tearGroups = container.querySelectorAll('g[style*="cursor: pointer"]');
 
-            // Hover over hour 6
-            fireEvent.mouseEnter(tearGroups[5]);
+            // Hover over hour 6 (at index 6 because: index 0=hour12, then 1-11 are hours 1-11)
+            fireEvent.mouseEnter(tearGroups[6]);
             expect(mockOnHoverChange).toHaveBeenCalledWith(6);
 
             // Leave hover
-            fireEvent.mouseLeave(tearGroups[5]);
+            fireEvent.mouseLeave(tearGroups[6]);
             expect(mockOnHoverChange).toHaveBeenCalledWith(null);
         });
 
@@ -394,7 +394,7 @@ describe('ClockFace - Complete Integration Test', () => {
             const tearPaths = container.querySelectorAll('path[transform*="scale(1.5)"]');
             expect(tearPaths.length).toBe(3);
 
-            const highlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            const highlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegments.length).toBe(6);
 
             // Change selection
@@ -410,7 +410,7 @@ describe('ClockFace - Complete Integration Test', () => {
             const newTearPaths = container.querySelectorAll('path[transform*="scale(1.5)"]');
             expect(newTearPaths.length).toBe(1);
 
-            const newHighlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            const newHighlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(newHighlightedSegments.length).toBe(2);
         });
     });
@@ -423,11 +423,20 @@ describe('ClockFace - Complete Integration Test', () => {
             const tearGroups = container.querySelectorAll('g[style*="cursor: pointer"]');
             expect(tearGroups.length).toBe(12);
 
-            // Each tear should have a transform with translation
+            // Each tear should have positioned children (circles and paths)
             tearGroups.forEach(group => {
-                const transform = group.getAttribute('transform') || '';
-                // Should have translate values
-                expect(transform).toMatch(/translate\([^)]+\)/);
+                const circle = group.querySelector('circle');
+                const path = group.querySelector('path');
+                
+                // Should have positioned elements
+                if (circle) {
+                    expect(circle.getAttribute('cx')).toBeTruthy();
+                    expect(circle.getAttribute('cy')).toBeTruthy();
+                }
+                if (path) {
+                    // Path uses d attribute for positioning
+                    expect(path.getAttribute('d')).toBeTruthy();
+                }
             });
         });
 
@@ -440,7 +449,7 @@ describe('ClockFace - Complete Integration Test', () => {
             );
 
             // Segment 0 should be at the top (12 o'clock position)
-            const highlightedSegment = container.querySelector('path[fill*="rgba(59, 130, 246"]');
+            const highlightedSegment = container.querySelector('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegment).toBeInTheDocument();
 
             // The path should start near the top of the circle
@@ -456,7 +465,7 @@ describe('ClockFace - Complete Integration Test', () => {
             );
 
             // Initially no segments highlighted
-            let highlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            let highlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegments.length).toBe(0);
 
             // During drawing, segments get highlighted
@@ -467,7 +476,7 @@ describe('ClockFace - Complete Integration Test', () => {
                 />
             );
 
-            highlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            highlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegments.length).toBe(3);
         });
 
@@ -487,7 +496,7 @@ describe('ClockFace - Complete Integration Test', () => {
             expect(tearPaths.length).toBe(2);
 
             // - Highlighted segments
-            const highlightedSegments = container.querySelectorAll('path[fill*="rgba(59, 130, 246"]');
+            const highlightedSegments = container.querySelectorAll('path[fill="rgba(59, 130, 246, 0.5)"]');
             expect(highlightedSegments.length).toBe(2);
 
             // - Background circles

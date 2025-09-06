@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import ClockFaceSVG from './ClockFaceSVG.jsx';
 
 const ClockFace = ({
@@ -25,6 +25,11 @@ const ClockFace = ({
   const [currentDetachmentSegments, setCurrentDetachmentSegments] = useState(initialDetachmentSegments);
   const [drawMode, setDrawMode] = useState(null); // 'add' or 'remove'
   const svgRef = useRef(null);
+
+  // Sync currentDetachmentSegments with prop changes
+  useEffect(() => {
+    setCurrentDetachmentSegments(initialDetachmentSegments);
+  }, [initialDetachmentSegments]);
 
   const handleReset = () => {
     setCurrentDetachmentSegments([]);
