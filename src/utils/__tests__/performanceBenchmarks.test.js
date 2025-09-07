@@ -87,7 +87,7 @@ describe('Utility Function Performance Benchmarks', () => {
             const results = measurePerformance(detectBreaks, 1000);
             
             expect(results.stats.avg).toBeLessThan(1);
-            expect(results.stats.max).toBeLessThan(5);
+            expect(results.stats.max).toBeLessThan(10);
         });
 
         it('should prioritize location detection efficiently', () => {

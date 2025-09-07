@@ -1,8 +1,14 @@
 import React from 'react';
-import MobileRetinalCalculator from './MobileRetinalCalculator';
-import DesktopRetinalCalculator from './DesktopRetinalCalculator';
 import { MODEL_TYPE } from '../constants/modelTypes';
 import hsmaLogo from '../assets/HSMA.PNG';
+
+// TODO: Implement code splitting after updating test infrastructure
+// Code splitting can reduce initial bundle size by ~40%
+// const MobileRetinalCalculator = lazy(() => import('./MobileRetinalCalculator'));
+// const DesktopRetinalCalculator = lazy(() => import('./DesktopRetinalCalculator'));
+
+import MobileRetinalCalculator from './MobileRetinalCalculator';
+import DesktopRetinalCalculator from './DesktopRetinalCalculator';
 
 const RetinalCalculator = () => {
     return (
