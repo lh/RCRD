@@ -27,6 +27,8 @@
   "test": "react-scripts test",
   "test:sequential": "react-scripts test --maxWorkers=1",
   "test:performance": "react-scripts test --maxWorkers=1 Performance ClockPerformance performanceBenchmarks",
+  "test:ci": "react-scripts test --watchAll=false --coverage",
+  "verify": "npm run build && npm test -- --watchAll=false",
   "eject": "react-scripts eject",
   "clean-docs": "rm -rf docs",
   "docs:components": "jsdoc2md \"src/components/**/*.jsx\" \"src/components/**/*.js\" > docs/components.md",
