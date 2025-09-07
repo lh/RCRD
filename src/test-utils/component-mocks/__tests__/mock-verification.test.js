@@ -101,10 +101,11 @@ describe('Mock Verification Tests', () => {
       const MinimalMock = createMinimalRiskResults();
       const DetailedMock = createDetailedRiskResults();
 
-      const { getByTestId: getMinimal } = render(<MinimalMock {...testProps} />);
-      const { getByTestId: getDetailed } = render(<DetailedMock {...testProps} />);
-
+      const { getByTestId: getMinimal, unmount: unmountMinimal } = render(<MinimalMock {...testProps} />);
       expect(getMinimal('risk-probability-value')).toHaveTextContent('74.5%');
+      unmountMinimal();
+      
+      const { getByTestId: getDetailed } = render(<DetailedMock {...testProps} />);
       expect(getDetailed('risk-probability-value')).toHaveTextContent('74.5%');
     });
 
@@ -243,11 +244,12 @@ describe('Mock Verification Tests', () => {
 
       // Test decimal precision
       const props = { fullModelRisk: { probability: 74.567 } };
-      const { getByTestId: getMinimal } = render(<MinimalMock {...props} />);
-      const { getByTestId: getDetailed } = render(<DetailedMock {...props} />);
-
+      const { getByTestId: getMinimal, unmount: unmountMinimal } = render(<MinimalMock {...props} />);
       // Both should format to 1 decimal place
       expect(getMinimal('risk-probability-value')).toHaveTextContent('74.6%');
+      unmountMinimal();
+      
+      const { getByTestId: getDetailed } = render(<DetailedMock {...props} />);
       expect(getDetailed('risk-probability-value')).toHaveTextContent('74.6%');
     });
   });

@@ -6,6 +6,10 @@ import { PAPER_COEFFICIENTS } from '../constants/paperCoefficients.js';
 import { ClockHourNotation } from '../components/clock/utils/clockHourNotation.js';
 import { MODEL_TYPE } from '../constants/modelTypes.js';
 import { isSignificant } from '../constants/paperCoefficients.js';
+import { 
+    calculateLogitConfidenceInterval, 
+    calculateProbabilityConfidenceInterval 
+} from './confidenceIntervals.js';
 
 /**
  * Get age group category for risk calculation
@@ -248,16 +252,34 @@ export function calculateRiskWithSteps({
         throw new Error('Calculation resulted in invalid probability value');
     }
 
+    // Calculate confidence intervals
+    const logitCI = calculateLogitConfidenceInterval(logit, steps);
+    const probabilityCI = calculateProbabilityConfidenceInterval(probability, logit, steps);
+
     return {
         probability,
         steps,
         logit,
-        age: ageGroup,
+        age: age,  // Return raw age value for display
+        ageGroup: ageGroup,  // Also return age group for reference
         pvrGrade: pvrCategory,
         vitrectomyGauge,
         cryotherapy,
         tamponade,
-        error: false
+        selectedHours,  // Include for display purposes
+        detachmentSegments,  // Include for display purposes
+        error: false,
+        // New confidence interval data
+        confidenceIntervals: {
+            logit: logitCI,
+            probability: probabilityCI,
+            // Formatted strings for easy display
+            formatted: {
+                probability95: `${probability.toFixed(1)}% (95% CI: ${probabilityCI.lower.toFixed(1)}%-${probabilityCI.upper.toFixed(1)}%)`,
+                probabilityRange: `${probabilityCI.lower.toFixed(1)}%-${probabilityCI.upper.toFixed(1)}%`,
+                marginOfError: `±${probabilityCI.marginOfError.toFixed(1)}%`
+            }
+        }
     };
     } catch (error) {
         // Log error in development

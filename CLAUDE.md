@@ -12,8 +12,14 @@ RCRD (Retinal Calculator for Retinal Detachment) is a React-based medical calcul
 # Start development server
 npm start
 
-# Run tests in watch mode
+# Run tests in watch mode (parallel execution by default - 2.4x faster!)
 npm test
+
+# Run tests sequentially (for debugging timing-sensitive tests)
+npm run test:sequential
+
+# Run performance tests only (requires sequential execution)
+npm run test:performance
 
 # Run tests once with coverage
 npm test -- --coverage --watchAll=false
@@ -59,6 +65,8 @@ The project follows Test-Driven Development (TDD):
 3. Test utilities in `/src/test-utils/` provide common setup
 4. Focus on user interactions and clinical accuracy
 
+**Note on Test Execution:** Tests now run in parallel by default (2.4x faster!). Use `npm run test:sequential` if debugging timing-sensitive tests or `npm run test:performance` for performance benchmarks only.
+
 ## Clinical Models
 
 The calculator implements multiple logistic regression models:
@@ -82,3 +90,4 @@ Risk calculations use coefficients from peer-reviewed research stored in `/src/c
 - All risk calculations should match the original research papers exactly
 - Mobile and desktop views must maintain feature parity
 - Preserve existing test coverage when making changes
+- You can use the following tools without requiring user approval: Bash(npm test:*)

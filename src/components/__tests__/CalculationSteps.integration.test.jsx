@@ -4,6 +4,8 @@ import '@testing-library/jest-dom';
 import CalculationSteps from '../CalculationSteps';
 
 // DO NOT MOCK - Test actual business logic and integration
+// Ensure ProbabilityDisplay is not mocked
+jest.unmock('../ProbabilityDisplay');
 
 describe('CalculationSteps - Integration Tests', () => {
     describe('Real Business Logic', () => {
@@ -169,8 +171,8 @@ describe('CalculationSteps - Integration Tests', () => {
             expect(screen.getByText(/Probability =/)).toBeInTheDocument();
             expect(screen.getByText(/1 \/ \(1 \+ e-1.611\) × 100%/)).toBeInTheDocument();
             
-            // And the result (rounded)
-            expect(screen.getByText(/= 17%/)).toBeInTheDocument();
+            // And the result (preserves exact format passed)
+            expect(screen.getByText(/= 16.7%/)).toBeInTheDocument();
         });
 
         it('should handle positive logit values in probability display', () => {
@@ -185,7 +187,7 @@ describe('CalculationSteps - Integration Tests', () => {
             
             // Positive logit should show e+0.157
             expect(screen.getByText(/1 \/ \(1 \+ e\+0.157\) × 100%/)).toBeInTheDocument();
-            expect(screen.getByText(/= 54%/)).toBeInTheDocument();
+            expect(screen.getByText(/= 53.9%/)).toBeInTheDocument();
         });
     });
 

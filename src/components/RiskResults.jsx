@@ -26,7 +26,9 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
             steps: Array.isArray(risk.steps) ? risk.steps : [],
             logit: (typeof risk.logit === 'number' && !isNaN(risk.logit)) 
                 ? risk.logit 
-                : 0
+                : 0,
+            // Preserve confidence intervals if present
+            confidenceIntervals: risk.confidenceIntervals || undefined
         };
     };
 
@@ -113,11 +115,31 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                  aria-label={`Risk percentage: ${validProbability.toFixed(1)}%`}>
                 <div className="text-3xl font-bold mb-2"
                      data-testid="risk-probability-value">
-                    {validProbability.toFixed(1)}%
+                    {/* Display with confidence interval if available */}
+                    {risk.confidenceIntervals ? (
+                        <>
+                            {validProbability.toFixed(1)}% 
+                            <span className="text-xl font-normal text-gray-600 ml-2">
+                                ({risk.confidenceIntervals.probability.lower.toFixed(0)}-{risk.confidenceIntervals.probability.upper.toFixed(0)}%)
+                            </span>
+                        </>
+                    ) : (
+                        `${validProbability.toFixed(1)}%`
+                    )}
                 </div>
                 <p className="text-sm text-gray-600">
-                    Probability of requiring additional surgery within 6 months
+                    {risk.confidenceIntervals ? (
+                        'Probability (95% CI)'
+                    ) : (
+                        'Probability of requiring additional surgery within 6 months'
+                    )}
                 </p>
+                {/* Additional subtitle for clarity when CIs are shown */}
+                {risk.confidenceIntervals && (
+                    <p className="text-xs text-gray-500 mt-1">
+                        Risk of requiring additional surgery within 6 months
+                    </p>
+                )}
             </div>
 
             {/* Show/Hide Details Button */}
@@ -167,6 +189,27 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
                                     </p>
                                 </div>
                             </div>
+
+                            {/* Confidence Interval Details */}
+                            {risk.confidenceIntervals && (
+                                <div className="bg-blue-50 rounded-lg p-4 mt-4">
+                                    <h5 className="font-medium mb-2 text-gray-700">95% Confidence Interval</h5>
+                                    <div className="space-y-2 text-sm text-gray-600">
+                                        <p>
+                                            <span className="font-medium">Probability:</span> {risk.confidenceIntervals.probability.lower.toFixed(1)}% to {risk.confidenceIntervals.probability.upper.toFixed(1)}%
+                                        </p>
+                                        <p>
+                                            <span className="font-medium">Logit:</span> {risk.confidenceIntervals.logit.lower.toFixed(3)} to {risk.confidenceIntervals.logit.upper.toFixed(3)}
+                                        </p>
+                                        <p>
+                                            <span className="font-medium">Standard Error (logit):</span> {risk.confidenceIntervals.logit.standardError.toFixed(3)}
+                                        </p>
+                                        <p className="text-xs mt-2 italic">
+                                            Based on actual standard errors from the BEAVRS study
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
