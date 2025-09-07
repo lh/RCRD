@@ -12,13 +12,10 @@ root.render(
   </React.StrictMode>
 );
 
-// Performance monitoring for production
+// Performance monitoring
 if (process.env.NODE_ENV === 'production') {
   reportWebVitals((metric) => {
-    // Log to console for now
-    console.log(metric);
-    
-    // You can also send to analytics endpoint
+    // In production, send to analytics endpoint instead of console
     // Example for Google Analytics:
     // window.gtag('event', metric.name, {
     //   value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
@@ -34,11 +31,9 @@ if (process.env.NODE_ENV === 'production') {
     //   body: JSON.stringify(metric),
     // });
   });
-} else {
-  // In development, you might want to log metrics for debugging
-  if (process.env.NODE_ENV === 'development') {
-    reportWebVitals((metric) => {
-      console.debug('Web Vitals (dev):', metric);
-    });
-  }
+} else if (process.env.NODE_ENV === 'development') {
+  // Only log metrics in development for debugging
+  reportWebVitals((metric) => {
+    console.debug('Web Vitals (dev):', metric);
+  });
 }
