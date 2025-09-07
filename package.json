@@ -25,6 +25,8 @@
   "start": "react-scripts start",
   "build": "react-scripts build",
   "test": "react-scripts test",
+  "test:sequential": "react-scripts test --maxWorkers=1",
+  "test:performance": "react-scripts test --maxWorkers=1 Performance ClockPerformance performanceBenchmarks",
   "eject": "react-scripts eject",
   "clean-docs": "rm -rf docs",
   "docs:components": "jsdoc2md \"src/components/**/*.jsx\" \"src/components/**/*.js\" > docs/components.md",
@@ -61,7 +63,8 @@
   "svgo": "^3.0.0",
   "css-select": "^5.1.0",
   "@svgr/webpack": "^8.0.0",
-  "resolve-url-loader": "^5.0.0"
+  "resolve-url-loader": "^5.0.0",
+  "webpack-dev-server": "^5.2.1"
  },
  "overrides": {
   "nth-check": "^2.0.1",
@@ -69,6 +72,7 @@
   "svgo": "^3.0.0",
   "css-select": "^5.1.0",
   "@svgr/webpack": "^8.0.0",
-  "resolve-url-loader": "^5.0.0"
+  "resolve-url-loader": "^5.0.0",
+  "webpack-dev-server": "^5.2.1"
  }
 }
