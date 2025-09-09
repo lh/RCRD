@@ -89,4 +89,20 @@ const ClockFace = ({
   );
 };
 
-export default ClockFace;
+// Memoize ClockFace to prevent unnecessary re-renders
+// Only re-render if props actually change
+export default React.memo(ClockFace, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render)
+  // Return false if props are different (re-render)
+  return (
+    JSON.stringify(prevProps.selectedHours) === JSON.stringify(nextProps.selectedHours) &&
+    JSON.stringify(prevProps.detachmentSegments) === JSON.stringify(nextProps.detachmentSegments) &&
+    prevProps.hoveredHour === nextProps.hoveredHour &&
+    prevProps.onHoverChange === nextProps.onHoverChange &&
+    prevProps.onTearToggle === nextProps.onTearToggle &&
+    prevProps.onSegmentToggle === nextProps.onSegmentToggle &&
+    prevProps.setDetachmentSegments === nextProps.setDetachmentSegments &&
+    prevProps.readOnly === nextProps.readOnly &&
+    prevProps.isMobile === nextProps.isMobile
+  );
+});

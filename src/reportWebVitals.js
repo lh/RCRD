@@ -1,20 +1,20 @@
 const reportWebVitals = onPerfEntry => {
   if (onPerfEntry && onPerfEntry instanceof Function) {
-    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+    import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
       // Cumulative Layout Shift - measures visual stability
-      getCLS(onPerfEntry);
+      onCLS(onPerfEntry);
       
-      // First Input Delay - measures interactivity
-      getFID(onPerfEntry);
+      // First Input Delay - measures interactivity  
+      onFID(onPerfEntry);
       
       // First Contentful Paint - measures loading performance
-      getFCP(onPerfEntry);
+      onFCP(onPerfEntry);
       
       // Largest Contentful Paint - measures loading performance
-      getLCP(onPerfEntry);
+      onLCP(onPerfEntry);
       
       // Time to First Byte - measures server response time
-      getTTFB(onPerfEntry);
+      onTTFB(onPerfEntry);
     });
   }
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { calculateRiskWithSteps } from '../../../utils/riskCalculations.js';
 import { MODEL_TYPE } from '../../../constants/modelTypes.js';
 
@@ -33,7 +33,8 @@ export const useRetinalCalculator = () => {
         setDetachmentSegments(newDetachment);
     };
 
-    const handleCalculate = () => {
+    // Memoize handleCalculate to prevent unnecessary re-creation
+    const handleCalculate = useMemo(() => () => {
         if (!age || detachmentSegments.length === 0) return;
 
         const inputs = {
@@ -61,7 +62,7 @@ export const useRetinalCalculator = () => {
             full: fullRisk,
             significant: significantRisk
         });
-    };
+    }, [age, pvrGrade, vitrectomyGauge, selectedHours, detachmentSegments, cryotherapy, tamponade]);
 
     const handleReset = () => {
         setAge('50');  // Reset to default age 50

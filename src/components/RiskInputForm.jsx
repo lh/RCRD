@@ -182,4 +182,5 @@ const RiskInputForm = ({
     return null;
 };
 
-export default RiskInputForm;
+// Memoize RiskInputForm to prevent unnecessary re-renders
+export default React.memo(RiskInputForm);
