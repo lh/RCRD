@@ -6,8 +6,8 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useClockInteractions } from '../useClockInteractions';
 
-// Mock clockCalculations module with implementation
-jest.mock('../../utils/clockCalculations', () => ({
+// Mock segmentHourMapping module with implementation
+jest.mock('../../utils/segmentHourMapping', () => ({
   segmentToHour: (segment) => {
     // Handle hour 12 (segments 55-59 and 0-4)
     if (segment >= 55) {

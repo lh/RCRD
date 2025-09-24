@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { MODEL_TYPE } from '../constants/modelTypes.js';
 import ModelToggle from './ModelToggle';
 
@@ -216,6 +217,42 @@ const RiskResults = ({ fullModelRisk, significantModelRisk, isMobile = false }) 
             )}
         </div>
     );
+};
+
+// PropTypes definition
+const riskPropType = PropTypes.shape({
+    probability: PropTypes.number,
+    steps: PropTypes.arrayOf(PropTypes.shape({
+        step: PropTypes.string,
+        value: PropTypes.number,
+        excluded: PropTypes.bool,
+        category: PropTypes.string,
+        detail: PropTypes.string
+    })),
+    logit: PropTypes.number,
+    confidenceIntervals: PropTypes.shape({
+        probability: PropTypes.shape({
+            lower: PropTypes.number,
+            upper: PropTypes.number
+        }),
+        logit: PropTypes.shape({
+            lower: PropTypes.number,
+            upper: PropTypes.number,
+            standardError: PropTypes.number
+        })
+    })
+});
+
+RiskResults.propTypes = {
+    fullModelRisk: riskPropType,
+    significantModelRisk: riskPropType,
+    isMobile: PropTypes.bool
+};
+
+RiskResults.defaultProps = {
+    fullModelRisk: null,
+    significantModelRisk: null,
+    isMobile: false
 };
 
 export default RiskResults;

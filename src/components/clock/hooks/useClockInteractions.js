@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { segmentToHour } from '../utils/clockCalculations';
+import { segmentToHour } from '../utils/segmentHourMapping';
 import { ClockHourNotation } from '../utils/clockHourNotation';
 
 export const useClockInteractions = (onChange) => {

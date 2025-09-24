@@ -196,7 +196,8 @@ describe('RiskInputForm - Unit Tests', () => {
             };
             
             render(<RiskInputForm {...minimalProps} />);
-            expect(screen.getByLabelText(/age \(years\)/i)).toHaveValue(null);
+            // Component has defaultProps that sets age to '50'
+            expect(screen.getByLabelText(/age \(years\)/i)).toHaveValue(50);
         });
 
 

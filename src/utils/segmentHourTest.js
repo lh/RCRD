@@ -3,7 +3,7 @@
 // 1. x = (segment + 24) / 2
 // 2. hour = x > 12 ? x - 12 : x
 
-function segmentToHour(segment) {
+export function segmentToHour(segment) {
     // Normalize segment to 0-23 range
     const normalizedSegment = ((segment % 24) + 24) % 24;
     
@@ -21,16 +21,16 @@ function segmentToHour(segment) {
 }
 
 // Test all segments
-console.log('Testing segment to hour mapping:');
-console.log('--------------------------------');
-for (let segment = 0; segment < 24; segment++) {
-    const hour = segmentToHour(segment);
-    console.log(`Segment ${segment} -> Hour ${hour}`);
-}
+// console.log('Testing segment to hour mapping:');
+// console.log('--------------------------------');
+// for (let segment = 0; segment < 24; segment++) {
+//     const hour = segmentToHour(segment);
+//     console.log(`Segment ${segment} -> Hour ${hour}`);
+// }
 
 // Test specific cases
-console.log('\nTesting specific cases:');
-console.log('--------------------------------');
+// console.log('\nTesting specific cases:');
+// console.log('--------------------------------');
 const testCases = [
     { segment: 1, expectedHour: 1 },  // Hour 1
     { segment: 2, expectedHour: 1 },  // Hour 1
@@ -48,11 +48,11 @@ const testCases = [
     { segment: 0, expectedHour: 12 }   // Hour 12
 ];
 
-testCases.forEach(({ segment, expectedHour }) => {
-    const actualHour = segmentToHour(segment);
-    const passed = actualHour === expectedHour;
-    console.log(
-        `Segment ${segment.toString().padStart(2)} -> Hour ${actualHour} ` +
-        `(Expected: ${expectedHour}) ${passed ? '✓' : '✗'}`
-    );
-});
+// testCases.forEach(({ segment, expectedHour }) => {
+//     const actualHour = segmentToHour(segment);
+//     const passed = actualHour === expectedHour;
+//     console.log(
+//         `Segment ${segment.toString().padStart(2)} -> Hour ${actualHour} ` +
+//         `(Expected: ${expectedHour}) ${passed ? '✓' : '✗'}`
+//     );
+// });

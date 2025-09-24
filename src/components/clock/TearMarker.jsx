@@ -1,6 +1,8 @@
 import React from 'react';
-import { DIMENSIONS, getStyles, createTearPath } from './styles/clockStyles.js';
-import { getPosition } from './utils/clockGeometry.js';
+import PropTypes from 'prop-types';
+import { getStyles } from './styles/clockStyles.js';
+import { DIMENSIONS } from './utils/clockDimensions.js';
+import { getPosition, createTearPath } from './utils/clockFaceGeometry.js';
 
 const TearMarker = ({
   hour,
@@ -109,6 +111,22 @@ const TearMarker = ({
       )}
     </g>
   );
+};
+
+TearMarker.propTypes = {
+    hour: PropTypes.number.isRequired,
+    isSelected: PropTypes.bool,
+    onToggle: PropTypes.func.isRequired,
+    isHovered: PropTypes.bool,
+    onHoverChange: PropTypes.func,
+    readOnly: PropTypes.bool
+};
+
+TearMarker.defaultProps = {
+    isSelected: false,
+    isHovered: false,
+    onHoverChange: () => {},
+    readOnly: false
 };
 
 export default TearMarker;

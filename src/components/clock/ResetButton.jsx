@@ -1,5 +1,4 @@
 import React from 'react';
-import { DIMENSIONS } from './styles/clockStyles.js';
 
 const ResetButton = ({ onReset, isMobile, readOnly }) => {
   if (!isMobile || readOnly) return null;

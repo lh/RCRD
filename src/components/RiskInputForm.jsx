@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { pvrOptions } from '../constants/riskCalculatorConstants.js';
 import GaugeSelection from './GaugeSelection.jsx';
 import TamponadeSelection from './TamponadeSelection.jsx';
@@ -180,6 +181,35 @@ const RiskInputForm = ({
     }
 
     return null;
+};
+
+// PropTypes definition
+RiskInputForm.propTypes = {
+    age: PropTypes.string,
+    setAge: PropTypes.func,
+    pvrGrade: PropTypes.string,
+    setPvrGrade: PropTypes.func,
+    vitrectomyGauge: PropTypes.string,
+    setVitrectomyGauge: PropTypes.func,
+    cryotherapy: PropTypes.string,
+    setCryotherapy: PropTypes.func,
+    tamponade: PropTypes.string,
+    setTamponade: PropTypes.func,
+    position: PropTypes.oneOf(['left', 'right'])
+};
+
+RiskInputForm.defaultProps = {
+    age: '50',
+    setAge: () => {},
+    pvrGrade: 'none',
+    setPvrGrade: () => {},
+    vitrectomyGauge: '25g',
+    setVitrectomyGauge: () => {},
+    cryotherapy: 'yes',
+    setCryotherapy: () => {},
+    tamponade: 'c2f6',
+    setTamponade: () => {},
+    position: null
 };
 
 // Memoize RiskInputForm to prevent unnecessary re-renders

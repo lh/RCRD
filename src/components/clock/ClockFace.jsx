@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import PropTypes from 'prop-types';
 import ClockFaceSVG from './ClockFaceSVG.jsx';
 
 const ClockFace = ({
@@ -87,6 +88,31 @@ const ClockFace = ({
       </div>
     </div>
   );
+};
+
+// PropTypes definition
+ClockFace.propTypes = {
+  selectedHours: PropTypes.arrayOf(PropTypes.number),
+  detachmentSegments: PropTypes.arrayOf(PropTypes.string),
+  hoveredHour: PropTypes.number,
+  onHoverChange: PropTypes.func,
+  onTearToggle: PropTypes.func,
+  onSegmentToggle: PropTypes.func,
+  setDetachmentSegments: PropTypes.func,
+  readOnly: PropTypes.bool,
+  isMobile: PropTypes.bool
+};
+
+ClockFace.defaultProps = {
+  selectedHours: [],
+  detachmentSegments: [],
+  hoveredHour: null,
+  onHoverChange: () => {},
+  onTearToggle: () => {},
+  onSegmentToggle: () => {},
+  setDetachmentSegments: () => {},
+  readOnly: false,
+  isMobile: false
 };
 
 // Memoize ClockFace to prevent unnecessary re-renders
