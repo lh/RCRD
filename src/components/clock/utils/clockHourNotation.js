@@ -1,29 +1,30 @@
 class ClockHourNotation {
     /**
      * Check if any segments touch a given hour
-     * @param {number[]} segments - Array of segment numbers
-     * @param {number} hour - Clock hour to check
+     * @param {number[]} segments - Array of segment numbers (0-23)
+     * @param {number} hour - Clock hour to check (1-12)
      * @returns {boolean}
      */
     static segmentsTouchHour(segments, hour) {
-        // Define segment ranges for each hour (5 segments per hour)
+        // Define segment ranges for each hour (2 segments per hour in 24-segment system)
         const hourRanges = {
-            1: [0, 4],      // Hour 1: 0-4
-            2: [5, 9],      // Hour 2: 5-9
-            3: [10, 14],    // Hour 3: 10-14
-            4: [15, 19],    // Hour 4: 15-19
-            5: [20, 24],    // Hour 5: 20-24
-            6: [25, 29],    // Hour 6: 25-29
-            7: [30, 34],    // Hour 7: 30-34
-            8: [35, 39],    // Hour 8: 35-39
-            9: [40, 44],    // Hour 9: 40-44
-            10: [45, 49],   // Hour 10: 45-49
-            11: [50, 54],   // Hour 11: 50-54
-            12: [55, 59]    // Hour 12: 55-59
+            1: [1, 2],      // Hour 1: segments 1-2
+            2: [3, 4],      // Hour 2: segments 3-4
+            3: [5, 6],      // Hour 3: segments 5-6
+            4: [7, 8],      // Hour 4: segments 7-8
+            5: [9, 10],     // Hour 5: segments 9-10
+            6: [11, 12],    // Hour 6: segments 11-12
+            7: [13, 14],    // Hour 7: segments 13-14
+            8: [15, 16],    // Hour 8: segments 15-16
+            9: [17, 18],    // Hour 9: segments 17-18
+            10: [19, 20],   // Hour 10: segments 19-20
+            11: [21, 22],   // Hour 11: segments 21-22
+            12: [23, 0]     // Hour 12: segments 23 and 0
         };
 
         if (hour === 12) {
-            return segments.some(s => s >= 55 || s <= 4);
+            // Hour 12 includes segments 23 and 0
+            return segments.some(s => s === 23 || s === 0);
         }
 
         const [start, end] = hourRanges[hour];
@@ -98,7 +99,7 @@ class ClockHourNotation {
 
     /**
      * Format clock hour notation for retinal detachment
-     * @param {number[]} segments - Array of affected segments
+     * @param {number[]} segments - Array of affected segments (0-23)
      * @returns {string} Formatted clock hour notation
      */
     static formatDetachment(segments) {
@@ -106,8 +107,8 @@ class ClockHourNotation {
             return "None";
         }
 
-        // Consider it total detachment if 55 or more segments are marked
-        if (segments.length >= 55) {
+        // Consider it total detachment if 22 or more segments are marked (out of 24)
+        if (segments.length >= 22) {
             return "1-12 o'clock (Total)";
         }
 
@@ -117,17 +118,6 @@ class ClockHourNotation {
             if (this.segmentsTouchHour(segments, hour)) {
                 hours.add(hour);
             }
-        }
-
-        // Special handling for hours 3, 6, and 9
-        if (segments.some(s => (s >= 10 && s <= 14) || (s >= 20 && s <= 24))) {
-            hours.add(3);
-        }
-        if (segments.some(s => (s >= 40 && s <= 44) || (s >= 50 && s <= 54))) {
-            hours.add(9);
-        }
-        if (hours.has(5) || hours.has(7)) {
-            hours.add(6);
         }
 
         // Build ranges

@@ -88,21 +88,21 @@ describe('CoordinateSystem', () => {
   });
 
   describe('segment conversions', () => {
-    const DEGREES_PER_SEGMENT = 6; // 360° / 60 segments
+    const DEGREES_PER_SEGMENT = 15; // 360° / 24 segments
 
     test('converts segments to angles', () => {
       expect(CoordinateSystem.segmentToAngle(0)).toBe(0);
-      expect(CoordinateSystem.segmentToAngle(10)).toBe(10 * DEGREES_PER_SEGMENT);
-      expect(CoordinateSystem.segmentToAngle(30)).toBe(30 * DEGREES_PER_SEGMENT);
-      expect(CoordinateSystem.segmentToAngle(60)).toBe(0); // Full circle wraps to 0
+      expect(CoordinateSystem.segmentToAngle(4)).toBe(4 * DEGREES_PER_SEGMENT);  // 60°
+      expect(CoordinateSystem.segmentToAngle(12)).toBe(12 * DEGREES_PER_SEGMENT); // 180°
+      expect(CoordinateSystem.segmentToAngle(24)).toBe(0); // Full circle wraps to 0
     });
 
     test('converts angles to segments', () => {
       // Note: Implementation doesn't wrap at 360°
       expect(CoordinateSystem.angleToSegment(0)).toBe(0);
-      expect(CoordinateSystem.angleToSegment(60)).toBe(10); // 60° = segment 10
-      expect(CoordinateSystem.angleToSegment(180)).toBe(30); // 180° = segment 30
-      expect(CoordinateSystem.angleToSegment(360)).toBe(60); // Returns 60 instead of wrapping to 0
+      expect(CoordinateSystem.angleToSegment(60)).toBe(4);   // 60° = segment 4
+      expect(CoordinateSystem.angleToSegment(180)).toBe(12); // 180° = segment 12
+      expect(CoordinateSystem.angleToSegment(360)).toBe(24); // Returns 24 instead of wrapping to 0
     });
 
     test('converts segments to points', () => {
@@ -113,18 +113,18 @@ describe('CoordinateSystem', () => {
       expect(point.x).toBeCloseTo(0);
       expect(point.y).toBeCloseTo(radius);
 
-      // Segment 15 (Clock 3)
-      point = CoordinateSystem.getPointFromSegment(15, radius);
+      // Segment 6 (Clock 3) - 90° in 24-segment system
+      point = CoordinateSystem.getPointFromSegment(6, radius);
       expect(point.x).toBeCloseTo(radius);
       expect(point.y).toBeCloseTo(0);
 
-      // Segment 30 (Clock 6)
-      point = CoordinateSystem.getPointFromSegment(30, radius);
+      // Segment 12 (Clock 6) - 180° in 24-segment system
+      point = CoordinateSystem.getPointFromSegment(12, radius);
       expect(point.x).toBeCloseTo(0);
       expect(point.y).toBeCloseTo(-radius);
 
-      // Segment 45 (Clock 9)
-      point = CoordinateSystem.getPointFromSegment(45, radius);
+      // Segment 18 (Clock 9) - 270° in 24-segment system
+      point = CoordinateSystem.getPointFromSegment(18, radius);
       expect(point.x).toBeCloseTo(-radius);
       expect(point.y).toBeCloseTo(0);
     });
@@ -132,10 +132,11 @@ describe('CoordinateSystem', () => {
     test('converts points to segments', () => {
       const radius = 100;
       // Note: Implementation returns negative segments for some quadrants
-      expect(CoordinateSystem.getSegmentFromPoint(0, radius)).toBe(0);
-      expect(CoordinateSystem.getSegmentFromPoint(radius, 0)).toBe(15);
-      expect(CoordinateSystem.getSegmentFromPoint(0, -radius)).toBe(30);
-      expect(CoordinateSystem.getSegmentFromPoint(-radius, 0)).toBe(-15); // Returns negative segment
+      // Using 24-segment model (15° per segment)
+      expect(CoordinateSystem.getSegmentFromPoint(0, radius)).toBe(0);     // 12 o'clock = segment 0
+      expect(CoordinateSystem.getSegmentFromPoint(radius, 0)).toBe(6);     // 3 o'clock = segment 6
+      expect(CoordinateSystem.getSegmentFromPoint(0, -radius)).toBe(12);   // 6 o'clock = segment 12
+      expect(CoordinateSystem.getSegmentFromPoint(-radius, 0)).toBe(-6);   // 9 o'clock = segment -6 (negative)
     });
   });
 

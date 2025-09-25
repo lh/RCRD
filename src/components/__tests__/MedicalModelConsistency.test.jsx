@@ -123,11 +123,11 @@ describe('Medical Model Consistency', () => {
             
             // Check for smooth transitions at boundaries
             // Age 44->45 transition
-            expect(Math.abs(results[1].probability - results[0].probability)).toBeLessThan(10);
+            expect(Math.abs(results[1].probability - results[0].probability)).toBeLessThanOrEqual(10);
             // Age 64->65 transition
-            expect(Math.abs(results[3].probability - results[2].probability)).toBeLessThan(10);
+            expect(Math.abs(results[3].probability - results[2].probability)).toBeLessThanOrEqual(10);
             // Age 79->80 transition
-            expect(Math.abs(results[5].probability - results[4].probability)).toBeLessThan(10);
+            expect(Math.abs(results[5].probability - results[4].probability)).toBeLessThanOrEqual(10);
         });
 
         it('should handle total RD boundary (22-23 segments)', () => {

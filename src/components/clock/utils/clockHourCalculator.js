@@ -1,16 +1,20 @@
 /**
- * Converts a segment number (0-59) to its corresponding clock hour (1-12)
- * @param {number} segment - The segment number (0-59)
+ * Converts a segment number (0-23) to its corresponding clock hour (1-12)
+ * @param {number} segment - The segment number (0-23)
  * @returns {number} The corresponding clock hour (1-12)
  */
 export const segmentToHour = (segment) => {
-    // Handle hour 12 (segments 55-59 and 0-4)
-    if (segment >= 55 || segment <= 4) {
+    // Normalize segment to 0-23 range
+    const normalizedSegment = ((segment % 24) + 24) % 24;
+    
+    // Handle hour 12 (segments 23 and 0)
+    if (normalizedSegment === 23 || normalizedSegment === 0) {
         return 12;
     }
     
-    // Regular hours (1-11)
-    return Math.floor(segment / 5) + 1;
+    // Regular hours (1-11): each hour has 2 segments
+    // Segments 1-2 = Hour 1, Segments 3-4 = Hour 2, etc.
+    return Math.floor((normalizedSegment + 1) / 2);
 };
 
 /**

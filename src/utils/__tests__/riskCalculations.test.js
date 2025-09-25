@@ -74,26 +74,26 @@ describe('getBreakLocation', () => {
 
 describe('getInferiorDetachment', () => {
     test('identifies 6 hours detachment (all inferior hours)', () => {
-        // All inferior hours (3-9)
+        // All inferior hours (3-9) in 24-segment model (2 segments per hour)
         const segments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19,  // Hour 4
-            20, 21, 22, 23, 24,  // Hour 5
-            25, 26, 27, 28, 29,  // Hour 6
-            30, 31, 32, 33, 34,  // Hour 7
-            35, 36, 37, 38, 39,  // Hour 8
-            40, 41, 42, 43, 44   // Hour 9
+            5, 6,     // Hour 3
+            7, 8,     // Hour 4
+            9, 10,    // Hour 5
+            11, 12,   // Hour 6
+            13, 14,   // Hour 7
+            15, 16,   // Hour 8
+            17, 18    // Hour 9
         ];
         expect(getInferiorDetachment(segments)).toBe('6_hours');
     });
 
     test('identifies 3-5 inferior hours detachment', () => {
-        // 4 inferior hours (3-6)
+        // 4 inferior hours (3-6) in 24-segment model
         const segments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19,  // Hour 4
-            20, 21, 22, 23, 24,  // Hour 5
-            25, 26, 27, 28, 29   // Hour 6
+            5, 6,     // Hour 3
+            7, 8,     // Hour 4
+            9, 10,    // Hour 5
+            11, 12    // Hour 6
         ];
         expect(getInferiorDetachment(segments)).toBe('3_to_5');
     });
@@ -102,10 +102,10 @@ describe('getInferiorDetachment', () => {
         // No inferior hours
         expect(getInferiorDetachment([])).toBe('less_than_3');
         
-        // 2 inferior hours (3-4)
+        // 2 inferior hours (3-4) in 24-segment model
         const segments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19   // Hour 4
+            5, 6,     // Hour 3
+            7, 8      // Hour 4
         ];
         expect(getInferiorDetachment(segments)).toBe('less_than_3');
     });
@@ -155,9 +155,9 @@ describe('calculateRiskWithSteps', () => {
             vitrectomyGauge: '25g',
             selectedHours: [6],
             detachmentSegments: [
-                10, 11, 12, 13, 14,  // Hour 3
-                15, 16, 17, 18, 19,  // Hour 4
-                20, 21, 22, 23, 24   // Hour 5
+                5, 6,     // Hour 3
+                7, 8,     // Hour 4
+                9, 10     // Hour 5
             ]
         });
 
@@ -207,13 +207,15 @@ describe('calculateRiskWithSteps', () => {
             vitrectomyGauge: '25g',
             selectedHours: [],
             detachmentSegments: [
-                10, 11, 12, 13, 14,  // Hour 3
-                15, 16, 17, 18, 19,  // Hour 4
-                20, 21, 22, 23, 24,  // Hour 5
-                25, 26, 27, 28, 29,  // Hour 6
-                30, 31, 32, 33, 34,  // Hour 7
-                35, 36, 37, 38, 39,  // Hour 8
-                40, 41, 42, 43, 44   // Hour 9
+                0, 1, 2, 3, 4,    // Hours 12, 1, 2
+                5, 6,             // Hour 3
+                7, 8,             // Hour 4
+                9, 10,            // Hour 5
+                11, 12,           // Hour 6
+                13, 14,           // Hour 7
+                15, 16,           // Hour 8
+                17, 18,           // Hour 9
+                19, 20, 21, 22, 23 // Hours 10, 11, 12
             ]
         });
 
@@ -231,10 +233,10 @@ describe('calculateRiskWithSteps', () => {
             vitrectomyGauge: '25g',
             selectedHours: [],
             detachmentSegments: [
-                10, 11, 12, 13, 14,  // Hour 3
-                15, 16, 17, 18, 19,  // Hour 4
-                20, 21, 22, 23, 24,  // Hour 5
-                25, 26, 27, 28, 29   // Hour 6
+                5, 6,     // Hour 3
+                7, 8,     // Hour 4
+                9, 10,    // Hour 5
+                11, 12    // Hour 6
             ]
         });
 
@@ -252,20 +254,20 @@ describe('calculateRiskWithSteps', () => {
             vitrectomyGauge: '25g',
             selectedHours: [],
             detachmentSegments: [
-                10, 11, 12, 13, 14,  // Hour 3
-                15, 16, 17, 18, 19,  // Hour 4
-                20, 21, 22, 23, 24,  // Hour 5
-                25, 26, 27, 28, 29,  // Hour 6
-                30, 31, 32, 33, 34,  // Hour 7
-                35, 36, 37, 38, 39,  // Hour 8
-                40, 41, 42, 43, 44   // Hour 9
+                5, 6,     // Hour 3
+                7, 8,     // Hour 4
+                9, 10,    // Hour 5
+                11, 12,   // Hour 6
+                13, 14,   // Hour 7
+                15, 16,   // Hour 8
+                17, 18    // Hour 9
             ]
         });
 
         const totalRDStep = result.steps.find(s => s.step === 'Total RD');
         const inferiorStep = result.steps.find(s => s.step === 'Inferior detachment');
 
-        expect(totalRDStep.category).toBe('yes');
+        expect(totalRDStep.category).toBe('no');  // Not enough segments for total RD
         expect(inferiorStep.category).toBe('6_hours');
     });
 });

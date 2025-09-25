@@ -269,7 +269,7 @@ describe('Medical Validation - BEAVRS Study', () => {
             const sixHoursInferior = {
                 age: 60,
                 selectedHours: [4, 5, 6, 7, 8, 9], // 6 inferior hours
-                detachmentSegments: Array.from({ length: 30 }, (_, i) => `segment${i + 15}`), // Segments 15-44 for hours 4-9
+                detachmentSegments: Array.from({ length: 12 }, (_, i) => `segment${i + 7}`), // Segments 7-18 for hours 4-9 in 24-segment model
                 pvrGrade: 'none',
                 vitrectomyGauge: '25g',
                 tamponade: 'sf6',

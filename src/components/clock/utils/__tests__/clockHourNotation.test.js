@@ -28,20 +28,23 @@ import { ClockHourNotation } from '../clockHourNotation';
 describe('ClockHourNotation', () => {
   describe('segmentsTouchHour', () => {
     test('correctly identifies segments touching hour 12', () => {
-      expect(ClockHourNotation.segmentsTouchHour([55, 56, 57], 12)).toBe(true);
-      expect(ClockHourNotation.segmentsTouchHour([0, 1, 2], 12)).toBe(true);
-      expect(ClockHourNotation.segmentsTouchHour([30, 31, 32], 12)).toBe(false);
+      // Hour 12 uses segments 23-0 in 24-segment model
+      expect(ClockHourNotation.segmentsTouchHour([23, 0], 12)).toBe(true);
+      expect(ClockHourNotation.segmentsTouchHour([0, 1], 12)).toBe(true);
+      expect(ClockHourNotation.segmentsTouchHour([10, 11], 12)).toBe(false);
     });
 
     test('correctly identifies segments touching regular hours', () => {
-      expect(ClockHourNotation.segmentsTouchHour([5, 6, 7], 2)).toBe(true);
-      expect(ClockHourNotation.segmentsTouchHour([10, 11, 12], 3)).toBe(true);
-      expect(ClockHourNotation.segmentsTouchHour([5, 6, 7], 3)).toBe(false);
+      // Hour 2: segments 3-4, Hour 3: segments 5-6
+      expect(ClockHourNotation.segmentsTouchHour([3, 4], 2)).toBe(true);
+      expect(ClockHourNotation.segmentsTouchHour([5, 6], 3)).toBe(true);
+      expect(ClockHourNotation.segmentsTouchHour([3, 4], 3)).toBe(false);
     });
 
     test('handles edge cases', () => {
       expect(ClockHourNotation.segmentsTouchHour([], 1)).toBe(false);
-      expect(ClockHourNotation.segmentsTouchHour([59, 0], 12)).toBe(true);
+      // Hour 12 spans segments 23-0
+      expect(ClockHourNotation.segmentsTouchHour([23, 0], 12)).toBe(true);
     });
   });
 
@@ -91,58 +94,67 @@ describe('ClockHourNotation', () => {
     });
 
     test('handles total detachment', () => {
-      const segments = Array.from({ length: 55 }, (_, i) => i);
+      // Total detachment needs 23+ segments in 24-segment model
+      const segments = Array.from({ length: 23 }, (_, i) => i);
       expect(ClockHourNotation.formatDetachment(segments)).toBe('1-12 o\'clock (Total)');
     });
 
     test('handles single hour', () => {
-      expect(ClockHourNotation.formatDetachment([0, 1, 2, 3, 4])).toBe('12-1 o\'clock');
+      // Hour 12: segments 23-0, Hour 1: segments 1-2
+      expect(ClockHourNotation.formatDetachment([23, 0, 1, 2])).toBe('12-1 o\'clock');
     });
 
     test('handles midnight crossing', () => {
-      const segments = [53, 54, 55, 56, 57, 58, 59, 0, 1, 2];
-      expect(ClockHourNotation.formatDetachment(segments)).toBe('11-1; 9-9 o\'clock');
+      // Hour 11: segments 21-22, Hour 12: segments 23-0, Hour 1: segments 1-2
+      const segments = [21, 22, 23, 0, 1, 2];
+      expect(ClockHourNotation.formatDetachment(segments)).toBe('11-1 o\'clock');
     });
 
     test('handles multiple ranges', () => {
-      const segments = [25, 26, 27, 28, 29, 30, 40, 41, 42];
+      // Hour 6: segments 11-12, Hour 7: segments 13-14, Hour 9: segments 17-18
+      const segments = [11, 12, 13, 14, 17, 18];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('6-7; 9-9 o\'clock');
     });
 
     test('includes hour 6 when hour 5 is present', () => {
-      const segments = [20, 21, 22, 23, 24, 25];
-      expect(ClockHourNotation.formatDetachment(segments)).toBe('3-3; 5-6 o\'clock');
+      // Hour 5: segments 9-10, Hour 6: segments 11-12
+      const segments = [9, 10, 11, 12];
+      expect(ClockHourNotation.formatDetachment(segments)).toBe('5-6 o\'clock');
     });
 
     test('includes hour 6 when hour 7 is present', () => {
-      const segments = [30, 31, 32, 33, 34];
+      // Hour 6: segments 11-12, Hour 7: segments 13-14
+      const segments = [11, 12, 13, 14];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('6-7 o\'clock');
     });
 
     test('includes hour 3 for specific segments', () => {
-      const segments = [10, 11, 12, 13, 14];
+      // Hour 3: segments 5-6
+      const segments = [5, 6];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('3-3 o\'clock');
     });
 
     test('includes hour 9 for specific segments', () => {
-      const segments = [40, 41, 42, 43, 44];
+      // Hour 9: segments 17-18
+      const segments = [17, 18];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('9-9 o\'clock');
     });
 
     test('handles complex midnight crossing with multiple ranges', () => {
       const segments = [
-        ...Array.from({ length: 5 }, (_, i) => i + 50), // Hour 11
-        ...Array.from({ length: 5 }, (_, i) => i + 55), // Hour 12
-        ...Array.from({ length: 5 }, (_, i) => i),      // Hour 1
-        ...Array.from({ length: 5 }, (_, i) => i + 25), // Hour 6
+        21, 22,  // Hour 11
+        23, 0,   // Hour 12 
+        1, 2,    // Hour 1
+        11, 12,  // Hour 6
+        17, 18   // Hour 9
       ];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('11-1; 6-6; 9-9 o\'clock');
     });
 
     test('handles special case from screenshot', () => {
       const segments = [
-        ...Array.from({ length: 15 }, (_, i) => i + 40), // Hours 9-11
-        ...Array.from({ length: 25 }, (_, i) => i + 10)  // Hours 3-7
+        5, 6, 7, 8, 9, 10, 11, 12, 13, 14,  // Hours 3-7
+        17, 18, 19, 20, 21, 22               // Hours 9-11
       ];
       expect(ClockHourNotation.formatDetachment(segments)).toBe('3-7; 9-11 o\'clock');
     });

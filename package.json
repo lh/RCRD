@@ -28,6 +28,7 @@
   "test": "react-scripts test",
   "test:sequential": "react-scripts test --maxWorkers=1",
   "test:performance": "react-scripts test --maxWorkers=1 Performance ClockPerformance performanceBenchmarks",
+  "test:differential": "node scripts/run-differential-test.js",
   "test:ci": "react-scripts test --watchAll=false --coverage",
   "verify": "npm run build && npm test -- --watchAll=false",
   "size": "size-limit",
