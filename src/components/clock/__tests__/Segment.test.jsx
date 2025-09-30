@@ -20,7 +20,7 @@ describe('Segment', () => {
       const segment = container.firstChild;
       expect(segment).toHaveClass(
         'absolute',
-        'w-1',
+        'w-2.5',
         'h-8',
         'origin-bottom',
         'transform',

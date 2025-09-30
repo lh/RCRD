@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import PropTypes from 'prop-types';
 import ClockFaceSVG from './ClockFaceSVG.jsx';
 
 const ClockFace = ({
@@ -25,6 +26,11 @@ const ClockFace = ({
   const [currentDetachmentSegments, setCurrentDetachmentSegments] = useState(initialDetachmentSegments);
   const [drawMode, setDrawMode] = useState(null); // 'add' or 'remove'
   const svgRef = useRef(null);
+
+  // Sync currentDetachmentSegments with prop changes
+  useEffect(() => {
+    setCurrentDetachmentSegments(initialDetachmentSegments);
+  }, [initialDetachmentSegments]);
 
   const handleReset = () => {
     setCurrentDetachmentSegments([]);
@@ -84,4 +90,45 @@ const ClockFace = ({
   );
 };
 
-export default ClockFace;
+// PropTypes definition
+ClockFace.propTypes = {
+  selectedHours: PropTypes.arrayOf(PropTypes.number),
+  detachmentSegments: PropTypes.arrayOf(PropTypes.string),
+  hoveredHour: PropTypes.number,
+  onHoverChange: PropTypes.func,
+  onTearToggle: PropTypes.func,
+  onSegmentToggle: PropTypes.func,
+  setDetachmentSegments: PropTypes.func,
+  readOnly: PropTypes.bool,
+  isMobile: PropTypes.bool
+};
+
+ClockFace.defaultProps = {
+  selectedHours: [],
+  detachmentSegments: [],
+  hoveredHour: null,
+  onHoverChange: () => {},
+  onTearToggle: () => {},
+  onSegmentToggle: () => {},
+  setDetachmentSegments: () => {},
+  readOnly: false,
+  isMobile: false
+};
+
+// Memoize ClockFace to prevent unnecessary re-renders
+// Only re-render if props actually change
+export default React.memo(ClockFace, (prevProps, nextProps) => {
+  // Return true if props are equal (skip re-render)
+  // Return false if props are different (re-render)
+  return (
+    JSON.stringify(prevProps.selectedHours) === JSON.stringify(nextProps.selectedHours) &&
+    JSON.stringify(prevProps.detachmentSegments) === JSON.stringify(nextProps.detachmentSegments) &&
+    prevProps.hoveredHour === nextProps.hoveredHour &&
+    prevProps.onHoverChange === nextProps.onHoverChange &&
+    prevProps.onTearToggle === nextProps.onTearToggle &&
+    prevProps.onSegmentToggle === nextProps.onSegmentToggle &&
+    prevProps.setDetachmentSegments === nextProps.setDetachmentSegments &&
+    prevProps.readOnly === nextProps.readOnly &&
+    prevProps.isMobile === nextProps.isMobile
+  );
+});

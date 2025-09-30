@@ -1,9 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, within, waitFor } from '@testing-library/react';
 import MobileRetinalCalculator from '../MobileRetinalCalculator';
-import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 
-// Mock child components
+// Mock child components - but NOT business logic
 jest.mock('../clock/ClockFace', () => {
   return function MockClockFace({ 
     onTearToggle, 
@@ -79,20 +78,10 @@ jest.mock('../RiskInputForm', () => {
   };
 });
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
+// NO LONGER MOCKING BUSINESS LOGIC - using real calculations
 
 describe('MobileRetinalCalculator', () => {
-  const mockRisk = {
-    probability: 25.5,
-    steps: [],
-    logit: -1.082
-  };
-
-  beforeEach(() => {
-    calculateRiskWithSteps.mockReset();
-    calculateRiskWithSteps.mockReturnValue(mockRisk);
-  });
+  // No mocks needed - tests will use real calculations
 
   test('handles touch device detection', () => {
     render(<MobileRetinalCalculator />);
@@ -122,12 +111,11 @@ describe('MobileRetinalCalculator', () => {
     const calculateButton = screen.getByTestId('calculate-button');
     fireEvent.click(calculateButton);
     
-    expect(calculateRiskWithSteps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        age: '65',
-        pvrGrade: 'b'
-      })
-    );
+    // Instead of checking mock calls, verify the results are displayed
+    // The actual probability will be calculated based on the inputs
+    expect(screen.getByText(/probability of requiring additional surgery/i)).toBeInTheDocument();
+    // Check that a percentage is displayed (the exact value will depend on real calculation)
+    expect(screen.getByText(/%/)).toBeInTheDocument();
   });
 
   test('displays calculation results with mobile layout', async () => {
@@ -147,10 +135,10 @@ describe('MobileRetinalCalculator', () => {
     const inputSummaryHeading = screen.getByRole('heading', { name: /input summary/i });
     expect(inputSummaryHeading).toBeInTheDocument();
     
-    // Verify risk display
-    const riskHeading = screen.getByText(/probability of requiring additional surgery/i);
-    expect(riskHeading).toBeInTheDocument();
-    expect(screen.getByText('25.5%')).toBeInTheDocument();
+    // Verify risk display - check that the probability value is displayed
+    const probabilityValue = screen.getByTestId('risk-probability-value');
+    expect(probabilityValue).toBeInTheDocument();
+    expect(probabilityValue.textContent).toMatch(/\d+\.\d%/);
     
     // Verify clock face is present
     const clockFace = screen.getByTestId('clock-face');

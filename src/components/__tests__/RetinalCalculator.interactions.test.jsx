@@ -2,7 +2,6 @@ import React from 'react';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
 import { getMobileView } from '../test-helpers/RetinalCalculator.helpers';
-import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { TEST_DEFAULTS } from '../../test-utils/constants';
 
 // Mock child components
@@ -131,23 +130,11 @@ jest.mock('../RiskResults', () => {
   };
 });
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
 
+// NO LONGER MOCKING BUSINESS LOGIC - using real calculations
 describe('RetinalCalculator Interactions', () => {
   beforeEach(() => {
-    calculateRiskWithSteps.mockReturnValue({
-      probability: 75,
-      steps: [],
-      logit: 1.5,
-      age: TEST_DEFAULTS.age.value,
-      pvrGrade: TEST_DEFAULTS.pvrGrade.value,
-      vitrectomyGauge: TEST_DEFAULTS.vitrectomyGauge.value,
-      cryotherapy: TEST_DEFAULTS.cryotherapy.value,
-      tamponade: TEST_DEFAULTS.tamponade.value,
-      selectedHours: [6], // Test expects this specific value
-      detachmentSegments: [25] // Test expects this specific value
-    });
+    // No setup needed - using real calculations
   });
 
   test('handles tear selection', () => {

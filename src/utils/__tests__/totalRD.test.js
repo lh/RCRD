@@ -18,38 +18,40 @@ describe('Total RD Detection', () => {
 
     // Test inferior detachment detection
     test('correctly identifies inferior hours', () => {
-        // Create segments for hours 3-9 (5 segments per hour)
+        // Create segments for hours 3-9 (2 segments per hour in 24-segment model)
         const inferiorSegments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19,  // Hour 4
-            20, 21, 22, 23, 24,  // Hour 5
-            25, 26, 27, 28, 29,  // Hour 6
-            30, 31, 32, 33, 34,  // Hour 7
-            35, 36, 37, 38, 39,  // Hour 8
-            40, 41, 42, 43, 44   // Hour 9
+            5, 6,     // Hour 3
+            7, 8,     // Hour 4
+            9, 10,    // Hour 5
+            11, 12,   // Hour 6
+            13, 14,   // Hour 7
+            15, 16,   // Hour 8
+            17, 18    // Hour 9
         ];
         expect(getInferiorDetachment(inferiorSegments)).toBe('6_hours');
 
         // Test partial inferior detachment (hours 3-5)
         const partialInferiorSegments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19,  // Hour 4
-            20, 21, 22, 23, 24   // Hour 5
+            5, 6,     // Hour 3
+            7, 8,     // Hour 4
+            9, 10     // Hour 5
         ];
         expect(getInferiorDetachment(partialInferiorSegments)).toBe('3_to_5');
     });
 
     // Test complete risk calculation
     test('calculates correct risk for total RD case', () => {
-        // Create segments for total RD including all inferior hours
+        // Create segments for total RD - need 23+ segments for total RD (24-segment model)
         const totalRDSegments = [
-            10, 11, 12, 13, 14,  // Hour 3
-            15, 16, 17, 18, 19,  // Hour 4
-            20, 21, 22, 23, 24,  // Hour 5
-            25, 26, 27, 28, 29,  // Hour 6
-            30, 31, 32, 33, 34,  // Hour 7
-            35, 36, 37, 38, 39,  // Hour 8
-            40, 41, 42, 43, 44   // Hour 9
+            0, 1, 2, 3, 4,     // Hours 12, 1, 2
+            5, 6,              // Hour 3
+            7, 8,              // Hour 4
+            9, 10,             // Hour 5
+            11, 12,            // Hour 6
+            13, 14,            // Hour 7
+            15, 16,            // Hour 8
+            17, 18,            // Hour 9
+            19, 20, 21, 22     // Hours 10, 11
         ];
 
         const result = calculateRiskWithSteps({

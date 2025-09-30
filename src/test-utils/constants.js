@@ -81,8 +81,28 @@ export const VALIDATION_SCENARIOS = {
     value: '200',
     error: 'Age must be between 0 and 120'
   },
+  invalidAgeTooYoung: {
+    value: '17',
+    error: 'Age must be between 18 and 100'
+  },
+  invalidAgeTooOld: {
+    value: '101',
+    error: 'Age must be between 18 and 100'
+  },
   emptyRequired: {
     value: '',
     error: 'This field is required'
   }
+};
+
+/**
+ * Common test ages for different scenarios
+ */
+export const TEST_AGES = {
+  young: '25',        // Young adult
+  typical: '50',      // Median age from BEAVRS
+  middle: '60',       // Middle-aged adult
+  senior: '65',       // Senior adult
+  elderly: '75',      // Elderly adult
+  veryElderly: '82'   // From BEAVRS paper example
 };

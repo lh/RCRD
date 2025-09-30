@@ -1,10 +1,11 @@
 import React from 'react';
-import { DIMENSIONS } from './styles/clockStyles.js';
-import { polarToCartesian, segmentToDegree } from './utils/clockGeometry.js';
+import PropTypes from 'prop-types';
+import { DIMENSIONS } from './utils/clockDimensions.js';
+import { polarToCartesian, segmentToDegree } from './utils/clockFaceGeometry.js';
 import { CLOCK } from './utils/clockConstants.js';
 
 const DetachmentSegments = ({
-  currentDetachmentSegments,
+  currentDetachmentSegments = [],
   readOnly
 }) => {
   return (
@@ -38,6 +39,19 @@ const DetachmentSegments = ({
       })}
     </g>
   );
+};
+
+DetachmentSegments.propTypes = {
+    segments: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        path: PropTypes.string.isRequired,
+        isInteractive: PropTypes.bool
+    })).isRequired,
+    readOnly: PropTypes.bool
+};
+
+DetachmentSegments.defaultProps = {
+    readOnly: false
 };
 
 export default DetachmentSegments;

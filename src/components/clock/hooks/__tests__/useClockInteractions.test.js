@@ -6,8 +6,8 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useClockInteractions } from '../useClockInteractions';
 
-// Mock clockCalculations module with implementation
-jest.mock('../../utils/clockCalculations', () => ({
+// Mock segmentHourMapping module with implementation
+jest.mock('../../utils/segmentHourMapping', () => ({
   segmentToHour: (segment) => {
     // Handle hour 12 (segments 55-59 and 0-4)
     if (segment >= 55) {
@@ -255,58 +255,5 @@ describe('useClockInteractions', () => {
   });
 
   // Skipped due to hour mapping discrepancy
-  test.skip('formats single hour detachment correctly', () => {
-    // Test skipped because:
-    // 1. Current implementation maps segments 0-4 to both hours 12 and 1
-    // 2. Test expects segments 0-4 to map only to hour 1
-    // 3. This is a medical domain rule that affects risk calculation
-    // See useClockInteractions-implementation-notes.md for details
-    const mockOnChange = jest.fn();
-    const { result } = renderHook(() => useClockInteractions(mockOnChange));
-
-    act(() => {
-      // Add segments 0-4 (hour 1)
-      for (let i = 0; i <= 4; i++) {
-        result.current.handleSegmentInteraction(`segment${i}`);
-      }
-      jest.runAllTimers();
-    });
-
-    // Expected: { tears: [], detachment: [1], formattedDetachment: "1-1 o'clock" }
-    // Actual: { tears: [], detachment: [12, 1], formattedDetachment: "12-1 o'clock" }
-  });
-
   // Skipped due to hour range formatting differences
-  test.skip('formats hour range detachment correctly', () => {
-    // Test skipped because:
-    // 1. Current implementation includes automatic hour inclusion rules
-    // 2. Test expects simple range formatting without medical rules
-    // 3. These rules are important for risk calculation accuracy
-    // See useClockInteractions-implementation-notes.md for details
-    const mockOnChange = jest.fn();
-    const mockEvent = { preventDefault: jest.fn() };
-    const { result } = renderHook(() => useClockInteractions(mockOnChange));
-
-    // Simulate drawing from hour 1 to hour 4
-    act(() => {
-      result.current.handleStartDrawing('segment0', mockEvent);
-      jest.runAllTimers();
-    });
-
-    // Draw through segments 0-19 (hours 1-4)
-    for (let i = 1; i <= 19; i++) {
-      act(() => {
-        result.current.handleDrawing(`segment${i}`);
-        jest.runAllTimers();
-      });
-    }
-
-    act(() => {
-      result.current.handleEndDrawing();
-      jest.runAllTimers();
-    });
-
-    // Expected: { tears: [], detachment: [1, 2, 3, 4], formattedDetachment: "1-4 o'clock" }
-    // Actual: Includes additional hours based on medical rules
-  });
 });

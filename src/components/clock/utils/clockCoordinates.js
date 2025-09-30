@@ -1,5 +1,5 @@
 // clockCoordinates.js
-const SEGMENTS = 60;
+const SEGMENTS = 24;
 const DEGREES_PER_SEGMENT = 360 / SEGMENTS;
 
 const CoordinateSystem = {

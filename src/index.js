@@ -12,7 +12,28 @@ root.render(
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Performance monitoring
+if (process.env.NODE_ENV === 'production') {
+  reportWebVitals((metric) => {
+    // In production, send to analytics endpoint instead of console
+    // Example for Google Analytics:
+    // window.gtag('event', metric.name, {
+    //   value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+    //   event_category: 'Web Vitals',
+    //   event_label: metric.id,
+    //   non_interaction: true,
+    // });
+    
+    // Or send to custom analytics endpoint:
+    // fetch('/api/analytics', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(metric),
+    // });
+  });
+} else if (process.env.NODE_ENV === 'development') {
+  // Only log metrics in development for debugging
+  reportWebVitals((metric) => {
+    console.debug('Web Vitals (dev):', metric);
+  });
+}

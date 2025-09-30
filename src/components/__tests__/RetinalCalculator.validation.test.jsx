@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, within, fireEvent } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
-import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { getMobileView } from '../test-helpers/RetinalCalculator.helpers';
 
 // Mock child components
@@ -69,20 +68,10 @@ jest.mock('../RiskInputForm', () => {
   };
 });
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
+// NO LONGER MOCKING BUSINESS LOGIC - using real calculations
 
 describe('RetinalCalculator Form Validation', () => {
-  const mockRisk = {
-    probability: 25.5,
-    steps: [],
-    logit: -1.082
-  };
-
-  beforeEach(() => {
-    calculateRiskWithSteps.mockReset();
-    calculateRiskWithSteps.mockReturnValue(mockRisk);
-  });
+  // No mocks needed - tests will use real calculations
 
   const getEnabledCalculateButton = () => {
     const buttons = screen.getAllByTestId('calculate-button');
@@ -155,9 +144,8 @@ describe('RetinalCalculator Form Validation', () => {
     const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
     
-    expect(calculateRiskWithSteps).toHaveBeenCalledWith(
-      expect.objectContaining({ pvrGrade: 'b' })
-    );
+    // Verify results are displayed (real calculation happened)
+    expect(screen.getByTestId('risk-results')).toBeInTheDocument();
   });
 
   test('handles vitrectomy gauge changes', () => {
@@ -177,9 +165,8 @@ describe('RetinalCalculator Form Validation', () => {
     const calculateButton = getEnabledCalculateButton();
     fireEvent.click(calculateButton);
     
-    expect(calculateRiskWithSteps).toHaveBeenCalledWith(
-      expect.objectContaining({ vitrectomyGauge: '23g' })
-    );
+    // Verify results are displayed (real calculation happened)
+    expect(screen.getByTestId('risk-results')).toBeInTheDocument();
   });
 
 

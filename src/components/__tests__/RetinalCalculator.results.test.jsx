@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen, within, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import RetinalCalculator from '../RetinalCalculator';
-import { calculateRiskWithSteps } from '../../utils/riskCalculations';
 import { getMobileView, getResultsSection, fillForm } from '../test-helpers/RetinalCalculator.helpers';
 import { TEST_DEFAULTS } from '../../test-utils/constants';
 
@@ -131,9 +130,8 @@ jest.mock('../RiskResults', () => ({
   }
 }));
 
-jest.mock('../../utils/riskCalculations');
-jest.mock('../clock/utils/formatDetachmentHours');
 
+// NO LONGER MOCKING BUSINESS LOGIC - using real calculations
 describe('RetinalCalculator Results Display', () => {
   const mockRisk = {
     probability: 25.5,
@@ -149,8 +147,6 @@ describe('RetinalCalculator Results Display', () => {
   };
 
   beforeEach(() => {
-    calculateRiskWithSteps.mockReset();
-    calculateRiskWithSteps.mockReturnValue(mockRisk);
   });
 
   afterEach(cleanup);
@@ -237,13 +233,6 @@ describe('RetinalCalculator Results Display', () => {
     await waitFor(() => {
       expect(screen.queryByTestId('risk-results')).not.toBeInTheDocument();
     });
-    
-    // Update mock for second calculation
-    calculateRiskWithSteps.mockImplementation(() => ({
-      ...mockRisk,
-      pvrGrade: 'NONE',
-      vitrectomyGauge: '25g'
-    }));
     
     const clockFace = screen.getAllByTestId('clock-face')[0];
     fillForm({ 

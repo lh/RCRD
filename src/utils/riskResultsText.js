@@ -9,30 +9,33 @@
  * @returns {string} The explanation text
  */
 export function getStepExplanation(step, value) {
+    // Convert value to number for comparison
+    const numValue = parseFloat(value);
+    
     switch (step) {
         case 'Vitrectomy gauge':
             // Only show 25g coefficient as it was the only one statistically significant (p=0.014)
-            if (value === -0.885) return "25g vs 20g (reference): coefficient -0.885 (odds ratio 0.413, p=0.014)";
+            if (Math.abs(numValue - (-0.885)) < 0.001) return "25g vs 20g: coefficient -0.885, odds ratio 0.413 (p=0.014)";
             return "20g or other: reference category (non-25g coefficients excluded as p>0.05)";
         case 'Age group':
-            if (value === 0.236) return "65-79 years vs 45-64 years (reference): coefficient +0.236 (odds ratio 1.266, p=0.005)";
-            if (value === 0.498) return "≥80 years vs 45-64 years (reference): coefficient +0.498 (odds ratio 1.645, p=0.001)";
-            if (value === 0.459) return "<45 years vs 45-64 years (reference): coefficient +0.459 (odds ratio 1.582, p=0.004)";
+            if (Math.abs(numValue - 0.236) < 0.001) return "65-79 years vs 45-64 years: coefficient +0.236, odds ratio 1.266 (p=0.005)";
+            if (Math.abs(numValue - 0.498) < 0.001) return "≥80 years vs 45-64 years: coefficient +0.498, odds ratio 1.645 (p=0.001)";
+            if (Math.abs(numValue - 0.459) < 0.001) return "<45 years vs 45-64 years: coefficient +0.459, odds ratio 1.582 (p=0.004)";
             return "45-64 years: reference category";
         case 'Break location':
-            if (value === 0.428) return "4 or 8 o'clock vs 9-3 o'clock (reference): coefficient +0.428 (odds ratio 1.534, p=0.002)";
-            if (value === 0.607) return "5-7 o'clock vs 9-3 o'clock (reference): coefficient +0.607 (odds ratio 1.835, p<0.001)";
-            if (value === 0.676) return "No break vs 9-3 o'clock (reference): coefficient +0.676 (odds ratio 1.966, p=0.242)";
+            if (Math.abs(numValue - 0.428) < 0.001) return "4 or 8 o'clock vs 9-3 o'clock: coefficient +0.428, odds ratio 1.534 (p=0.002)";
+            if (Math.abs(numValue - 0.607) < 0.001) return "5-7 o'clock vs 9-3 o'clock: coefficient +0.607, odds ratio 1.835 (p<0.001)";
+            if (Math.abs(numValue - 0.676) < 0.001) return "No break vs 9-3 o'clock: coefficient +0.676, odds ratio 1.966 (p=0.242)";
             return "9-3 o'clock: reference category";
         case 'Inferior detachment':
-            if (value === 0.441) return "3-5 hours vs <3h (reference): coefficient +0.441 (odds ratio 1.554, p<0.001)";
-            if (value === 0.435) return "6+ hours vs <3h (reference): coefficient +0.435 (odds ratio 1.545, p=0.005)";
+            if (Math.abs(numValue - 0.441) < 0.001) return "3-5 hours vs <3h: coefficient +0.441, odds ratio 1.554 (p<0.001)";
+            if (Math.abs(numValue - 0.435) < 0.001) return "6+ hours vs <3h: coefficient +0.435, odds ratio 1.545 (p=0.005)";
             return "<3 hours: reference category";
         case 'Total RD':
-            if (value === 0.663) return "Total detachment vs not total (reference): coefficient +0.663 (odds ratio 1.941, p<0.001)";
+            if (Math.abs(numValue - 0.663) < 0.001) return "Total detachment vs not total: coefficient +0.663, odds ratio 1.941 (p<0.001)";
             return "Not total: reference category";
         case 'PVR grade':
-            if (value === 0.220) return "Grade C vs None/A/B (reference): coefficient +0.220 (odds ratio 1.246, p<0.001)";
+            if (Math.abs(numValue - 0.220) < 0.001) return "Grade C vs None/A/B: coefficient +0.220, odds ratio 1.246 (p<0.001)";
             return "Grade None/A/B: reference category";
         case 'Constant':
             return "Base constant: coefficient -1.611 (p<0.001)";
@@ -47,8 +50,12 @@ export function getStepExplanation(step, value) {
  * @returns {string} The formula text
  */
 export function getProbabilityFormulaText(logit) {
-    const sign = logit >= 0 ? "+" : "";
-    return "1 / (1 + e" + sign + logit + ") × 100%";
+    // Convert string to number to handle negative zero correctly
+    const numLogit = Number(logit);
+    // Use the numeric value for display to avoid "-0" display issues
+    const displayValue = numLogit === 0 ? "0" : logit;
+    const sign = numLogit >= 0 ? "+" : "";
+    return "1 / (1 + e" + sign + displayValue + ") × 100%";
 }
 
 /**
@@ -57,7 +64,12 @@ export function getProbabilityFormulaText(logit) {
  * @returns {string} The result text
  */
 export function getProbabilityResultText(probability) {
-    return Math.round(probability) + "%";
+    // Convert to string to preserve decimal places if provided
+    const probStr = String(probability);
+    // Remove existing % sign if present
+    const cleanProb = probStr.replace('%', '');
+    // Return with % sign added
+    return cleanProb + "%";
 }
 
 /**

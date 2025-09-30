@@ -12,83 +12,123 @@ describe('GaugeSelection', () => {
         jest.clearAllMocks();
     });
 
-    test('renders all gauge options', () => {
+    test('renders all gauge options as radio buttons', () => {
         render(<GaugeSelection {...defaultProps} />);
         
-        const select = screen.getByRole('combobox');
-        const options = Array.from(select.options).map(option => option.text);
+        // Check radio group
+        expect(screen.getByRole('radiogroup')).toBeInTheDocument();
         
-        expect(options).toEqual([
-            'Select gauge...',
-            '20 gauge',
-            '23 gauge',
-            '25 gauge',
-            '27 gauge',
-            'Not recorded'
-        ]);
+        // Check all radio buttons
+        expect(screen.getByLabelText('20 gauge')).toBeInTheDocument();
+        expect(screen.getByLabelText('23 gauge')).toBeInTheDocument();
+        expect(screen.getByLabelText('25 gauge')).toBeInTheDocument();
+        expect(screen.getByLabelText('27 gauge')).toBeInTheDocument();
+        expect(screen.getByLabelText('Not recorded')).toBeInTheDocument();
+        
+        // All should be radio inputs
+        const radioButtons = screen.getAllByRole('radio');
+        expect(radioButtons).toHaveLength(5);
     });
 
     test('handles gauge selection', () => {
         render(<GaugeSelection {...defaultProps} />);
         
-        const select = screen.getByRole('combobox');
-        fireEvent.change(select, { target: { value: '25g' } });
+        const gauge25 = screen.getByLabelText('25 gauge');
+        fireEvent.click(gauge25);
         
         expect(defaultProps.onChange).toHaveBeenCalledWith('25g');
     });
 
-    test('disables selection when disabled prop is true', () => {
+    test('shows selected value', () => {
+        render(<GaugeSelection {...defaultProps} value="23g" />);
+        
+        const gauge23 = screen.getByLabelText('23 gauge');
+        expect(gauge23).toBeChecked();
+        
+        // Others should not be checked
+        expect(screen.getByLabelText('20 gauge')).not.toBeChecked();
+        expect(screen.getByLabelText('25 gauge')).not.toBeChecked();
+    });
+
+    test('disables all options when disabled prop is true', () => {
         render(<GaugeSelection {...defaultProps} disabled={true} />);
         
-        expect(screen.getByRole('combobox')).toBeDisabled();
+        const radioButtons = screen.getAllByRole('radio');
+        radioButtons.forEach(button => {
+            expect(button).toBeDisabled();
+        });
     });
 
     test('applies custom className', () => {
         const className = 'custom-class';
         render(<GaugeSelection {...defaultProps} className={className} />);
         
-        const container = screen.getByLabelText('Vitrectomy Gauge').closest('.space-y-4');
+        const container = screen.getByRole('radiogroup').parentElement.parentElement;
         expect(container).toHaveClass(className);
+        expect(container).toHaveClass('space-y-4'); // Default spacing
     });
 
     test('has proper accessibility attributes', () => {
         render(<GaugeSelection {...defaultProps} />);
         
-        const select = screen.getByRole('combobox');
-        expect(select).toHaveAttribute('aria-required', 'true');
-        expect(select).toHaveAttribute('id', 'gauge-select');
-        expect(screen.getByLabelText('Vitrectomy Gauge')).toBeInTheDocument();
+        const radioGroup = screen.getByRole('radiogroup');
+        expect(radioGroup).toHaveAttribute('aria-labelledby', 'gauge-group-label');
+        expect(radioGroup).toHaveAttribute('aria-required', 'true');
+        
+        // Check label
+        expect(screen.getByText('Vitrectomy Gauge')).toHaveAttribute('id', 'gauge-group-label');
     });
 
     test('maintains selection after multiple changes', () => {
         const { rerender } = render(<GaugeSelection {...defaultProps} />);
         
         // Select 25g
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: '25g' } });
+        fireEvent.click(screen.getByLabelText('25 gauge'));
         expect(defaultProps.onChange).toHaveBeenCalledWith('25g');
         
         // Update component with new value
         rerender(<GaugeSelection {...defaultProps} value="25g" />);
-        expect(screen.getByRole('combobox')).toHaveValue('25g');
+        expect(screen.getByLabelText('25 gauge')).toBeChecked();
         
         // Change to another gauge
-        fireEvent.change(screen.getByRole('combobox'), { target: { value: '23g' } });
+        fireEvent.click(screen.getByLabelText('23 gauge'));
         expect(defaultProps.onChange).toHaveBeenCalledWith('23g');
     });
 
-    test('shows empty selection by default', () => {
+    test('all options have unique ids', () => {
         render(<GaugeSelection {...defaultProps} />);
         
-        const select = screen.getByRole('combobox');
-        expect(select.value).toBe('');
-        expect(select.options[0].text).toBe('Select gauge...');
+        expect(screen.getByRole('radio', { name: '20 gauge' })).toHaveAttribute('id', 'gauge-20g');
+        expect(screen.getByRole('radio', { name: '23 gauge' })).toHaveAttribute('id', 'gauge-23g');
+        expect(screen.getByRole('radio', { name: '25 gauge' })).toHaveAttribute('id', 'gauge-25g');
+        expect(screen.getByRole('radio', { name: '27 gauge' })).toHaveAttribute('id', 'gauge-27g');
+        expect(screen.getByRole('radio', { name: 'Not recorded' })).toHaveAttribute('id', 'gauge-not_recorded');
     });
 
     test('preserves selected value on rerender', () => {
         const { rerender } = render(<GaugeSelection {...defaultProps} value="25g" />);
-        expect(screen.getByRole('combobox')).toHaveValue('25g');
+        expect(screen.getByLabelText('25 gauge')).toBeChecked();
 
         rerender(<GaugeSelection {...defaultProps} value="25g" />);
-        expect(screen.getByRole('combobox')).toHaveValue('25g');
+        expect(screen.getByLabelText('25 gauge')).toBeChecked();
+    });
+
+    test('applies mobile styling when isMobile is true', () => {
+        render(<GaugeSelection {...defaultProps} isMobile={true} />);
+        
+        const container = screen.getByRole('radiogroup').parentElement.parentElement;
+        expect(container).toHaveClass('space-y-1'); // Mobile spacing
+        
+        const label = screen.getByText('Vitrectomy Gauge');
+        expect(label).toHaveClass('mb-0.5'); // Mobile margin
+    });
+
+    test('all radio buttons share the same name attribute', () => {
+        render(<GaugeSelection {...defaultProps} />);
+        
+        const radioButtons = screen.getAllByRole('radio');
+        radioButtons.forEach(button => {
+            expect(button).toHaveAttribute('name', 'gauge');
+        });
     });
 });

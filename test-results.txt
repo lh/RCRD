@@ -1,0 +1,1831 @@
+
+> retinal-calculator@0.1.0 test
+> react-scripts test --coverage --watchAll=false
+
+FAIL src/components/__tests__/RiskInputForm.base.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       6 |
+       7 | // Mock child components
+    >  8 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       9 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      10 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      11 |
+
+      at src/components/__tests__/RiskInputForm.base.test.jsx:8:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.base.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.state.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.state.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.state.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.accessibility.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.accessibility.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.accessibility.test.jsx:3:1)
+
+PASS src/utils/__tests__/riskCalculations.test.js
+  ● Console
+
+    console.log
+      Age group: category=age, value=65-79, coefficient=0.236, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=5-7, coefficient=0.607, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=3_to_5, coefficient=0.441, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=none, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=25g, coefficient=-0.885, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=sf6, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Age group: category=age, value=45-64, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=none, coefficient=0.676, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=less_than_3, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=none, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=sf6, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Age group: category=age, value=65-79, coefficient=0.236, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=none, coefficient=0.676, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=6_hours, coefficient=0.435, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=yes, coefficient=0.663, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=none, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=25g, coefficient=-0.885, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=sf6, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Age group: category=age, value=65-79, coefficient=0.236, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=none, coefficient=0.676, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=3_to_5, coefficient=0.441, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=none, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=25g, coefficient=-0.885, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=sf6, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Age group: category=age, value=65-79, coefficient=0.236, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=none, coefficient=0.676, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=6_hours, coefficient=0.435, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=yes, coefficient=0.663, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=none, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=25g, coefficient=-0.885, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=no, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=sf6, coefficient=0, significant=false
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+FAIL src/components/__tests__/RiskInputForm.disabled.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.disabled.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.disabled.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.integration.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       7 |
+       8 | // Mock child components
+    >  9 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+      10 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      11 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      12 |
+
+      at src/components/__tests__/RiskInputForm.integration.test.jsx:9:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.integration.test.jsx:4:1)
+
+FAIL src/components/__tests__/ProbabilityDisplay.integration.test.jsx
+  ● ProbabilityDisplay - Integration Tests › Real Probability Result Display › should display decimal probability correctly
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 80\.00%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+1.386) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m80%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      46 |             render(<ProbabilityDisplay logit="1.386" probability="80.00" />);
+      47 |             
+    > 48 |             expect(screen.getByText(/= 80\.00%/)).toBeInTheDocument();
+         |                           ^
+      49 |         });
+      50 |
+      51 |         it('should handle probability without % sign', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:48:27)
+
+  ● ProbabilityDisplay - Integration Tests › Mathematical Consistency › should handle extreme positive logit values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 99\.3%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+5) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m99%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      71 |             
+      72 |             expect(screen.getByText(/1 \/ \(1 \+ e\+5\) × 100%/)).toBeInTheDocument();
+    > 73 |             expect(screen.getByText(/= 99\.3%/)).toBeInTheDocument();
+         |                           ^
+      74 |         });
+      75 |
+      76 |         it('should handle extreme negative logit values', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:73:27)
+
+  ● ProbabilityDisplay - Integration Tests › Mathematical Consistency › should handle extreme negative logit values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 0\.7%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e-5) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m1%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      79 |             
+      80 |             expect(screen.getByText(/1 \/ \(1 \+ e-5\) × 100%/)).toBeInTheDocument();
+    > 81 |             expect(screen.getByText(/= 0\.7%/)).toBeInTheDocument();
+         |                           ^
+      82 |         });
+      83 |     });
+      84 |
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:81:27)
+
+  ● ProbabilityDisplay - Integration Tests › Visual Layout and Structure › should maintain correct visual hierarchy
+
+    expect(element).toHaveTextContent()
+
+    Expected element to have text content:
+      = 81.8%
+    Received:
+      = 82%
+
+       95 |             // Result section should come second with emphasis
+       96 |             const resultSection = container.querySelector('.mt-1.text-sm.font-medium.text-gray-900');
+    >  97 |             expect(resultSection).toHaveTextContent('= 81.8%');
+          |                                   ^
+       98 |         });
+       99 |     });
+      100 |
+
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:97:35)
+
+  ● ProbabilityDisplay - Integration Tests › Edge Cases with Real Values › should handle very precise decimal values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 90\.000%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+2.30259) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m90%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      111 |             
+      112 |             expect(screen.getByText(/1 \/ \(1 \+ e\+2\.30259\) × 100%/)).toBeInTheDocument();
+    > 113 |             expect(screen.getByText(/= 90\.000%/)).toBeInTheDocument();
+          |                           ^
+      114 |         });
+      115 |
+      116 |         it('should handle negative zero correctly', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:113:27)
+
+  ● ProbabilityDisplay - Integration Tests › Edge Cases with Real Values › should handle negative zero correctly
+
+    TestingLibraryElementError: Unable to find an element with the text: /1 \/ \(1 \+ e\+0\) × 100%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+-0) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m50%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      118 |             
+      119 |             // -0 should be treated as 0 and show +
+    > 120 |             expect(screen.getByText(/1 \/ \(1 \+ e\+0\) × 100%/)).toBeInTheDocument();
+          |                           ^
+      121 |         });
+      122 |     });
+      123 | });
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:120:27)
+
+PASS src/components/__tests__/DesktopRetinalCalculator.test.jsx
+PASS src/components/clock/hooks/__tests__/useClockInteractions.test.js
+PASS src/components/__tests__/RiskInputForm.test.jsx
+PASS src/components/clock/__tests__/TearMarker.test.jsx
+PASS src/components/clock/utils/__tests__/clockCoordinates.test.js
+FAIL src/components/__tests__/RiskInputForm.layout.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       6 |
+       7 | // Mock child components
+    >  8 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       9 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      10 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      11 |
+
+      at src/components/__tests__/RiskInputForm.layout.test.jsx:8:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.layout.test.jsx:3:1)
+
+PASS src/components/__tests__/RiskResults.test.jsx
+FAIL src/components/__tests__/RiskInputForm.error.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.error.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.error.test.jsx:3:1)
+
+PASS src/components/__tests__/RetinalCalculator.form.test.jsx
+PASS src/components/__tests__/RetinalCalculator.helpers.test.jsx
+PASS src/components/__tests__/RetinalCalculator.results.test.jsx
+PASS src/components/clock/__tests__/ClockFace.touch.test.jsx
+PASS src/components/__tests__/MobileRetinalCalculator.test.jsx
+PASS src/components/__tests__/RetinalCalculator.validation.test.jsx
+PASS src/components/__tests__/RetinalCalculator.rendering.test.jsx
+PASS src/components/__tests__/RetinalCalculator.interactions.test.jsx
+FAIL src/components/__tests__/__mocks__/RiskInputFormMocks.js
+  ● Test suite failed to run
+
+    Your test suite must contain at least one test.
+
+      at onResult (node_modules/@jest/core/build/TestScheduler.js:175:18)
+      at node_modules/@jest/core/build/TestScheduler.js:316:17
+      at node_modules/emittery/index.js:260:13
+          at Array.map (<anonymous>)
+      at Emittery.emit (node_modules/emittery/index.js:258:23)
+
+PASS src/components/clock/utils/__tests__/getSegmentRanges.test.js
+PASS src/components/__tests__/Toggle.test.jsx
+PASS src/components/clock/utils/__tests__/clockMapping.test.js
+PASS src/components/clock/utils/__tests__/useLongPress.test.js
+PASS src/utils/__tests__/totalRD.test.js
+  ● Console
+
+    console.log
+      Age group: category=age, value=80+, coefficient=0.498, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Break location: category=breakLocation, value=5-7, coefficient=0.607, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Inferior detachment: category=inferiorDetachment, value=6_hours, coefficient=0.435, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Total RD: category=totalDetachment, value=yes, coefficient=0.663, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      PVR grade: category=pvrGrade, value=C, coefficient=0.22, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Vitrectomy gauge: category=vitrectomyGauge, value=25g, coefficient=-0.885, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Cryotherapy: category=cryotherapy, value=yes, coefficient=-0.42, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      Tamponade: category=tamponade, value=c2f6, coefficient=-0.417, significant=true
+
+      at addCoefficient (src/utils/riskCalculations.js:112:17)
+
+    console.log
+      
+      Risk calculation steps:
+
+      at Object.<anonymous> (src/utils/__tests__/totalRD.test.js:66:17)
+
+    console.log
+      Constant: -1.611 ()
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Age group: 0.498 (80+)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Break location: 0.607 (5-7)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Inferior detachment: 0.435 (6_hours)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Total RD: 0.663 (yes)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      PVR grade: 0.22 (C)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Vitrectomy gauge: -0.885 (25g)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Cryotherapy: -0.42 (yes)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+    console.log
+      Tamponade: -0.417 (c2f6)
+
+      at forEach (src/utils/__tests__/totalRD.test.js:68:21)
+          at Array.forEach (<anonymous>)
+
+PASS src/components/clock/utils/__tests__/formatDetachmentHours.test.js
+PASS src/components/clock/utils/__tests__/detachmentCategories.test.js
+PASS src/components/clock/__tests__/Controls.test.jsx
+FAIL src/components/__tests__/ModelToggle.test.jsx
+  ● ModelToggle › calls onChange when toggling between models
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "significant"
+
+    Number of calls: 0
+
+      79 |         // Now "Full Model" is checked, click "Significant Only"
+      80 |         fireEvent.click(screen.getByLabelText('Significant Only'));
+    > 81 |         expect(mockOnChange).toHaveBeenCalledWith(MODEL_TYPE.SIGNIFICANT);
+         |                              ^
+      82 |     });
+      83 |
+      84 |     test('hides title in mobile mode', () => {
+
+      at Object.<anonymous> (src/components/__tests__/ModelToggle.test.jsx:81:30)
+
+PASS src/components/__tests__/RetinalCalculator.test.jsx
+PASS src/components/__tests__/GaugeSelection.test.jsx
+PASS src/components/__tests__/CryotherapySelection.test.jsx
+PASS src/components/clock/utils/__tests__/clockHourNotation.test.js
+PASS src/components/__tests__/RiskSummary.test.jsx
+PASS src/components/clock/utils/__tests__/getClockHour.test.js
+PASS src/components/__tests__/CalculationSteps.integration.test.jsx
+PASS src/components/clock/utils/__tests__/interpolateSegments.test.js
+FAIL src/components/__tests__/CalculationSteps.test.jsx
+  ● CalculationSteps › Rendering › should render without crashing
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display methodology note
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should render all calculation steps
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display step explanations
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display total logit
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should render ProbabilityDisplay component with correct props
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle empty steps array
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle single step
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle many steps
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle different logit formats
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to container
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to methodology note
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to step rows
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to total section
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should call getStepExplanation for each step with correct arguments
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should call getMethodologyNote once
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should pass correct props to ProbabilityDisplay
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should handle when getStepExplanation returns different values
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should handle when getMethodologyNote returns different text
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle special characters in step names
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle very long step explanations
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle undefined or null in mock returns gracefully
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+PASS src/components/__tests__/PrintHeader.test.jsx
+PASS src/components/__tests__/ProbabilityDisplay.test.jsx
+PASS src/components/clock/__tests__/DetachmentSegments.test.jsx
+PASS src/components/__tests__/RiskSummary.integration.test.jsx
+PASS src/components/clock/__tests__/ClockFaceSVG.test.jsx
+PASS src/components/clock/utils/__tests__/segmentHourMapping.test.js
+PASS src/components/clock/utils/__tests__/clockHourCalculator.test.js
+PASS src/components/clock/__tests__/ClockFace.interactions.test.jsx
+PASS src/components/clock/__tests__/Segment.test.jsx
+PASS src/components/clock/utils/__tests__/segmentCalculator.test.js
+PASS src/components/__tests__/TamponadeSelection.test.jsx
+PASS src/components/clock/utils/__tests__/detachmentFormatter.test.js
+PASS src/components/clock/utils/__tests__/clockCalculations.test.js
+PASS src/components/clock/__tests__/ClockFace.rendering.test.jsx
+PASS src/components/clock/__tests__/ClockFaceUtils.test.js
+PASS src/components/clock/__tests__/ResetButton.test.jsx
+Failed to collect coverage from /Users/rose/Code/retinal/RCRD/src/components/clock/utils/clockTests.js
+ERROR: unknown: import.meta may appear only with 'sourceType: "module"' (692:4)
+Consider renaming the file to '.mjs', or setting sourceType:module or sourceType:unambiguous in your Babel config for this file.
+
+  690 | /* istanbul ignore next */
+  691 | cov_dab2244mf().s[24]++;
+> 692 | if (import.meta.url === import.meta.resolve('./clockTests.js')) {
+      |     ^
+  693 |   /* istanbul ignore next */
+  694 |   cov_dab2244mf().b[3][0]++;
+  695 |   cov_dab2244mf().s[25]++;
+STACK: SyntaxError: unknown: import.meta may appear only with 'sourceType: "module"' (692:4)
+Consider renaming the file to '.mjs', or setting sourceType:module or sourceType:unambiguous in your Babel config for this file.
+
+  690 | /* istanbul ignore next */
+  691 | cov_dab2244mf().s[24]++;
+> 692 | if (import.meta.url === import.meta.resolve('./clockTests.js')) {
+      |     ^
+  693 |   /* istanbul ignore next */
+  694 |   cov_dab2244mf().b[3][0]++;
+  695 |   cov_dab2244mf().s[25]++;
+    at constructor (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:359:19)
+    at Parser.raise (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:3266:19)
+    at Parser.parseImportMetaProperty (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:11117:14)
+    at Parser.parseExprAtom (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10822:23)
+    at Parser.parseExprSubscripts (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10615:23)
+    at Parser.parseUpdate (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10600:21)
+    at Parser.parseMaybeUnary (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10580:23)
+    at Parser.parseMaybeUnaryOrPrivate (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10434:61)
+    at Parser.parseExprOps (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10439:23)
+    at Parser.parseMaybeConditional (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10416:23)
+    at Parser.parseMaybeAssign (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10379:21)
+    at Parser.parseExpressionBase (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10333:23)
+    at /Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10329:39
+    at Parser.allowInAnd (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:11946:16)
+    at Parser.parseExpression (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:10329:17)
+    at Parser.parseHeaderExpression (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12526:22)
+    at Parser.parseIfStatement (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12623:22)
+    at Parser.parseStatementContent (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12286:21)
+    at Parser.parseStatementLike (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12257:17)
+    at Parser.parseModuleItem (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12234:17)
+    at Parser.parseBlockOrModuleBlockBody (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12810:36)
+    at Parser.parseBlockBody (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12803:10)
+    at Parser.parseProgram (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12131:10)
+    at Parser.parseTopLevel (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:12121:25)
+    at Parser.parse (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:13929:10)
+    at parse (/Users/rose/Code/retinal/RCRD/node_modules/@babel/parser/lib/index.js:13963:38)
+    at parser (/Users/rose/Code/retinal/RCRD/node_modules/@babel/core/lib/parser/index.js:41:34)
+    at parser.next (<anonymous>)
+    at parse (/Users/rose/Code/retinal/RCRD/node_modules/@babel/core/lib/parse.js:25:37)
+    at parse.next (<anonymous>)
+    at evaluateSync (/Users/rose/Code/retinal/RCRD/node_modules/gensync/index.js:251:28)
+    at sync (/Users/rose/Code/retinal/RCRD/node_modules/gensync/index.js:89:14)
+    at stopHiding - secret - don't use this - v1 (/Users/rose/Code/retinal/RCRD/node_modules/@babel/core/lib/errors/rewrite-stack-trace.js:47:12)
+    at parseSync (/Users/rose/Code/retinal/RCRD/node_modules/@babel/core/lib/parse.js:40:72)
+    at getAst (/Users/rose/Code/retinal/RCRD/node_modules/istanbul-lib-instrument/src/read-coverage.js:16:12)
+    at readInitialCoverage (/Users/rose/Code/retinal/RCRD/node_modules/istanbul-lib-instrument/src/read-coverage.js:31:17)
+    at generateEmptyCoverage (/Users/rose/Code/retinal/RCRD/node_modules/@jest/reporters/build/generateEmptyCoverage.js:155:72)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------
+File                           | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                          
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------
+All files                      |      70 |    70.51 |   67.82 |   69.61 |                                                            
+ src                           |       0 |        0 |       0 |       0 |                                                            
+  App.js                       |       0 |      100 |       0 |       0 | 4                                                          
+  index.js                     |       0 |      100 |     100 |       0 | 8-18                                                       
+  reportWebVitals.js           |       0 |        0 |       0 |       0 | 1-8                                                        
+ src/components                |   91.07 |    87.82 |   85.71 |   91.81 |                                                            
+  CalculationSteps.jsx         |     100 |      100 |     100 |     100 |                                                            
+  CryotherapySelection.jsx     |     100 |    66.66 |     100 |     100 | 20-29                                                      
+  DesktopRetinalCalculator.jsx |     100 |    94.11 |      25 |     100 | 77                                                         
+  GaugeSelection.jsx           |     100 |      100 |     100 |     100 |                                                            
+  MobileRetinalCalculator.jsx  |     100 |      100 |      25 |     100 |                                                            
+  ModelToggle.jsx              |     100 |      100 |     100 |     100 |                                                            
+  PrintHeader.jsx              |     100 |      100 |     100 |     100 |                                                            
+  ProbabilityDisplay.jsx       |     100 |      100 |     100 |     100 |                                                            
+  RetinalCalculator.jsx        |     100 |      100 |     100 |     100 |                                                            
+  RiskInputForm.jsx            |    92.3 |    83.33 |     100 |    92.3 | 30,182                                                     
+  RiskResults.jsx              |     100 |      100 |     100 |     100 |                                                            
+  RiskSummary.jsx              |     100 |      100 |     100 |     100 |                                                            
+  TamponadeSelection.jsx       |     100 |    66.66 |     100 |     100 | 24-33                                                      
+  Toggle.jsx                   |      75 |    84.31 |     100 |   77.41 | 51-59                                                      
+ src/components/clock          |   60.12 |    51.42 |   62.22 |   61.39 |                                                            
+  ClockFace.jsx                |   81.25 |    76.92 |   33.33 |   81.25 | 30-31,45                                                   
+  ClockFaceSVG.jsx             |   94.11 |       92 |   86.66 |   94.11 | 229-241                                                    
+  ClockFaceUtils.js            |    82.5 |     37.5 |      75 |    82.5 | 70-72,108-116                                              
+  Controls.jsx                 |     100 |      100 |     100 |     100 |                                                            
+  DetachmentSegments.jsx       |       0 |        0 |       0 |       0 | 6-22                                                       
+  ResetButton.jsx              |     100 |      100 |     100 |     100 |                                                            
+  Segment.jsx                  |     100 |      100 |     100 |     100 |                                                            
+  TearMarker.jsx               |       0 |        0 |       0 |       0 | 5-107                                                      
+ src/components/clock/handlers |      86 |    69.09 |    92.3 |   92.13 |                                                            
+  clockFaceHandlers.js         |      86 |    69.09 |    92.3 |   92.13 | 52-55,59,107,112                                           
+ src/components/clock/hooks    |   51.15 |       31 |      50 |   53.13 |                                                            
+  useClockInteractions.js      |   61.87 |    36.17 |   51.61 |   63.77 | 26-32,38-41,75,130-134,138-150,159-189,199-201,210-211,223 
+  useDrawingInteractions.js    |       0 |        0 |       0 |       0 | 5-110                                                      
+  useRetinalCalculator.js      |      94 |     87.5 |   83.33 |   97.87 | 19                                                         
+ src/components/clock/styles   |   66.66 |     37.5 |      50 |   66.66 |                                                            
+  clockFaceStyles.js           |     100 |       60 |     100 |     100 | 34-40                                                      
+  clockStyles.js               |   33.33 |        0 |       0 |   33.33 | 30-38                                                      
+ src/components/clock/utils    |   75.19 |    82.19 |   69.52 |   72.53 |                                                            
+  clockCalculations.js         |       0 |        0 |       0 |       0 | 3-281                                                      
+  clockConstants.js            |     100 |      100 |     100 |     100 |                                                            
+  clockCoordinates.js          |     100 |      100 |     100 |     100 |                                                            
+  clockFaceGeometry.js         |     100 |      100 |     100 |     100 |                                                            
+  clockGeometry.js             |       0 |        0 |       0 |       0 | 2-53                                                       
+  clockHourCalculator.js       |     100 |      100 |     100 |     100 |                                                            
+  clockHourNotation.js         |     100 |    96.77 |     100 |     100 | 50,83                                                      
+  clockMapping.js              |   93.65 |    82.05 |    92.3 |   92.72 | 60,65,112-113                                              
+  detachmentCategories.js      |     100 |      100 |     100 |     100 |                                                            
+  detachmentFormatter.js       |     100 |      100 |     100 |     100 |                                                            
+  formatDetachmentHours.js     |   97.72 |    84.84 |     100 |   97.56 | 37                                                         
+  getClockHour.js              |     100 |      100 |     100 |     100 |                                                            
+  getSegmentRanges.js          |     100 |      100 |     100 |     100 |                                                            
+  interpolateSegments.js       |     100 |      100 |     100 |     100 |                                                            
+  segmentCalculator.js         |     100 |      100 |     100 |     100 |                                                            
+  segmentHourMapping.js        |     100 |      100 |     100 |     100 |                                                            
+  useLongPress.js              |     100 |      100 |     100 |     100 |                                                            
+ src/components/test-helpers   |      50 |       50 |   28.57 |   51.21 |                                                            
+  RetinalCalculator.helpers.js |   67.74 |    58.33 |      50 |      70 | 23-27,36-40                                                
+  RiskInputForm.helpers.js     |       0 |        0 |       0 |       0 | 5-37                                                       
+ src/constants                 |     100 |       50 |     100 |     100 |                                                            
+  modelTypes.js                |     100 |      100 |     100 |     100 |                                                            
+  paperCoefficients.js         |     100 |       50 |     100 |     100 | 74                                                         
+  riskCalculatorConstants.js   |     100 |      100 |     100 |     100 |                                                            
+ src/test-utils                |     100 |      100 |     100 |     100 |                                                            
+  constants.js                 |     100 |      100 |     100 |     100 |                                                            
+ src/utils                     |   79.48 |    82.75 |   89.47 |   76.08 |                                                            
+  riskCalculations.js          |   96.77 |    89.79 |     100 |   95.91 | 115-122                                                    
+  riskResultsText.js           |   89.18 |     87.5 |     100 |   88.46 | 16,33,36                                                   
+  segmentHourTest.js           |       0 |        0 |       0 |       0 | 8-54                                                       
+-------------------------------|---------|----------|---------|---------|------------------------------------------------------------
+
+Summary of all failing tests
+FAIL src/components/__tests__/RiskInputForm.base.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       6 |
+       7 | // Mock child components
+    >  8 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       9 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      10 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      11 |
+
+      at src/components/__tests__/RiskInputForm.base.test.jsx:8:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.base.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.state.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.state.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.state.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.accessibility.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.accessibility.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.accessibility.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.disabled.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.disabled.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.disabled.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.integration.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       7 |
+       8 | // Mock child components
+    >  9 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+      10 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      11 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      12 |
+
+      at src/components/__tests__/RiskInputForm.integration.test.jsx:9:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.integration.test.jsx:4:1)
+
+FAIL src/components/__tests__/ProbabilityDisplay.integration.test.jsx
+  ● ProbabilityDisplay - Integration Tests › Real Probability Result Display › should display decimal probability correctly
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 80\.00%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+1.386) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m80%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      46 |             render(<ProbabilityDisplay logit="1.386" probability="80.00" />);
+      47 |             
+    > 48 |             expect(screen.getByText(/= 80\.00%/)).toBeInTheDocument();
+         |                           ^
+      49 |         });
+      50 |
+      51 |         it('should handle probability without % sign', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:48:27)
+
+  ● ProbabilityDisplay - Integration Tests › Mathematical Consistency › should handle extreme positive logit values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 99\.3%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+5) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m99%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      71 |             
+      72 |             expect(screen.getByText(/1 \/ \(1 \+ e\+5\) × 100%/)).toBeInTheDocument();
+    > 73 |             expect(screen.getByText(/= 99\.3%/)).toBeInTheDocument();
+         |                           ^
+      74 |         });
+      75 |
+      76 |         it('should handle extreme negative logit values', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:73:27)
+
+  ● ProbabilityDisplay - Integration Tests › Mathematical Consistency › should handle extreme negative logit values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 0\.7%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e-5) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m1%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      79 |             
+      80 |             expect(screen.getByText(/1 \/ \(1 \+ e-5\) × 100%/)).toBeInTheDocument();
+    > 81 |             expect(screen.getByText(/= 0\.7%/)).toBeInTheDocument();
+         |                           ^
+      82 |         });
+      83 |     });
+      84 |
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:81:27)
+
+  ● ProbabilityDisplay - Integration Tests › Visual Layout and Structure › should maintain correct visual hierarchy
+
+    expect(element).toHaveTextContent()
+
+    Expected element to have text content:
+      = 81.8%
+    Received:
+      = 82%
+
+       95 |             // Result section should come second with emphasis
+       96 |             const resultSection = container.querySelector('.mt-1.text-sm.font-medium.text-gray-900');
+    >  97 |             expect(resultSection).toHaveTextContent('= 81.8%');
+          |                                   ^
+       98 |         });
+       99 |     });
+      100 |
+
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:97:35)
+
+  ● ProbabilityDisplay - Integration Tests › Edge Cases with Real Values › should handle very precise decimal values
+
+    TestingLibraryElementError: Unable to find an element with the text: /= 90\.000%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+2.30259) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m90%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      111 |             
+      112 |             expect(screen.getByText(/1 \/ \(1 \+ e\+2\.30259\) × 100%/)).toBeInTheDocument();
+    > 113 |             expect(screen.getByText(/= 90\.000%/)).toBeInTheDocument();
+          |                           ^
+      114 |         });
+      115 |
+      116 |         it('should handle negative zero correctly', () => {
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:113:27)
+
+  ● ProbabilityDisplay - Integration Tests › Edge Cases with Real Values › should handle negative zero correctly
+
+    TestingLibraryElementError: Unable to find an element with the text: /1 \/ \(1 \+ e\+0\) × 100%/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+    Ignored nodes: comments, script, style
+    [36m<body>[39m
+      [36m<div>[39m
+        [36m<div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-2 text-sm text-gray-600"[39m
+          [36m>[39m
+            [0mProbability = [0m
+            [0m1 / (1 + e+-0) × 100%[0m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mt-1 text-sm font-medium text-gray-900"[39m
+          [36m>[39m
+            [0m= [0m
+            [0m50%[0m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+    [36m</body>[39m
+
+      118 |             
+      119 |             // -0 should be treated as 0 and show +
+    > 120 |             expect(screen.getByText(/1 \/ \(1 \+ e\+0\) × 100%/)).toBeInTheDocument();
+          |                           ^
+      121 |         });
+      122 |     });
+      123 | });
+
+      at Object.getElementError (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/config.js:37:19)
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+      at node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+      at getByText (node_modules/@testing-library/react/node_modules/@testing-library/dom/dist/query-helpers.js:95:19)
+      at Object.<anonymous> (src/components/__tests__/ProbabilityDisplay.integration.test.jsx:120:27)
+
+FAIL src/components/__tests__/RiskInputForm.layout.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       6 |
+       7 | // Mock child components
+    >  8 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       9 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+      10 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      11 |
+
+      at src/components/__tests__/RiskInputForm.layout.test.jsx:8:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.layout.test.jsx:3:1)
+
+FAIL src/components/__tests__/RiskInputForm.error.test.jsx
+  ● Test suite failed to run
+
+    TypeError: Cannot read properties of undefined (reading 'MockGaugeSelection')
+
+       5 |
+       6 | // Mock child components
+    >  7 | jest.mock('../GaugeSelection', () => ({ default: MockGaugeSelection }));
+         |                                                  ^
+       8 | jest.mock('../TamponadeSelection', () => ({ default: MockTamponadeSelection }));
+       9 | jest.mock('../CryotherapySelection', () => ({ default: MockCryotherapySelection }));
+      10 |
+
+      at src/components/__tests__/RiskInputForm.error.test.jsx:7:50
+      at Object.<anonymous> (src/components/RiskInputForm.jsx:3:1)
+      at Object.<anonymous> (src/components/__tests__/RiskInputForm.error.test.jsx:3:1)
+
+FAIL src/components/__tests__/__mocks__/RiskInputFormMocks.js
+  ● Test suite failed to run
+
+    Your test suite must contain at least one test.
+
+      at onResult (node_modules/@jest/core/build/TestScheduler.js:175:18)
+      at node_modules/@jest/core/build/TestScheduler.js:316:17
+      at node_modules/emittery/index.js:260:13
+          at Array.map (<anonymous>)
+      at Emittery.emit (node_modules/emittery/index.js:258:23)
+
+FAIL src/components/__tests__/ModelToggle.test.jsx
+  ● ModelToggle › calls onChange when toggling between models
+
+    expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+    Expected: "significant"
+
+    Number of calls: 0
+
+      79 |         // Now "Full Model" is checked, click "Significant Only"
+      80 |         fireEvent.click(screen.getByLabelText('Significant Only'));
+    > 81 |         expect(mockOnChange).toHaveBeenCalledWith(MODEL_TYPE.SIGNIFICANT);
+         |                              ^
+      82 |     });
+      83 |
+      84 |     test('hides title in mobile mode', () => {
+
+      at Object.<anonymous> (src/components/__tests__/ModelToggle.test.jsx:81:30)
+
+FAIL src/components/__tests__/CalculationSteps.test.jsx
+  ● CalculationSteps › Rendering › should render without crashing
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display methodology note
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should render all calculation steps
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display step explanations
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should display total logit
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Rendering › should render ProbabilityDisplay component with correct props
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle empty steps array
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle single step
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle many steps
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Props Handling › should handle different logit formats
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to container
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to methodology note
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to step rows
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Styling › should apply correct CSS classes to total section
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should call getStepExplanation for each step with correct arguments
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should call getMethodologyNote once
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should pass correct props to ProbabilityDisplay
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should handle when getStepExplanation returns different values
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Integration › should handle when getMethodologyNote returns different text
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle special characters in step names
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle very long step explanations
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+  ● CalculationSteps › Edge Cases › should handle undefined or null in mock returns gracefully
+
+    ReferenceError: getMethodologyNote is not defined
+
+      21 |     beforeEach(() => {
+      22 |         jest.clearAllMocks();
+    > 23 |         getMethodologyNote.mockReturnValue('This calculation uses evidence-based methodology');
+         |         ^
+      24 |         getStepExplanation.mockImplementation((step, value) => `Explanation for ${step}: ${value}`);
+      25 |     });
+      26 |
+
+      at Object.<anonymous> (src/components/__tests__/CalculationSteps.test.jsx:23:9)
+
+
+Test Suites: 11 failed, 47 passed, 58 total
+Tests:       29 failed, 2 skipped, 563 passed, 594 total
+Snapshots:   0 total
+Time:        3.273 s
+Ran all test suites.
